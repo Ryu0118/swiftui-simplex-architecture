@@ -9,7 +9,7 @@ public protocol SimplexStoreView<Reducer>: View {
 
 public protocol StatesProtocol<Target> {
     associatedtype Target: SimplexStoreView
-    static var keyPathDictionary: [PartialKeyPath<Self>: PartialKeyPath<Target>] { get }
+    static var keyPathMap: [PartialKeyPath<Self>: PartialKeyPath<Target>] { get }
 }
 
 public extension SimplexStoreView where Reducer.ReducerState == Never {

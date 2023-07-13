@@ -36,7 +36,7 @@ final class StateBuilderMacroTests: XCTestCase {
                 internal struct States: StatesProtocol {
                     var testState: Int = 0
                     var testBinding: String
-                    internal static var keyPathDictionary: [PartialKeyPath<States>: PartialKeyPath<TestView>] {
+                    internal static var keyPathMap: [PartialKeyPath<States>: PartialKeyPath<TestView>] {
                         [\\.testState: \\.testState, \\.testBinding: \\.testBinding]
                     }
                 }
@@ -74,7 +74,7 @@ final class StateBuilderMacroTests: XCTestCase {
                 internal struct States: StatesProtocol {
                     var testState: Int = 0
                     var testBinding: String
-                    internal static var keyPathDictionary: [PartialKeyPath<States>: PartialKeyPath<TestView>] {
+                    internal static var keyPathMap: [PartialKeyPath<States>: PartialKeyPath<TestView>] {
                         [\\.testState: \\.testState, \\.testBinding: \\.testBinding]
                     }
                 }
@@ -112,7 +112,7 @@ final class StateBuilderMacroTests: XCTestCase {
                 public struct States: StatesProtocol {
                     var testState: Int = 0
                     var testBinding: String
-                    public static var keyPathDictionary: [PartialKeyPath<States>: PartialKeyPath<TestView>] {
+                    public static var keyPathMap: [PartialKeyPath<States>: PartialKeyPath<TestView>] {
                         [\\.testState: \\.testState, \\.testBinding: \\.testBinding]
                     }
                 }

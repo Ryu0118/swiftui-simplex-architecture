@@ -17,7 +17,7 @@ public struct StateContainer<Target: SimplexStoreView> {
 
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.States, U>) -> U {
         _read {
-            if let viewKeyPath = Target.States.keyPathDictionary[keyPath as PartialKeyPath<Target.States>] as? WritableKeyPath<Target, U>
+            if let viewKeyPath = Target.States.keyPathMap[keyPath as PartialKeyPath<Target.States>] as? WritableKeyPath<Target, U>
             {
                 yield _entity[keyPath: viewKeyPath]
             } else {
@@ -25,7 +25,7 @@ public struct StateContainer<Target: SimplexStoreView> {
             }
         }
         _modify {
-            if let viewKeyPath = Target.States.keyPathDictionary[keyPath as PartialKeyPath<Target.States>] as? WritableKeyPath<Target, U>
+            if let viewKeyPath = Target.States.keyPathMap[keyPath as PartialKeyPath<Target.States>] as? WritableKeyPath<Target, U>
             {
                 yield &_entity[keyPath: viewKeyPath]
             } else {

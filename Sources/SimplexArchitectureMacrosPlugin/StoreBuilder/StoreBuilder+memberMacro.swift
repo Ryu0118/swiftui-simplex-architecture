@@ -109,7 +109,7 @@ public struct StoreBuilder: MemberMacro {
                         MemberDeclListSyntax(stateVariables.map { MemberDeclListItemSyntax(decl: $0) })
                         try MemberDeclListSyntax {
                             MemberDeclListItemSyntax(
-                                decl: try VariableDeclSyntax("\(raw: modifier) static var keyPathDictionary: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>]") {
+                                decl: try VariableDeclSyntax("\(raw: modifier) static var keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>]") {
                                     StmtSyntax("[\(raw: keyPathPairs)]")
                                 }
                             )
