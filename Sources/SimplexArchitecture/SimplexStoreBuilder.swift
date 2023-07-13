@@ -1,6 +1,6 @@
 public protocol SimplexStoreBuilder<Reducer>: SimplexStoreView {
     var _store: Store<Self>? { get nonmutating set }
-    func getStore() -> Store<Self>
+    func makeStore() -> Store<Self>
 }
 
 public extension SimplexStoreBuilder {
@@ -9,7 +9,7 @@ public extension SimplexStoreBuilder {
             if let _store {
                 return _store
             } else {
-                let store = getStore()
+                let store = makeStore()
                 _store = store
                 return store
             }

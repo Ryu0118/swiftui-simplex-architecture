@@ -96,7 +96,7 @@ public struct StoreBuilder: MemberMacro {
                     "\(raw: modifier) typealias Reducer = \(raw: reducerType)"
                 ),
                 DeclSyntax(
-                    "\(raw: modifier) func getStore() -> SimplexArchitecture.Store<\(raw: structName)> { Store(reducer: \(raw: reducerInstance), target: self) }"
+                    "\(raw: modifier) func makeStore() -> SimplexArchitecture.Store<\(raw: structName)> { Store(reducer: \(raw: reducerInstance), target: self) }"
                 ),
                 DeclSyntax(
                     try StructDeclSyntax(
