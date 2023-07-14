@@ -4,8 +4,8 @@ public final class Store<Target> where Target: SimplexStoreView {
     let reducer: Target.Reducer
     private var storeType: StoreType
 
-    var isSenderNil: Bool {
-        storeType.isSenderNil
+    var isTargetIdentified: Bool {
+        storeType.isTargetIdentified
     }
 
     public init(reducer: Target.Reducer, target: Target) where Target.Reducer.ReducerState == Never {
@@ -20,7 +20,10 @@ public final class Store<Target> where Target: SimplexStoreView {
         self.storeType = .normal()
     }
 
-    public init(reducer: Target.Reducer, initialReducerState: Target.Reducer.ReducerState) {
+    public init(
+        reducer: Target.Reducer,
+        initialReducerState: @autoclosure @escaping () -> Target.Reducer.ReducerState
+    ) {
         self.reducer = reducer
         self.storeType = .containReducerState(initialReducerState: initialReducerState)
     }
@@ -35,7 +38,7 @@ extension Store {
             if let send {
                 send(action)
             } else {
-                let send = Send(target: target, reducerState: initialReducerState)
+                let send = Send(target: target, reducerState: initialReducerState())
                 send(action)
                 storeType = .containReducerState(send: send, initialReducerState: initialReducerState)
             }
@@ -97,10 +100,10 @@ private extension Store {
 
         case containReducerState(
             send: Send<Target>? = nil,
-            initialReducerState: Target.Reducer.ReducerState
+            initialReducerState: () -> Target.Reducer.ReducerState
         )
 
-        var isSenderNil: Bool {
+        var isTargetIdentified: Bool {
             switch self {
             case .normal(let send), .containReducerState(let send, _):
                 send == nil
