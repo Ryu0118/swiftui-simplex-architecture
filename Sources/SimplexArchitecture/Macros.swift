@@ -1,6 +1,7 @@
 /// Macro for building a store in View.
 ///
 /// Use this macro to create a store with a specific reducer in View.
+/// It is conformed to the `SimplexStoreView` protocol by the `StoreBuilder` macro.
 ///
 /// Example usage:
 /// ```
@@ -45,6 +46,7 @@ public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externa
 /// Macro for manually building a store in View.
 ///
 /// Use this macro to manually generate a Reducer in Simplex Architecture. This is useful for Dependency Injection and using ReducerState
+/// It is conformed to the `SimplexStoreBuilder` protocol by the `ManualStoreBuilder` macro.
 ///
 /// Example usage (Dependency Injection):
 /// ```
@@ -130,6 +132,7 @@ public macro ManualStoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer.Type)
 /// Macro for creating a reducer.
 ///
 /// Use this macro to define a reducer that handles state updates for a specific View.
+/// It is conformed to the `ReducerProtocol` protocol by the `Reducer` macro.
 ///
 /// Example usage:
 /// ```

@@ -45,7 +45,7 @@ private extension Send {
         }
 
         // Root of Task Tree
-        rootTask = Task {
+        rootTask = Task.detached {
             await withTaskGroup(of: Void.self) { group in
                 for task in tasks {
                     group.addTask {
