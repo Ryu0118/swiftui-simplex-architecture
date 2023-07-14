@@ -1,8 +1,8 @@
 import Foundation
 
-public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target == Target.Reducer.Target, Target.Reducer.State == StateContainer<Target> {
-    var target: Target
-    var container: StateContainer<Target>
+public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target.Reducer.State == StateContainer<Target> {
+    private let target: Target
+    private var container: StateContainer<Target>
 
     init(target: Target, container: StateContainer<Target>) {
         self.target = target
