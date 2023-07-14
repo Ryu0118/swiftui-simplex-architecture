@@ -3,7 +3,7 @@ import Foundation
 public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target.Reducer.State == StateContainer<Target> {
     private let target: Target
     private var container: StateContainer<Target>
-    private var currentTask: Task<(), Never>?
+    private var rootTask: Task<(), Never>?
 
     init(target: Target, container: StateContainer<Target>) {
         self.target = target
@@ -21,7 +21,7 @@ public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Tar
     }
 
     deinit {
-        currentTask?.cancel()
+        rootTask?.cancel()
     }
 }
 
@@ -40,8 +40,12 @@ private extension Send {
         let effectTask = reduce(action)
         let tasks = runEffect(effectTask)
 
+        guard !tasks.isEmpty else {
+            return
+        }
+
         // Root of Task Tree
-        currentTask = Task {
+        rootTask = Task {
             await withTaskGroup(of: Void.self) { group in
                 for task in tasks {
                     group.addTask {
@@ -55,6 +59,11 @@ private extension Send {
     func send(_ action: Target.Reducer.Action) async {
         let effectTask = reduce(action)
         let tasks = runEffect(effectTask)
+
+        guard !tasks.isEmpty else {
+            return
+        }
+
         await withTaskGroup(of: Void.self) { group in
             for task in tasks {
                 group.addTask {
