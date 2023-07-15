@@ -3,7 +3,7 @@ import Foundation
 public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target.Reducer.State == StateContainer<Target> {
     private let target: Target
     private var container: StateContainer<Target>
-    private var rootTask: Task<(), Never>?
+    private let lock = NSRecursiveLock()
 
     init(target: Target, container: StateContainer<Target>) {
         self.target = target
@@ -19,62 +19,48 @@ public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Tar
         self.target = target
         self.container = StateContainer(target, reducerState: reducerState)
     }
+}
 
-    deinit {
-        rootTask?.cancel()
+// MARK: - Send Public Methods
+public extension Send {
+    func callAsFunction(_ action: Target.Reducer.Action) async {
+        await send(action).wait()
     }
 }
 
-public extension Send {
-    func callAsFunction(_ action: Target.Reducer.Action) async {
-        await send(action)
-    }
-
-    func callAsFunction(_ action: Target.Reducer.Action) {
+// MARK: - Send Internal Methods
+extension Send {
+    @discardableResult
+    func callAsFunction(_ action: Target.Reducer.Action) -> SendTask {
         send(action)
     }
 }
 
+// MARK: - Send Private Methods
 private extension Send {
-    func send(_ action: Target.Reducer.Action) {
+    func send(_ action: Target.Reducer.Action) -> SendTask {
         let effectTask = reduce(action)
         let tasks = runEffect(effectTask)
 
         guard !tasks.isEmpty else {
-            return
+            return .init(task: nil)
         }
 
-        // Root of Task Tree
-        rootTask = Task.detached {
+        let task = Task.detached {
             await withTaskGroup(of: Void.self) { group in
                 for task in tasks {
                     group.addTask {
+                        guard !Task.isCancelled else {
+                            return
+                        }
                         await task.value
                     }
                 }
+                await group.waitForAll()
             }
         }
-    }
 
-    func send(_ action: Target.Reducer.Action) async {
-        let effectTask = reduce(action)
-        let tasks = runEffect(effectTask)
-
-        guard !tasks.isEmpty else {
-            return
-        }
-
-        await withTaskGroup(of: Void.self) { group in
-            for task in tasks {
-                group.addTask {
-                    await withTaskCancellationHandler {
-                        await task.value
-                    } onCancel: {
-                        task.cancel()
-                    }
-                }
-            }
-        }
+        return SendTask(task: task)
     }
 
     func runEffect(_ effectTask: EffectTask<Target.Reducer>) -> [Task<Void, Never>] {
@@ -83,6 +69,8 @@ private extension Send {
             let task = Task.detached(priority: priority ?? .medium) {
                 do {
                     try await operation(self)
+                } catch is CancellationError {
+                    return
                 } catch {
                     if let `catch` {
                         await `catch`(error, self)
@@ -93,20 +81,20 @@ private extension Send {
             }
             return [task]
 
-        case let .merge(actions):
+        case let .concurrent(actions):
             var tasks = [Task<Void, Never>]()
             for action in actions {
                 let task = Task.detached {
-                    await self.send(action)
+                    await self.send(action).wait()
                 }
                 tasks.append(task)
             }
             return tasks
 
-        case let .concat(actions):
+        case let .serial(actions):
             let task = Task.detached {
                 for action in actions {
-                    await self.send(action)
+                    await self.send(action).wait()
                 }
             }
             return [task]
@@ -117,6 +105,14 @@ private extension Send {
     }
 
     func reduce(_ action: Target.Reducer.Action) -> EffectTask<Target.Reducer> {
-        target.store.reducer.reduce(into: &container, action: action)
+        withLock {
+            target.store.reducer.reduce(into: &container, action: action)
+        }
+    }
+
+    func withLock<T>(_ operation: () throws -> T) rethrows -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return try operation()
     }
 }
