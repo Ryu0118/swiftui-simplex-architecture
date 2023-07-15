@@ -13,22 +13,23 @@ public protocol StatesProtocol<Target> {
 }
 
 public extension SimplexStoreView where Reducer.ReducerState == Never {
-    func send(_ action: Reducer.Action) {
-        if store.isSenderNil {
+    func send(_ action: Reducer.Action) -> SendTask {
+        if store.isTargetIdentified {
             store.sendWhenNormalStore(action: action, target: self)
         } else {
-            store.sendIfNeeded(action: action)
+            store.sendIfNeeded(action: action)!
         }
     }
 }
 
 public extension SimplexStoreView {
+    @discardableResult
     @_disfavoredOverload
-    func send(_ action: Reducer.Action) {
-        if store.isSenderNil {
+    func send(_ action: Reducer.Action) -> SendTask {
+        if store.isTargetIdentified {
             store.sendWhenContainReducerState(action: action, target: self)
         } else {
-            store.sendIfNeeded(action: action)
+            store.sendIfNeeded(action: action)!
         }
     }
 }

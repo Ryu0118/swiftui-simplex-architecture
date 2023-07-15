@@ -1,8 +1,5 @@
-public enum TaskResult<Success: Sendable>: Sendable {
-    case success(Success)
-    case failure(Error)
-    
-    public init(body: @Sendable () async throws -> Success) async {
+public extension Result where Failure == Swift.Error {
+    init(catching body: () async throws -> Success) async {
         do {
             self = .success(try await body())
         } catch {
@@ -10,3 +7,5 @@ public enum TaskResult<Success: Sendable>: Sendable {
         }
     }
 }
+
+public typealias TaskResult<Success> = Result<Success, Swift.Error>

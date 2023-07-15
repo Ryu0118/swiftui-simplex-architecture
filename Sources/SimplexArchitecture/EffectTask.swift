@@ -8,8 +8,8 @@ public struct EffectTask<Reducer: ReducerProtocol> {
             operation: (_ send: Send<Reducer.Target>) async throws -> Void,
             catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)?
         )
-        case concat([Reducer.Action])
-        case merge([Reducer.Action])
+        case serial([Reducer.Action])
+        case concurrent([Reducer.Action])
     }
 
     let kind: EffectKind
@@ -32,11 +32,11 @@ public extension EffectTask {
         .init(effectKind: .run(priority: priority, operation: operation, catch: `catch`))
     }
 
-    static func merge(_ actions: Reducer.Action...) -> Self {
-        .init(effectKind: .merge(actions))
+    static func concurrent(_ actions: Reducer.Action...) -> Self {
+        .init(effectKind: .concurrent(actions))
     }
 
-    static func concat(_ actions: Reducer.Action...) -> Self {
-        .init(effectKind: .concat(actions))
+    static func serial(_ actions: Reducer.Action...) -> Self {
+        .init(effectKind: .serial(actions))
     }
 }

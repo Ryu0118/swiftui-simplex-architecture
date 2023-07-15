@@ -50,10 +50,11 @@ private extension Send {
             await withTaskGroup(of: Void.self) { group in
                 for task in tasks {
                     group.addTask {
-                        guard !Task.isCancelled else {
-                            return
+                        await withTaskCancellationHandler {
+                            await task.value
+                        } onCancel: {
+                            task.cancel()
                         }
-                        await task.value
                     }
                 }
                 await group.waitForAll()

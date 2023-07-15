@@ -30,39 +30,41 @@ public final class Store<Target> where Target: SimplexStoreView {
 }
 
 extension Store {
-    func sendWhenContainReducerState(action: Target.Reducer.Action, target: Target) {
+    @discardableResult
+    func sendWhenContainReducerState(action: Target.Reducer.Action, target: Target) -> SendTask {
         switch storeType {
         case .normal:
             fatalError()
         case .containReducerState(let send, let initialReducerState):
             if let send {
-                send(action)
+                return send(action)
             } else {
                 let send = Send(target: target, reducerState: initialReducerState())
-                send(action)
                 storeType = .containReducerState(send: send, initialReducerState: initialReducerState)
+                return send(action)
             }
         }
     }
 
-    func sendIfNeeded(action: Target.Reducer.Action) {
+    func sendIfNeeded(action: Target.Reducer.Action) -> SendTask? {
         switch storeType {
         case .normal(let send), .containReducerState(let send, _):
-            send?(action)
+            return send?(action)
         }
     }
 }
 
 extension Store where Target.Reducer.ReducerState == Never {
-    func sendWhenNormalStore(action: Target.Reducer.Action, target: Target) {
+    @discardableResult
+    func sendWhenNormalStore(action: Target.Reducer.Action, target: Target) -> SendTask {
         switch storeType {
         case .normal(let send):
             if let send {
-                send(action)
+                return send(action)
             } else {
                 let send = Send(target: target)
-                send(action)
                 storeType = .normal(send: send)
+                return send(action)
             }
         case .containReducerState:
             fatalError("Unreachable")
