@@ -1,0 +1,62 @@
+import Foundation
+
+public struct EffectTask<Reducer: ReducerProtocol>: Sendable {
+    enum EffectKind {
+        case none
+        case run(
+            priority: TaskPriority?,
+            operation: (_ send: Send<Reducer.Target>) async throws -> Void,
+            catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)?
+        )
+        case serialAction([Reducer.Action])
+        case concurrentAction([Reducer.Action])
+        case serialReducerAction([Reducer.ReducerAction])
+        case concurrentReducerAction([Reducer.ReducerAction])
+        case serialCombineAction([CombineAction<Reducer>])
+        case concurrentCombineAction([CombineAction<Reducer>])
+    }
+
+    let kind: EffectKind
+
+    init(effectKind: EffectKind) {
+        self.kind = effectKind
+    }
+}
+
+public extension EffectTask {
+    static var none: Self {
+        .init(effectKind: .none)
+    }
+
+    static func run(
+        priority: TaskPriority? = nil,
+        _ operation: @escaping (_ send: Send<Reducer.Target>) async throws -> Void,
+        catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)? = nil
+    ) -> Self {
+        .init(effectKind: .run(priority: priority, operation: operation, catch: `catch`))
+    }
+
+    static func concurrent(_ actions: Reducer.Action...) -> Self {
+        .init(effectKind: .concurrentAction(actions))
+    }
+
+    static func serial(_ actions: Reducer.Action...) -> Self {
+        .init(effectKind: .serialAction(actions))
+    }
+
+    static func concurrent(_ actions: Reducer.ReducerAction...) -> Self {
+        .init(effectKind: .concurrentReducerAction(actions))
+    }
+
+    static func serial(_ actions: Reducer.ReducerAction...) -> Self {
+        .init(effectKind: .serialReducerAction(actions))
+    }
+
+    static func concurrent(_ actions: CombineAction<Reducer>...) -> Self {
+        .init(effectKind: .concurrentCombineAction(actions))
+    }
+
+    static func serial(_ actions: CombineAction<Reducer>...) -> Self {
+        .init(effectKind: .serialCombineAction(actions))
+    }
+}

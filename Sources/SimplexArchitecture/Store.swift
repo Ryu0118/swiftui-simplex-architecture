@@ -9,8 +9,7 @@ public final class Store<Target> where Target: SimplexStoreView {
     }
 
     public init(reducer: Target.Reducer, target: Target) where Target.Reducer.ReducerState == Never {
-        let container = StateContainer(target)
-        let send = Send(target: target, container: container)
+        let send = Send(target: target)
         self.reducer = reducer
         self.storeType = .normal(send: send)
     }
@@ -31,10 +30,8 @@ public final class Store<Target> where Target: SimplexStoreView {
 
 extension Store {
     @discardableResult
-    func sendWhenContainReducerState(action: Target.Reducer.Action, target: Target) -> SendTask {
+    func sendIfReducerStateExists(action: Target.Reducer.Action, target: Target) -> SendTask {
         switch storeType {
-        case .normal:
-            fatalError()
         case .containReducerState(let send, let initialReducerState):
             if let send {
                 return send(action)
@@ -43,6 +40,8 @@ extension Store {
                 storeType = .containReducerState(send: send, initialReducerState: initialReducerState)
                 return send(action)
             }
+        case .normal:
+            fatalError()
         }
     }
 
@@ -56,7 +55,7 @@ extension Store {
 
 extension Store where Target.Reducer.ReducerState == Never {
     @discardableResult
-    func sendWhenNormalStore(action: Target.Reducer.Action, target: Target) -> SendTask {
+    func sendIfNormalStore(action: Target.Reducer.Action, target: Target) -> SendTask {
         switch storeType {
         case .normal(let send):
             if let send {
@@ -72,6 +71,7 @@ extension Store where Target.Reducer.ReducerState == Never {
     }
 }
 
+@available(*, unavailable)
 public extension Store where Target.Reducer.Action: ObservableAction {
     @_disfavoredOverload
     convenience init<each S>(

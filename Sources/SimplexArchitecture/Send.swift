@@ -5,11 +5,6 @@ public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Tar
     private var container: StateContainer<Target>
     private let lock = NSRecursiveLock()
 
-    init(target: Target, container: StateContainer<Target>) {
-        self.target = target
-        self.container = container
-    }
-
     init(target: Target) where Target.Reducer.ReducerState == Never {
         self.target = target
         self.container = StateContainer(target)
@@ -26,6 +21,10 @@ public extension Send {
     func callAsFunction(_ action: Target.Reducer.Action) async {
         await send(action).wait()
     }
+
+    func callAsFunction(_ action: Target.Reducer.ReducerAction) async {
+        await send(action).wait()
+    }
 }
 
 // MARK: - Send Internal Methods
@@ -39,9 +38,20 @@ extension Send {
 // MARK: - Send Private Methods
 private extension Send {
     func send(_ action: Target.Reducer.Action) -> SendTask {
-        let effectTask = reduce(action)
+        let effectTask = reduceViewAction(action)
         let tasks = runEffect(effectTask)
 
+        return executeTasks(tasks)
+    }
+
+    func send(_ action: Target.Reducer.ReducerAction) -> SendTask {
+        let effectTask = reduceReducerAction(action)
+        let tasks = runEffect(effectTask)
+
+        return executeTasks(tasks)
+    }
+
+    func executeTasks(_ tasks: [Task<Void, Never>]) -> SendTask {
         guard !tasks.isEmpty else {
             return .init(task: nil)
         }
@@ -82,7 +92,7 @@ private extension Send {
             }
             return [task]
 
-        case let .concurrent(actions):
+        case let .concurrentAction(actions):
             var tasks = [Task<Void, Never>]()
             for action in actions {
                 let task = Task.detached {
@@ -92,10 +102,75 @@ private extension Send {
             }
             return tasks
 
-        case let .serial(actions):
+        case let .serialAction(actions):
             let task = Task.detached {
                 for action in actions {
                     await self.send(action).wait()
+                }
+            }
+            return [task]
+
+        case let .concurrentReducerAction(actions):
+            var tasks = [Task<Void, Never>]()
+            for action in actions {
+                let task = Task.detached {
+                    await self.send(action).wait()
+                }
+                tasks.append(task)
+            }
+            return tasks
+
+        case let .serialReducerAction(actions):
+            let task = Task.detached {
+                for action in actions {
+                    await self.send(action).wait()
+                }
+            }
+            return [task]
+
+        case let .concurrentCombineAction(actions):
+            return actions.flatMap { action in
+                switch action.kind {
+                case let .reducerAction(operation, `catch`):
+                    return runEffect(
+                        .run(
+                            { try await $0(operation()) },
+                            catch: `catch`
+                        )
+                    )
+                case let .viewAction(operation, `catch`):
+                    return runEffect(
+                        .run(
+                            { try await $0(operation()) },
+                            catch: `catch`
+                        )
+                    )
+                }
+            }
+
+        case let .serialCombineAction(actions):
+            let task = Task.detached {
+                for action in actions {
+                    switch action.kind {
+                    case let .reducerAction(operation, `catch`):
+                        await self.runEffect(
+                            .run(
+                                { try await $0(operation()) },
+                                catch: `catch`
+                            )
+                        )
+                        .first?
+                        .value
+                    case let .viewAction(operation, `catch`):
+                        await self.runEffect(
+                            .run(
+                                { try await $0(operation()) },
+                                catch: `catch`
+                            )
+                        )
+                        .first?
+                        .value
+                    }
                 }
             }
             return [task]
@@ -105,7 +180,13 @@ private extension Send {
         }
     }
 
-    func reduce(_ action: Target.Reducer.Action) -> EffectTask<Target.Reducer> {
+    func reduceViewAction(_ action: Target.Reducer.Action) -> EffectTask<Target.Reducer> {
+        withLock {
+            target.store.reducer.reduce(into: &container, action: action)
+        }
+    }
+
+    func reduceReducerAction(_ action: Target.Reducer.ReducerAction) -> EffectTask<Target.Reducer> {
         withLock {
             target.store.reducer.reduce(into: &container, action: action)
         }
