@@ -1,5 +1,5 @@
 # swiftui-simple-architecture
-A Library of simple architectures with excellent performance that decouples state changes from SwiftUI's View
+A Library of simple architectures that decouples state changes from SwiftUI's View
 
 ## Installation
 ```Swift
