@@ -1,5 +1,6 @@
 import SwiftUI
 
+@available(*, unavailable)
 @propertyWrapper
 public struct ObservableState<T: Equatable> {
     let storage: State<T>
@@ -32,12 +33,14 @@ public struct ObservableState<T: Equatable> {
     }
 }
 
+@available(*, unavailable)
 extension ObservableState: Equatable {
     public static func == (lhs: ObservableState<T>, rhs: ObservableState<T>) -> Bool {
         lhs.storage.wrappedValue == rhs.storage.wrappedValue
     }
 }
 
+@available(*, unavailable)
 extension ObservableState: Hashable where T: Hashable {
     public func hash(into hasher: inout Hasher) {
         storage.wrappedValue.hash(into: &hasher)
