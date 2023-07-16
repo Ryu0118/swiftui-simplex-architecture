@@ -14,6 +14,7 @@ public protocol StatesProtocol<Target> {
 
 public extension SimplexStoreView where Reducer.ReducerState == Never {
     @discardableResult
+    @inlinable
     func send(_ action: consuming Reducer.Action) -> SendTask {
         store.sendIfNeeded(action: action)!
     }
