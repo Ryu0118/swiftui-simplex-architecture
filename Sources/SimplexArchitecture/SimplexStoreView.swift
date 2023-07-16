@@ -14,12 +14,8 @@ public protocol StatesProtocol<Target> {
 
 public extension SimplexStoreView where Reducer.ReducerState == Never {
     @discardableResult
-    func send(_ action: Reducer.Action) -> SendTask {
-        if store.isTargetIdentified {
-            store.sendIfNormalStore(action: action, target: self)
-        } else {
-            store.sendIfNeeded(action: action)!
-        }
+    func send(_ action: consuming Reducer.Action) -> SendTask {
+        store.sendIfNeeded(action: action)!
     }
 }
 
@@ -27,11 +23,11 @@ public extension SimplexStoreView {
     /// Send an action to the store
     @discardableResult
     @_disfavoredOverload
-    func send(_ action: Reducer.Action) -> SendTask {
-        if store.isTargetIdentified {
-            store.sendIfReducerStateExists(action: action, target: self)
-        } else {
+    func send(_ action: consuming Reducer.Action) -> SendTask {
+        if store.send == nil {
             store.sendIfNeeded(action: action)!
+        } else {
+            store.sendIfReducerStateExists(action: action, target: self)
         }
     }
 }

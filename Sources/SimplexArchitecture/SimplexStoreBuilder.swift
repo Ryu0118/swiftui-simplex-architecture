@@ -4,6 +4,7 @@ public protocol SimplexStoreBuilder<Reducer>: SimplexStoreView {
 }
 
 public extension SimplexStoreBuilder {
+    @inlinable
     var store: Store<Self> {
         get {
             if let _store {

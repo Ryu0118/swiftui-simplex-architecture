@@ -1,12 +1,15 @@
 import Foundation
 
 public struct SendTask: Sendable {
-    private let task: Task<(), Never>?
+    @usableFromInline
+    let task: Task<(), Never>?
 
-    init(task: Task<(), Never>?) {
+    @inlinable
+    init(task: consuming Task<(), Never>?) {
         self.task = task
     }
 
+    @inlinable
     public func wait() async {
         await withTaskCancellationHandler {
             await task?.value
@@ -15,6 +18,7 @@ public struct SendTask: Sendable {
         }
     }
 
+    @inlinable
     public func cancel() {
         task?.cancel()
     }

@@ -2,25 +2,30 @@ import Foundation
 
 public final class Store<Target> where Target: SimplexStoreView {
     let reducer: Target.Reducer
+
+    @usableFromInline
+    var send: Send<Target>?
+
     private var storeType: StoreType
 
-    var isTargetIdentified: Bool {
-        storeType.isTargetIdentified
-    }
-
-    public init(reducer: Target.Reducer, target: Target) where Target.Reducer.ReducerState == Never {
-        let send = Send(target: target)
+    public init(
+        reducer: consuming Target.Reducer,
+        target: consuming Target
+    ) where Target.Reducer.ReducerState == Never {
+        self.send = Send(target: target)
         self.reducer = reducer
-        self.storeType = .normal(send: send)
-    }
-
-    public init(reducer: Target.Reducer) where Target.Reducer.ReducerState == Never {
-        self.reducer = reducer
-        self.storeType = .normal()
+        self.storeType = .normal
     }
 
     public init(
-        reducer: Target.Reducer,
+        reducer: consuming Target.Reducer
+    ) where Target.Reducer.ReducerState == Never {
+        self.reducer = reducer
+        self.storeType = .normal
+    }
+
+    public init(
+        reducer: consuming Target.Reducer,
         initialReducerState: @autoclosure @escaping () -> Target.Reducer.ReducerState
     ) {
         self.reducer = reducer
@@ -30,43 +35,38 @@ public final class Store<Target> where Target: SimplexStoreView {
 
 extension Store {
     @discardableResult
-    func sendIfReducerStateExists(action: Target.Reducer.Action, target: Target) -> SendTask {
-        switch storeType {
-        case .containReducerState(let send, let initialReducerState):
-            if let send {
-                return send(action)
-            } else {
+    func sendIfReducerStateExists(
+        action: consuming Target.Reducer.Action,
+        target: consuming Target
+    ) -> SendTask {
+        if let send {
+            return send(action)
+        } else {
+            switch storeType {
+            case .containReducerState(let initialReducerState):
                 let send = Send(target: target, reducerState: initialReducerState())
-                storeType = .containReducerState(send: send, initialReducerState: initialReducerState)
+                self.send = send
                 return send(action)
+            case .normal:
+                fatalError()
             }
-        case .normal:
-            fatalError()
         }
     }
 
-    func sendIfNeeded(action: Target.Reducer.Action) -> SendTask? {
-        switch storeType {
-        case .normal(let send), .containReducerState(let send, _):
-            return send?(action)
-        }
+    @inlinable
+    func sendIfNeeded(action: consuming Target.Reducer.Action) -> SendTask? {
+        send?(action)
     }
 }
 
 extension Store where Target.Reducer.ReducerState == Never {
     @discardableResult
-    func sendIfNormalStore(action: Target.Reducer.Action, target: Target) -> SendTask {
-        switch storeType {
-        case .normal(let send):
-            if let send {
-                return send(action)
-            } else {
-                let send = Send(target: target)
-                storeType = .normal(send: send)
-                return send(action)
-            }
-        case .containReducerState:
-            fatalError("Unreachable")
+    func sendIfNormalStore(action: consuming Target.Reducer.Action, target: Target) -> SendTask {
+        if let send {
+            return send(action)
+        } else {
+            let send = Send(target: target)
+            return send(action)
         }
     }
 }
@@ -96,20 +96,10 @@ public extension Store where Target.Reducer.Action: ObservableAction {
 
 private extension Store {
     enum StoreType {
-        case normal(
-            send: Send<Target>? = nil
-        )
+        case normal
 
         case containReducerState(
-            send: Send<Target>? = nil,
             initialReducerState: () -> Target.Reducer.ReducerState
         )
-
-        var isTargetIdentified: Bool {
-            switch self {
-            case .normal(let send), .containReducerState(let send, _):
-                send == nil
-            }
-        }
     }
 }

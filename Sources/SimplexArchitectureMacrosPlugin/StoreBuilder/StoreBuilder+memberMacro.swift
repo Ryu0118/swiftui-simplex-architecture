@@ -99,7 +99,7 @@ public struct StoreBuilder: MemberMacro {
                     "\(raw: modifier) func makeStore() -> SimplexArchitecture.Store<\(raw: structName)> { Store(reducer: \(raw: reducerInstance), target: self) }"
                 ),
                 DeclSyntax(
-                    try StructDeclSyntax(
+                    StructDeclSyntax(
                         modifiers: [DeclModifierSyntax(name: .identifier(modifier))],
                         identifier: "States",
                         inheritanceClause: TypeInheritanceClauseSyntax {
@@ -107,11 +107,11 @@ public struct StoreBuilder: MemberMacro {
                         }
                     ) {
                         MemberDeclListSyntax(stateVariables.map { MemberDeclListItemSyntax(decl: $0) })
-                        try MemberDeclListSyntax {
+                        MemberDeclListSyntax {
                             MemberDeclListItemSyntax(
-                                decl: try VariableDeclSyntax("\(raw: modifier) static var keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>]") {
-                                    StmtSyntax("[\(raw: keyPathPairs)]")
-                                }
+                                decl: DeclSyntax(
+                                    "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>] = [\(raw: keyPathPairs)]"
+                                )
                             )
                         }
                     }

@@ -63,7 +63,7 @@ public struct ManualStoreBuilder: MemberMacro {
                 "\(raw: modifier) typealias Reducer = \(raw: reducerType)"
             ),
             DeclSyntax(
-                try StructDeclSyntax(
+                StructDeclSyntax(
                     modifiers: [DeclModifierSyntax(name: .identifier(modifier))],
                     identifier: "States",
                     inheritanceClause: TypeInheritanceClauseSyntax {
@@ -71,11 +71,11 @@ public struct ManualStoreBuilder: MemberMacro {
                     }
                 ) {
                     MemberDeclListSyntax(stateVariables.map { MemberDeclListItemSyntax(decl: $0) })
-                    try MemberDeclListSyntax {
+                    MemberDeclListSyntax {
                         MemberDeclListItemSyntax(
-                            decl: try VariableDeclSyntax("\(raw: modifier) static var keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>]") {
-                                StmtSyntax("[\(raw: keyPathPairs)]")
-                            }
+                            decl: DeclSyntax(
+                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>] = [\(raw: keyPathPairs)]"
+                            )
                         )
                     }
                 }

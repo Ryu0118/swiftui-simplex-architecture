@@ -39,7 +39,7 @@
 /// - Parameters:
 ///   - reducer: An instance of a reducer conforming to the `ReducerProtocol`. It handles state updates in View.
 ///
-@attached(member, names: named(States), named(getStore), named(Reducer), named(_store))
+@attached(member, names: named(States), named(makeStore), named(Reducer), named(_store))
 @attached(conformance)
 public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "StoreBuilder")
 

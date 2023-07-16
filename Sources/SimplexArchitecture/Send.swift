@@ -3,57 +3,83 @@ import Foundation
 public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target.Reducer.State == StateContainer<Target> {
     private let target: Target
     private var container: StateContainer<Target>
-    private let lock = NSRecursiveLock()
+    @usableFromInline let lock = NSRecursiveLock()
 
-    init(target: Target) where Target.Reducer.ReducerState == Never {
-        self.target = target
+    init(
+        target: consuming Target
+    ) where Target.Reducer.ReducerState == Never {
+        self.target = copy target
         self.container = StateContainer(target)
     }
 
-    init(target: Target, reducerState: Target.Reducer.ReducerState) {
-        self.target = target
+    init(
+        target: consuming Target,
+        reducerState: consuming Target.Reducer.ReducerState
+    ) {
+        self.target = copy target
         self.container = StateContainer(target, reducerState: reducerState)
     }
 }
 
 // MARK: - Send Public Methods
 public extension Send {
-    func callAsFunction(_ action: Target.Reducer.Action) async {
+    @inlinable
+    func callAsFunction(_ action: consuming Target.Reducer.Action) async {
         await send(action).wait()
     }
 
-    func callAsFunction(_ action: Target.Reducer.ReducerAction) async {
+    @inlinable
+    func callAsFunction(_ action: consuming Target.Reducer.ReducerAction) async {
         await send(action).wait()
     }
 }
 
 // MARK: - Send Internal Methods
 extension Send {
+    @inlinable
     @discardableResult
-    func callAsFunction(_ action: Target.Reducer.Action) -> SendTask {
+    func callAsFunction(_ action: consuming Target.Reducer.Action) -> SendTask {
         send(action)
     }
 }
 
 // MARK: - Send Private Methods
-private extension Send {
-    func send(_ action: Target.Reducer.Action) -> SendTask {
-        let effectTask = reduceViewAction(action)
-        let tasks = runEffect(effectTask)
-
-        return executeTasks(tasks)
+extension Send {
+    @usableFromInline
+    func send(_ action: consuming Target.Reducer.Action) -> SendTask {
+        let effectTask = withLock {
+            target.store.reducer.reduce(into: &container, action: action)
+        }
+        if case .none = effectTask.kind {
+            return .init(task: nil)
+        } else {
+            let tasks = runEffect(effectTask)
+            return executeTasks(tasks)
+        }
     }
 
-    func send(_ action: Target.Reducer.ReducerAction) -> SendTask {
-        let effectTask = reduceReducerAction(action)
-        let tasks = runEffect(effectTask)
-
-        return executeTasks(tasks)
+    @usableFromInline
+    func send(_ action: consuming Target.Reducer.ReducerAction) -> SendTask {
+        let effectTask = withLock {
+            target.store.reducer.reduce(into: &container, action: action)
+        }
+        if case .none = effectTask.kind {
+            return .init(task: nil)
+        } else {
+            let tasks = runEffect(effectTask)
+            return executeTasks(tasks)
+        }
     }
 
     func executeTasks(_ tasks: [Task<Void, Never>]) -> SendTask {
         guard !tasks.isEmpty else {
             return .init(task: nil)
+        }
+
+        if tasks.count == 1,
+           let task = tasks.first
+        {
+            return .init(task: task)
         }
 
         let task = Task.detached {
@@ -74,7 +100,7 @@ private extension Send {
         return SendTask(task: task)
     }
 
-    func runEffect(_ effectTask: EffectTask<Target.Reducer>) -> [Task<Void, Never>] {
+    func runEffect(_ effectTask: borrowing EffectTask<Target.Reducer>) -> [Task<Void, Never>] {
         switch effectTask.kind {
         case .run(let priority, let operation, let `catch`):
             let task = Task.detached(priority: priority ?? .medium) {
@@ -180,18 +206,7 @@ private extension Send {
         }
     }
 
-    func reduceViewAction(_ action: Target.Reducer.Action) -> EffectTask<Target.Reducer> {
-        withLock {
-            target.store.reducer.reduce(into: &container, action: action)
-        }
-    }
-
-    func reduceReducerAction(_ action: Target.Reducer.ReducerAction) -> EffectTask<Target.Reducer> {
-        withLock {
-            target.store.reducer.reduce(into: &container, action: action)
-        }
-    }
-
+    @inlinable
     func withLock<T>(_ operation: () throws -> T) rethrows -> T {
         lock.lock()
         defer { lock.unlock() }

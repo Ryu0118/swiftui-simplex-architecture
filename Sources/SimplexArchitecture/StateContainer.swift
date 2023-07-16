@@ -5,19 +5,24 @@ public struct StateContainer<Target: SimplexStoreView>: @unchecked Sendable {
     public var reducerState: ReducerStateContainer<Target>
     private var _entity: Target
 
-    init(_ entity: Target) where Target.Reducer.ReducerState == Never {
+    init(
+        _ entity: consuming Target
+    ) where Target.Reducer.ReducerState == Never {
         self._entity = entity
         self.reducerState = ReducerStateContainer()
     }
 
-    init(_ entity: Target, reducerState: Target.Reducer.ReducerState) {
+    init(
+        _ entity: consuming Target,
+        reducerState: consuming Target.Reducer.ReducerState
+    ) {
         self._entity = entity
         self.reducerState = ReducerStateContainer(reducerState)
     }
 
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.States, U>) -> U {
         _read {
-            if let viewKeyPath = Target.States.keyPathMap[keyPath as PartialKeyPath<Target.States>] as? WritableKeyPath<Target, U>
+            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U>
             {
                 yield _entity[keyPath: viewKeyPath]
             } else {
@@ -25,7 +30,7 @@ public struct StateContainer<Target: SimplexStoreView>: @unchecked Sendable {
             }
         }
         _modify {
-            if let viewKeyPath = Target.States.keyPathMap[keyPath as PartialKeyPath<Target.States>] as? WritableKeyPath<Target, U>
+            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U>
             {
                 yield &_entity[keyPath: viewKeyPath]
             } else {
@@ -45,7 +50,7 @@ public struct StateContainer<Target: SimplexStoreView>: @unchecked Sendable {
 public struct ReducerStateContainer<Target: SimplexStoreView>: @unchecked Sendable {
     private var _reducerStateEntity: Target.Reducer.ReducerState?
 
-    init(_ reducerStateEntity: Target.Reducer.ReducerState? = nil) {
+    init(_ reducerStateEntity: consuming Target.Reducer.ReducerState? = nil) {
         self._reducerStateEntity = reducerStateEntity
     }
 
