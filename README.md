@@ -1,5 +1,16 @@
-# swiftui-simple-architecture
-A Library of simple architectures that decouples state changes from SwiftUI's View
+<div align="center">  
+
+  # Simplex Architecture
+
+  <img width="450" alt="image" src="https://github.com/Ryu0118/swiftui-simplex-architecture/assets/87907656/69d1e19d-e011-4f13-ba26-39551205ed10">
+  
+  #### A Library of simple architectures that decouples state changes from SwiftUI's View.
+  
+  ![Language:Swift](https://img.shields.io/static/v1?label=Language&message=Swift&color=orange&style=flat-square)
+  ![License:MIT](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
+  [![Latest Release](https://img.shields.io/github/v/release/Ryu0118/swiftui-simplex-architecture?style=flat-square)](https://github.com/Ryu0118/swiftui-simplex-architecture/releases/latest)
+  [![Twitter](https://img.shields.io/twitter/follow/ryu_hu03?style=social)](https://twitter.com/ryu_hu03)
+</div>
 
 ## Installation
 ```Swift
