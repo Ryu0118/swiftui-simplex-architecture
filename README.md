@@ -9,6 +9,8 @@
   ![Language:Swift](https://img.shields.io/static/v1?label=Language&message=Swift&color=orange&style=flat-square)
   ![License:MIT](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
   [![Latest Release](https://img.shields.io/github/v/release/Ryu0118/swiftui-simplex-architecture?style=flat-square)](https://github.com/Ryu0118/swiftui-simplex-architecture/releases/latest)
+  [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FRyu0118%2Fswiftui-simplex-architecture%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Ryu0118/swiftui-simplex-architecture)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FRyu0118%2Fswiftui-simplex-architecture%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Ryu0118/swiftui-simplex-architecture)
   [![Twitter](https://img.shields.io/twitter/follow/ryu_hu03?style=social)](https://twitter.com/ryu_hu03)
 </div>
 
