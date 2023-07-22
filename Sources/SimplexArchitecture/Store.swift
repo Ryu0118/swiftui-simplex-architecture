@@ -45,7 +45,7 @@ extension Store {
             switch storeType {
             case .containReducerState(let initialReducerState):
                 let send = Send(target: target, reducerState: initialReducerState())
-                self.send = send
+                defer { self.send = send }
                 return send(action)
             case .normal:
                 fatalError()
