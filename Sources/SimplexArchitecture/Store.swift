@@ -71,29 +71,6 @@ extension Store where Target.Reducer.ReducerState == Never {
     }
 }
 
-@available(*, unavailable)
-public extension Store where Target.Reducer.Action: ObservableAction {
-    @_disfavoredOverload
-    convenience init<each S>(
-        reducer: Target.Reducer,
-        target: Target,
-        observableKeyPaths: repeat KeyPath<Target, each S>,
-        observableProjectedKeyPaths: repeat KeyPath<Target, ObservableState<each S>>
-    ) where Target.Reducer.ReducerState == Never {
-        self.init(reducer: reducer, target: target)
-    }
-
-    @_disfavoredOverload
-    convenience init<each S>(
-        reducer: Target.Reducer,
-        initialReducerState: Target.Reducer.ReducerState,
-        observableKeyPaths: repeat KeyPath<Target, each S>,
-        observableProjectedKeyPaths: repeat KeyPath<Target, ObservableState<each S>>
-    ) {
-        self.init(reducer: reducer, initialReducerState: initialReducerState)
-    }
-}
-
 private extension Store {
     enum StoreType {
         case normal
