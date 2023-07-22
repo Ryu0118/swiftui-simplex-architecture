@@ -6,17 +6,17 @@ public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Tar
     @usableFromInline let lock = NSRecursiveLock()
 
     init(
-        target: consuming Target
+        target: Target
     ) where Target.Reducer.ReducerState == Never {
-        self.target = copy target
+        self.target = target
         self.container = StateContainer(target)
     }
 
     init(
-        target: consuming Target,
+        target: Target,
         reducerState: consuming Target.Reducer.ReducerState
     ) {
-        self.target = copy target
+        self.target = target
         self.container = StateContainer(target, reducerState: reducerState)
     }
 }

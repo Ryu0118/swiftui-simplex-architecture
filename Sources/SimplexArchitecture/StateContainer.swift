@@ -1,14 +1,14 @@
 import Foundation
 
 @dynamicMemberLookup
-public struct StateContainer<Target: SimplexStoreView>: @unchecked Sendable {
-    var _reducerState: Target.Reducer.ReducerState?
-    private var _entity: Target
-
+public struct StateContainer<Target: SimplexStoreView> {
     public var reducerState: Target.Reducer.ReducerState {
         _read { yield _reducerState! }
         _modify { yield &_reducerState! }
     }
+
+    private var _reducerState: Target.Reducer.ReducerState?
+    private var _entity: Target
 
     init(
         _ entity: consuming Target
