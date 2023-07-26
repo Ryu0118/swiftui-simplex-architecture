@@ -44,11 +44,4 @@ public struct StateContainer<Target: SimplexStoreView> {
             }
         }
     }
-
-    @available(*, unavailable)
-    public func onChange<U: Equatable>(_ keyPath: KeyPath<Target, ObservableState<U>>, perform: @escaping (U) -> Void) {
-        _ = _entity.onChange(of: _entity[keyPath: keyPath]) { value in
-            perform(value.wrappedValue)
-        }
-    }
 }
