@@ -19,4 +19,10 @@ public extension SimplexStoreBuilder {
             _store = newValue
         }
     }
+
+    @discardableResult
+    @inlinable
+    func send(_ action: consuming Reducer.Action) -> SendTask where Reducer.ReducerState == Never {
+        store.sendIfNeeded(action: action)!
+    }
 }
