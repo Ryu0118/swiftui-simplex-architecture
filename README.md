@@ -107,7 +107,7 @@ struct MyReducer {
 struct MyView: View {
     @State var counter = 0
 
-    @State var store: Store<Self>
+    let store: Store<Self>
 
     init() {
         store = Store(reducer: MyReducer(), initialReducerState: MyReducer.ReducerState())
@@ -169,7 +169,7 @@ struct MyView: View {
     @State var email: String = ""
     @State var password: String = ""
 
-    @State var store: Store<Self>
+    let store: Store<Self>
 
     init(authClient: AuthClient) {
         store = Store(reducer: MyReducer(authClient: authClient))
