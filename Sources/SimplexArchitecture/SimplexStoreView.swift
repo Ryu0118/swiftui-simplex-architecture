@@ -4,7 +4,7 @@ public protocol SimplexStoreView<Reducer>: View {
     associatedtype Reducer: ReducerProtocol<Self> where Reducer.State == StateContainer<Self>
     associatedtype States: StatesProtocol
 
-    var store: Store<Self> { get nonmutating set }
+    var store: Store<Self> { get }
 }
 
 public protocol StatesProtocol<Target> {
@@ -13,7 +13,8 @@ public protocol StatesProtocol<Target> {
 }
 
 public extension SimplexStoreView where Reducer.ReducerState == Never {
-    func send(_ action: consuming Reducer.Action) -> SendTask where Reducer.ReducerState == Never {
+    @discardableResult
+    func send(_ action: consuming Reducer.Action) -> SendTask {
         if store.send == nil {
             store.sendIfReducerStateNever(action: action, target: self)
         } else {

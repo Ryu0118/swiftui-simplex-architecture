@@ -52,7 +52,7 @@ public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externa
 /// ```
 /// @ManualStoreBuilder(reducer: MyReducer.self)
 /// struct MyView: View {
-///     @State var store: Store<MyView>
+///     let store: Store<MyView>
 ///
 ///     init(authRepository: AuthRepository, selfRepository: SelfRepository) {
 ///         store = Store(
@@ -89,7 +89,7 @@ public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externa
 /// ```
 /// @ManualStoreBuilder(reducer: MyReducer.self)
 /// struct MyView: View {
-///     @State var store: Store<MyView>
+///     let store: Store<MyView>
 ///
 ///     init(authRepository: AuthRepository, selfRepository: SelfRepository) {
 ///         store = Store(reducer: MyReducer(), initialReducerState: .init(counter: 0))
