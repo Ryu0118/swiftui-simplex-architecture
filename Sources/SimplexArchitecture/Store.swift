@@ -15,6 +15,12 @@ public final class Store<Target> where Target: SimplexStoreView {
     }
 
     public init(
+        reducer: @escaping @autoclosure () -> Target.Reducer
+    ) where Target.Reducer.ReducerState == Never {
+        self.storeType = .lazy(reducer: reducer)
+    }
+
+    public init(
         reducer: @autoclosure @escaping () -> Target.Reducer,
         initialReducerState: @autoclosure @escaping () -> Target.Reducer.ReducerState
     ) {
@@ -37,7 +43,7 @@ extension Store {
                 let send = Send(reducer: reducer(), target: target, reducerState: initialReducerState())
                 defer { self.send = send }
                 return send(action)
-            case .normal:
+            case .normal, .lazy:
                 fatalError("Unreachable")
             }
         }
@@ -50,9 +56,32 @@ extension Store {
     }
 }
 
+extension Store where Target.Reducer.ReducerState == Never {
+    func sendIfReducerStateNever(
+        action: consuming Target.Reducer.Action,
+        target: consuming Target
+    ) -> SendTask {
+        if let send {
+            return send(action)
+        } else {
+            switch storeType {
+            case let .lazy(reducer):
+                let send = Send(reducer: reducer(), target: target)
+                defer { self.send = send }
+                return send(action)
+            default: fatalError("Unreachable")
+            }
+        }
+    }
+}
+
 private extension Store {
     enum StoreType {
         case normal
+
+        case lazy(
+            reducer: () -> Target.Reducer
+        )
 
         case containReducerState(
             reducer: () -> Target.Reducer,
