@@ -1,22 +1,24 @@
 import Foundation
 
 public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target.Reducer.State == StateContainer<Target> {
-    private let target: Target
+    private let reducer: Target.Reducer
     private var container: StateContainer<Target>
     @usableFromInline let lock = NSRecursiveLock()
 
     init(
-        target: Target
+        reducer: consuming Target.Reducer,
+        target: consuming Target
     ) where Target.Reducer.ReducerState == Never {
-        self.target = target
+        self.reducer = reducer
         self.container = StateContainer(target)
     }
 
     init(
-        target: Target,
+        reducer: consuming Target.Reducer,
+        target: consuming Target,
         reducerState: consuming Target.Reducer.ReducerState
     ) {
-        self.target = target
+        self.reducer = reducer
         self.container = StateContainer(target, reducerState: reducerState)
     }
 }
@@ -48,7 +50,7 @@ extension Send {
     @usableFromInline
     func send(_ action: consuming Target.Reducer.Action) -> SendTask {
         let effectTask = withLock {
-            target.store.reducer.reduce(into: &container, action: action)
+            reducer.reduce(into: &container, action: action)
         }
         if case .none = effectTask.kind {
             return .init(task: nil)
@@ -61,7 +63,7 @@ extension Send {
     @usableFromInline
     func send(_ action: consuming Target.Reducer.ReducerAction) -> SendTask {
         let effectTask = withLock {
-            target.store.reducer.reduce(into: &container, action: action)
+            reducer.reduce(into: &container, action: action)
         }
         if case .none = effectTask.kind {
             return .init(task: nil)
