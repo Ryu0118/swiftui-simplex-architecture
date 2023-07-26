@@ -3,12 +3,10 @@ import Foundation
 public struct CombineAction<Reducer: ReducerProtocol> {
     enum ActionKind {
         case viewAction(
-            operation: () async throws -> Reducer.Action,
-            catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)?
+            action: Reducer.Action
         )
         case reducerAction(
-            operation: () async throws -> Reducer.ReducerAction,
-            catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)?
+            action: Reducer.ReducerAction
         )
     }
 
@@ -21,16 +19,14 @@ public struct CombineAction<Reducer: ReducerProtocol> {
 
 public extension CombineAction {
     static func action(
-        _ operation: @escaping () async throws -> Reducer.Action,
-        catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)? = nil
+        _ action: Reducer.Action
     ) -> Self {
-        .init(kind: .viewAction(operation: operation, catch: `catch`))
+        .init(kind: .viewAction(action: action))
     }
 
     static func action(
-        _ operation: @escaping () async throws -> Reducer.ReducerAction,
-        catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)? = nil
+        _ action: Reducer.ReducerAction
     ) -> Self {
-        .init(kind: .reducerAction(operation: operation, catch: `catch`))
+        .init(kind: .reducerAction(action: action))
     }
 }

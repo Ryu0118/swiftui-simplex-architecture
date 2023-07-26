@@ -120,6 +120,12 @@ extension Send {
             }
             return [task]
 
+        case let .sendAction(action):
+            return [send(action)].compactMap(\.task)
+
+        case let .sendReducerAction(action):
+            return [send(action)].compactMap(\.task)
+
         case let .concurrentAction(actions):
             var tasks = [Task<Void, Never>]()
             for action in actions {
@@ -139,14 +145,11 @@ extension Send {
             return [task]
 
         case let .concurrentReducerAction(actions):
-            var tasks = [Task<Void, Never>]()
-            for action in actions {
-                let task = Task.detached {
-                    await self.send(action).wait()
+            return actions
+                .reduce(into: [SendTask]()) { tasks, action in
+                    tasks.append(send(action))
                 }
-                tasks.append(task)
-            }
-            return tasks
+                .compactMap(\.task)
 
         case let .serialReducerAction(actions):
             let task = Task.detached {
@@ -156,48 +159,25 @@ extension Send {
             }
             return [task]
 
-        case let .concurrentCombineAction(actions):
-            return actions.flatMap { action in
-                switch action.kind {
-                case let .reducerAction(operation, `catch`):
-                    return runEffect(
-                        .run(
-                            { try await $0(operation()) },
-                            catch: `catch`
-                        )
-                    )
-                case let .viewAction(operation, `catch`):
-                    return runEffect(
-                        .run(
-                            { try await $0(operation()) },
-                            catch: `catch`
-                        )
-                    )
+        case let .concurrentCombineAction(combineActions):
+            return combineActions.compactMap { combineAction in
+                switch combineAction.kind {
+                case let .reducerAction(action):
+                    send(action)
+                case let .viewAction(action):
+                    send(action)
                 }
             }
+            .compactMap(\.task)
 
-        case let .serialCombineAction(actions):
+        case let .serialCombineAction(combineActions):
             let task = Task.detached {
-                for action in actions {
-                    switch action.kind {
-                    case let .reducerAction(operation, `catch`):
-                        await self.runEffect(
-                            .run(
-                                { try await $0(operation()) },
-                                catch: `catch`
-                            )
-                        )
-                        .first?
-                        .value
-                    case let .viewAction(operation, `catch`):
-                        await self.runEffect(
-                            .run(
-                                { try await $0(operation()) },
-                                catch: `catch`
-                            )
-                        )
-                        .first?
-                        .value
+                for combineAction in combineActions {
+                    switch combineAction.kind {
+                    case let .reducerAction(action):
+                        await self.send(action).wait()
+                    case let .viewAction(action):
+                        await self.send(action).wait()
                     }
                 }
             }

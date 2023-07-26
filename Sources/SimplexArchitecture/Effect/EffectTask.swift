@@ -9,6 +9,8 @@ public struct EffectTask<Reducer: ReducerProtocol>: Sendable {
             operation: (_ send: Send<Reducer.Target>) async throws -> Void,
             catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)?
         )
+        case sendAction(Reducer.Action)
+        case sendReducerAction(Reducer.ReducerAction)
         case serialAction([Reducer.Action])
         case concurrentAction([Reducer.Action])
         case serialReducerAction([Reducer.ReducerAction])
@@ -38,6 +40,16 @@ public extension EffectTask {
         catch: ((_ error: any Error, _ send: Send<Reducer.Target>) async -> Void)? = nil
     ) -> Self {
         .init(effectKind: .run(priority: priority, operation: operation, catch: `catch`))
+    }
+
+    @inlinable
+    static func send(_ action: Reducer.Action) -> Self {
+        .init(effectKind: .sendAction(action))
+    }
+
+    @inlinable
+    static func send(_ action: Reducer.ReducerAction) -> Self {
+        .init(effectKind: .sendReducerAction(action))
     }
 
     @inlinable
