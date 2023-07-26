@@ -1,5 +1,7 @@
 import Foundation
 
+// StateContainer is not thread-safe. Therefore, StateContainer must use NSLock or NSRecursiveLock for exclusions when changing values.
+// In Send.swift, NSRecursiveLock is used for exclusions when executing the `reduce(into:action)`.
 @dynamicMemberLookup
 public struct StateContainer<Target: SimplexStoreView> {
     public var reducerState: Target.Reducer.ReducerState {
@@ -21,7 +23,7 @@ public struct StateContainer<Target: SimplexStoreView> {
         reducerState: consuming Target.Reducer.ReducerState
     ) {
         self._entity = entity
-        self.reducerState = reducerState
+        self._reducerState = reducerState
     }
 
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.States, U>) -> U {
