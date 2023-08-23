@@ -19,7 +19,7 @@ final class ReducerBuilderMacroTests: XCTestCase {
                     case test
                 }
 
-                func reduce(into state: inout State, action: Action) -> EffectTask<Self> {
+                func reduce(into state: inout State, action: Action) -> SideEffect<Self> {
                     .none
                 }
             }
@@ -31,7 +31,7 @@ final class ReducerBuilderMacroTests: XCTestCase {
                     case test
                 }
 
-                func reduce(into state: inout State, action: Action) -> EffectTask<Self> {
+                func reduce(into state: inout State, action: Action) -> SideEffect<Self> {
                     .none
                 }
                 internal typealias State = StateContainer<TestView>
@@ -49,7 +49,7 @@ final class ReducerBuilderMacroTests: XCTestCase {
                     case test
                 }
 
-                public func reduce(into state: inout State, action: Action) -> EffectTask<Self> {
+                public func reduce(into state: inout State, action: Action) -> SideEffect<Self> {
                     .none
                 }
             }
@@ -61,7 +61,7 @@ final class ReducerBuilderMacroTests: XCTestCase {
                     case test
                 }
 
-                public func reduce(into state: inout State, action: Action) -> EffectTask<Self> {
+                public func reduce(into state: inout State, action: Action) -> SideEffect<Self> {
                     .none
                 }
                 public typealias State = StateContainer<TestView>

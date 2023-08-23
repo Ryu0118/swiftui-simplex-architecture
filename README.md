@@ -42,7 +42,7 @@ struct MyReducer {
         case increment
         case decrement
     }
-    func reduce(into state: inout State, action: Action) -> EffectTask<Self> {
+    func reduce(into state: inout State, action: Action) -> SideEffect<Self> {
         switch action {
         case .increment:
             state.counter += 1
@@ -88,7 +88,7 @@ struct MyReducer {
         var totalCalledCount = 0
     }
 
-    func reduce(into state: inout State, action: Action) -> EffectTask<Self> {
+    func reduce(into state: inout State, action: Action) -> SideEffect<Self> {
         state.reducerState.totalCalledCount += 1
         switch action {
         case .increment:
@@ -142,7 +142,7 @@ struct MyReducer {
 
     let authClient: AuthClient
 
-    func reduce(into state: inout State, action: Action) -> EffectTask<Self> {
+    func reduce(into state: inout State, action: Action) -> SideEffect<Self> {
         switch action {
         case .login:
             return .run { [email = state.email, password = state.password] send in
@@ -155,7 +155,7 @@ struct MyReducer {
         }
     }
 
-    func reduce(into state: inout State, action: ReducerAction) -> EffectTask<Self> {
+    func reduce(into state: inout State, action: ReducerAction) -> SideEffect<Self> {
         switch action {
         case let .loginResponse(result):
             ...

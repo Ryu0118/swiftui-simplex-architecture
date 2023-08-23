@@ -22,7 +22,7 @@
 ///         case countDown
 ///     }
 ///
-///     func reduce(into state: inout State, action: Action) -> EffectTask<MyReducer> {
+///     func reduce(into state: inout State, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
 ///         case .countUp:
 ///             state.counter += 1
@@ -77,7 +77,7 @@ public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externa
 ///     let authRepository: AuthRepository
 ///     let selfRepository: SelfRepository
 ///
-///     func reduce(into state: inout State, action: Action) -> EffectTask<MyReducer> {
+///     func reduce(into state: inout State, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
 ///         case .someAction:
 ///             return .none
@@ -113,7 +113,7 @@ public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externa
 ///         var counter: Int
 ///     }
 ///
-///     func reduce(into state: inout State, action: Action) -> EffectTask<MyReducer> {
+///     func reduce(into state: inout State, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
 ///         case .someAction:
 ///             state.reducerState.counter += 1
@@ -142,7 +142,7 @@ public macro ManualStoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer.Type)
 ///         case someAction
 ///     }
 ///
-///     func reduce(into state: inout State, action: Action) -> EffectTask<MyReducer> {
+///     func reduce(into state: inout State, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
 ///         case .someAction:
 ///             state.reducerState.counter += 1
