@@ -40,7 +40,7 @@
 ///   - reducer: An instance of a reducer conforming to the `ReducerProtocol`. It handles state updates in View.
 ///
 @attached(member, names: named(States), named(makeStore), named(Reducer), named(_store))
-@attached(conformance)
+@attached(extension)
 public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "StoreBuilder")
 
 /// Macro for manually building a store in View.
@@ -126,7 +126,7 @@ public macro StoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer) = #externa
 ///   - reducer: The type of the reducer that handles state updates in the store. It should conform to the `ReducerProtocol`.
 ///
 @attached(member, names: named(States), named(Reducer))
-@attached(conformance)
+@attached(extension)
 public macro ManualStoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer.Type) = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ManualStoreBuilder")
 
 /// Macro for creating a reducer.
@@ -156,5 +156,5 @@ public macro ManualStoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer.Type)
 ///   - target: Name of the View that conforms to SimplexStoreView.
 ///
 @attached(member, names: named(State), named(Target))
-@attached(conformance)
+@attached(extension)
 public macro Reducer(_ target: String) = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ReducerBuilderMacro")
