@@ -3,7 +3,9 @@ import Foundation
 public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target.Reducer.State == StateContainer<Target> {
     private let reducer: Target.Reducer
     private var container: StateContainer<Target>
-    @usableFromInline let lock = NSRecursiveLock()
+
+    @usableFromInline
+    let lock = NSRecursiveLock()
 
     init(
         reducer: consuming Target.Reducer,

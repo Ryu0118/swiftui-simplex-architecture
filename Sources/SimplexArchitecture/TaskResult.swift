@@ -1,4 +1,7 @@
-public extension Result where Failure == Swift.Error {
+public extension TaskResult where Failure == any Error {
+    /// Creates a new task result by evaluating an async throwing closure.
+    ///
+    /// - Parameter body: An asynchronous throwing closure.
     @inlinable
     init(catching body: () async throws -> Success) async {
         do {
@@ -9,4 +12,5 @@ public extension Result where Failure == Swift.Error {
     }
 }
 
-public typealias TaskResult<Success> = Result<Success, Swift.Error>
+/// A typealias for a `Result` where the failure type is constrained to `Swift.Error`.
+public typealias TaskResult<Success> = Result<Success, any Error>
