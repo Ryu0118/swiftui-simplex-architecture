@@ -1,6 +1,6 @@
 import Foundation
 
-public struct EffectTask<Reducer: ReducerProtocol>: Sendable {
+public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
     @usableFromInline
     enum EffectKind: @unchecked Sendable {
         case none
@@ -27,7 +27,7 @@ public struct EffectTask<Reducer: ReducerProtocol>: Sendable {
     }
 }
 
-public extension EffectTask {
+public extension SideEffect {
     @inlinable
     static var none: Self {
         .init(effectKind: .none)

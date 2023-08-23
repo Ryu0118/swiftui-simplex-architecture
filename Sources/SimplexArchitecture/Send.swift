@@ -51,26 +51,26 @@ extension Send {
 extension Send {
     @usableFromInline
     func send(_ action: consuming Target.Reducer.Action) -> SendTask {
-        let effectTask = withLock {
+        let sideEffect = withLock {
             reducer.reduce(into: &container, action: action)
         }
-        if case .none = effectTask.kind {
+        if case .none = sideEffect.kind {
             return .init(task: nil)
         } else {
-            let tasks = runEffect(effectTask)
+            let tasks = runEffect(sideEffect)
             return executeTasks(tasks)
         }
     }
 
     @usableFromInline
     func send(_ action: consuming Target.Reducer.ReducerAction) -> SendTask {
-        let effectTask = withLock {
+        let sideEffect = withLock {
             reducer.reduce(into: &container, action: action)
         }
-        if case .none = effectTask.kind {
+        if case .none = sideEffect.kind {
             return .init(task: nil)
         } else {
-            let tasks = runEffect(effectTask)
+            let tasks = runEffect(sideEffect)
             return executeTasks(tasks)
         }
     }
@@ -104,8 +104,8 @@ extension Send {
         return SendTask(task: task)
     }
 
-    func runEffect(_ effectTask: borrowing EffectTask<Target.Reducer>) -> [Task<Void, Never>] {
-        switch effectTask.kind {
+    func runEffect(_ sideEffect: borrowing SideEffect<Target.Reducer>) -> [Task<Void, Never>] {
+        switch sideEffect.kind {
         case .run(let priority, let operation, let `catch`):
             let task = Task.detached(priority: priority ?? .medium) {
                 do {
