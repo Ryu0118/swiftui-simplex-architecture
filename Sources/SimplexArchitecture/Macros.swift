@@ -5,7 +5,7 @@
 ///
 /// Example usage (Dependency Injection):
 /// ```
-/// @ScopedState(reducer: MyReducer.self)
+/// @ScopedState
 /// struct MyView: View {
 ///     let store: Store<MyReducer>
 ///
@@ -23,8 +23,7 @@
 ///     }
 /// }
 ///
-/// @Reducer("MyView")
-/// struct MyReducer {
+/// struct MyReducer: ReducerProtocol {
 ///     enum Action {
 ///         case someAction
 ///     }
@@ -42,7 +41,7 @@
 /// ```
 /// Example usage (ReducerState):
 /// ```
-/// @ScopedState(reducer: MyReducer.self)
+/// @ScopedState
 /// struct MyView: View {
 ///     let store: Store<MyReducer>
 ///
@@ -58,8 +57,7 @@
 ///     }
 /// }
 ///
-/// @Reducer("MyView")
-/// struct MyReducer {
+/// struct MyReducer: ReducerProtocol {
 ///     enum Action {
 ///         case someAction
 ///     }
@@ -80,6 +78,6 @@
 /// - Parameters:
 ///   - reducer: The type of the reducer that handles state updates in the store. It should conform to the `ReducerProtocol`.
 ///
-@attached(member, names: named(States), named(Reducer))
-@attached(extension)
-public macro ScopedState<Reducer: ReducerProtocol>(reducer: Reducer.Type) = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopedState")
+@attached(member, names: named(States))
+@attached(extension, conformances: SimplexStoreView)
+public macro ScopedState() = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopedState")
