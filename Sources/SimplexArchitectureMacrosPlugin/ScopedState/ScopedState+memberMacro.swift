@@ -9,7 +9,7 @@ fileprivate extension VariableDeclSyntax {
     }
 }
 
-public struct ManualStoreBuilder: MemberMacro {
+public struct ScopedState: MemberMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax, Context: MacroExpansionContext
     >(
