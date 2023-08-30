@@ -1,10 +1,10 @@
 import SwiftUI
 
 public protocol SimplexStoreView<Reducer>: View {
-    associatedtype Reducer: ReducerProtocol<Self> where Reducer.State == StateContainer<Self>
+    associatedtype Reducer: ReducerProtocol<Self> where Reducer.Target == Self
     associatedtype States: StatesProtocol
 
-    var store: Store<Self> { get }
+    var store: Store<Reducer> { get }
 }
 
 public protocol StatesProtocol<Target> {
