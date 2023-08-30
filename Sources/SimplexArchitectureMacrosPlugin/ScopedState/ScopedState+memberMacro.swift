@@ -18,8 +18,6 @@ public struct ScopedState: MemberMacro {
         in context: Context
     ) throws -> [DeclSyntax] {
         guard let structDecl = decodeExpansion(of: node, attachedTo: declaration, in: context) else {
-            return []
-        }
 
         let variables = declaration
             .memberBlock

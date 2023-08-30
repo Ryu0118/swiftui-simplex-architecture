@@ -1,7 +1,7 @@
 /// Macro for manually building a store in View.
 ///
 /// Use this macro to manually generate a Reducer in Simplex Architecture. This is useful for Dependency Injection and using ReducerState
-/// It is conformed to the `SimplexStoreBuilder` protocol by the `ManualStoreBuilder` macro.
+/// It is conformed to the `SimplexStoreBuilder` protocol by the `ScopedState` macro.
 ///
 /// Example usage (Dependency Injection):
 /// ```

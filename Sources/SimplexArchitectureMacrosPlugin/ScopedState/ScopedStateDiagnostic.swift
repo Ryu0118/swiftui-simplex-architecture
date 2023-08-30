@@ -16,7 +16,6 @@ extension ScopedStateMacroDiagnostic: DiagnosticMessage {
         switch self {
         case .requiresStruct:
             return "'ScopedState' macro can only be applied to struct"
-
         case .invalidArgument:
             return "invalid arguments"
         }
@@ -25,7 +24,7 @@ extension ScopedStateMacroDiagnostic: DiagnosticMessage {
     public var severity: DiagnosticSeverity { .error }
 
     public var diagnosticID: MessageID {
-        MessageID(domain: "Swift", id: "ScopedStateMacro.\(self)")
+        MessageID(domain: "Swift", id: "ScopedState.\(self)")
     }
 }
 

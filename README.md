@@ -36,8 +36,7 @@ let package = Package(
 ## Usage
 #### Basic Usage
 ```Swift
-@Reducer("MyView")
-struct MyReducer {
+struct MyReducer: ReducerProtocol {
     enum Action {
         case increment
         case decrement
@@ -54,7 +53,7 @@ struct MyReducer {
     }
 }
 
-@StoreBuilder(reducer: MyReducer())
+@ScopedState
 struct MyView: View {
     @State var counter = 0
 
@@ -77,8 +76,7 @@ ReducerState is also effective to improve performance because the View is not up
 
 This is the example code
 ```Swift
-@Reducer("MyView")
-struct MyReducer {
+struct MyReducer: ReducerProtocol {
     enum Action {
         case increment
         case decrement
@@ -103,7 +101,7 @@ struct MyReducer {
     }
 }
 
-@ManualStoreBuilder(reducer: MyReducer.self)
+@ScopedState
 struct MyView: View {
     @State var counter = 0
 
@@ -130,8 +128,7 @@ If there are Actions that you do not want to expose to View, ReducerAction is ef
 This is the sample code:
 
 ```Swift
-@Reducer("MyView")
-struct MyReducer {
+struct MyReducer: ReducerProtocol {
     enum Action {
         case login
     }
@@ -164,7 +161,7 @@ struct MyReducer {
     }
 }
 
-@ManualStoreBuilder(reducer: MyReducer.self)
+@ScopedState
 struct MyView: View {
     @State var email: String = ""
     @State var password: String = ""
