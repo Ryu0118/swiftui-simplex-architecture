@@ -28,18 +28,15 @@ public struct ScopeState: MemberMacro {
             "AppStorage"
         ]
 
-        let variables = structDecl.variables
-        let structName = structDecl.name.text
-
-        let stateVariables = variables
+        let stateVariables = structDecl.variables
             .filter(propertyWrappers: detecting)
             .map { $0.with(\.attributes, []).with(\.modifiers, []) }
 
-        let keyPathPairs = stateVariables
+        let keyPathPairs = structDecl.variables
+            .filter(propertyWrappers: detecting)
+            .map { $0.with(\.attributes, []).with(\.modifiers, []) }
             .compactMap(\.variableName)
-            .map {
-                "\\.\($0): \\.\($0)"
-            }
+            .map { "\\.\($0): \\.\($0)" }
             .joined(separator: ", ")
             .modifying {
                 if $0.isEmpty {
@@ -66,7 +63,7 @@ public struct ScopeState: MemberMacro {
                     MemberBlockItemListSyntax {
                         MemberBlockItemSyntax(
                             decl: DeclSyntax(
-                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>] = [\(raw: keyPathPairs)]"
+                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structDecl.name.text)>] = [\(raw: keyPathPairs)]"
                             )
                         )
                     }
