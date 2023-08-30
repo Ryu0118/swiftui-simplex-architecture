@@ -3,12 +3,6 @@ import SwiftSyntax
 import SwiftSyntaxMacros
 import SwiftSyntaxBuilder
 
-fileprivate extension VariableDeclSyntax {
-    var variableName: String? {
-        bindings.first?.pattern.trimmed.description
-    }
-}
-
 public struct ScopedState: MemberMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax, Context: MacroExpansionContext
@@ -20,47 +14,50 @@ public struct ScopedState: MemberMacro {
         guard let structDecl = decodeExpansion(of: node, attachedTo: declaration, in: context) else {
             return []
         }
-        let variables = declaration
-            .memberBlock
-            .members
-            .compactMap { $0.decl.as(VariableDeclSyntax.self) }
+
+        // SwiftUI's propertyWrapper
+        let detecting = [
+            "State",
+            "Binding",
+            "ObservableState",
+            "ObservedObject",
+            "StateObject",
+            "FocusState",
+            "EnvironmentObject",
+            "GestureState",
+            "AppStorage"
+        ]
+
+        let variables = structDecl.variables
+        let structName = structDecl.name.text
 
         let stateVariables = variables
-            .filter {
-                $0.attributes
-                    .compactMap { $0.as(AttributeSyntax.self) }
-                    .contains {
-                        $0.attributeName.trimmed.description == "State" ||
-                        $0.attributeName.trimmed.description == "Binding" ||
-                        $0.attributeName.trimmed.description == "ObservableState" ||
-                        $0.attributeName.trimmed.description == "ObservedObject" ||
-                        $0.attributeName.trimmed.description == "StateObject" ||
-                        $0.attributeName.trimmed.description == "FocusState"
-                    }
-            }
-            .filter { $0.variableName != "store" && $0.variableName != "_store" }
+            .filter(propertyWrappers: detecting)
             .map { $0.with(\.attributes, []).with(\.modifiers, []) }
 
-        var keyPathPairs = stateVariables
+        let keyPathPairs = stateVariables
             .compactMap(\.variableName)
             .map {
                 "\\.\($0): \\.\($0)"
             }
             .joined(separator: ", ")
+            .modifying {
+                if $0.isEmpty {
+                    ":"
+                } else {
+                    $0
+                }
+            }
 
-        keyPathPairs = if keyPathPairs.isEmpty {
-            ":"
-        } else {
-            keyPathPairs
-        }
-        let structName = structDecl.name.text
-        let modifier = structDecl.modifiers.compactMap { $0.as(DeclModifierSyntax.self)?.name.text }.first ?? "internal"
+        let modifier = structDecl.modifiers.compactMap {
+            $0.as(DeclModifierSyntax.self)?.name.text
+        }.first ?? "internal"
 
         return [
             DeclSyntax(
                 StructDeclSyntax(
                     modifiers: [DeclModifierSyntax(name: .identifier(modifier))],
-                    identifier: "States",
+                    name: "States",
                     inheritanceClause: InheritanceClauseSyntax {
                         InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "StatesProtocol"))
                     }
