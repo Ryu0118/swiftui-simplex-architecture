@@ -9,7 +9,7 @@ fileprivate extension VariableDeclSyntax {
     }
 }
 
-public struct ManualStoreBuilder: MemberMacro {
+public struct ScopedState: MemberMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax, Context: MacroExpansionContext
     >(
@@ -17,7 +17,7 @@ public struct ManualStoreBuilder: MemberMacro {
         providingMembersOf declaration: Declaration,
         in context: Context
     ) throws -> [DeclSyntax] {
-        guard let (structDecl, reducerType) = decodeExpansion(of: node, attachedTo: declaration, in: context) else {
+        guard let structDecl = decodeExpansion(of: node, attachedTo: declaration, in: context) else {
             return []
         }
 
@@ -28,7 +28,7 @@ public struct ManualStoreBuilder: MemberMacro {
 
         let stateVariables = variables
             .filter {
-                $0.attributes?
+                $0.attributes
                     .compactMap { $0.as(AttributeSyntax.self) }
                     .contains {
                         $0.attributeName.trimmed.description == "State" ||
@@ -37,7 +37,7 @@ public struct ManualStoreBuilder: MemberMacro {
                         $0.attributeName.trimmed.description == "ObservedObject" ||
                         $0.attributeName.trimmed.description == "StateObject" ||
                         $0.attributeName.trimmed.description == "FocusState"
-                    } ?? false
+                    } 
             }
             .filter { $0.variableName != "store" && $0.variableName != "_store" }
             .map { $0.with(\.attributes, []) }
@@ -55,24 +55,21 @@ public struct ManualStoreBuilder: MemberMacro {
             keyPathPairs
         }
 
-        let structName = structDecl.identifier.text
-        let modifier = structDecl.modifiers?.compactMap { $0.as(DeclModifierSyntax.self)?.name.text }.first ?? "internal"
+        let structName = structDecl.name.text
+        let modifier = structDecl.modifiers.compactMap { $0.as(DeclModifierSyntax.self)?.name.text }.first ?? "internal"
 
         return [
-            DeclSyntax(
-                "\(raw: modifier) typealias Reducer = \(raw: reducerType)"
-            ),
             DeclSyntax(
                 StructDeclSyntax(
                     modifiers: [DeclModifierSyntax(name: .identifier(modifier))],
                     identifier: "States",
-                    inheritanceClause: TypeInheritanceClauseSyntax {
-                        InheritedTypeSyntax(typeName: TypeSyntax(stringLiteral: "StatesProtocol"))
+                    inheritanceClause: InheritanceClauseSyntax {
+                        InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "StatesProtocol"))
                     }
                 ) {
-                    MemberDeclListSyntax(stateVariables.map { MemberDeclListItemSyntax(decl: $0) })
-                    MemberDeclListSyntax {
-                        MemberDeclListItemSyntax(
+                    MemberBlockItemListSyntax(stateVariables.map { MemberBlockItemSyntax(decl: $0) })
+                    MemberBlockItemListSyntax {
+                        MemberBlockItemSyntax(
                             decl: DeclSyntax(
                                 "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structName)>] = [\(raw: keyPathPairs)]"
                             )

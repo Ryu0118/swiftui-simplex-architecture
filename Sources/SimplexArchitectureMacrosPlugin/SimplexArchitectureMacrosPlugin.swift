@@ -5,7 +5,7 @@ import SwiftCompilerPlugin
 @main
 struct SimplexArchitectureMacrosPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        ManualStoreBuilder.self
+        ScopedState.self
     ]
 }
 #endif
