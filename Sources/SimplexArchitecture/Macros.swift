@@ -1,11 +1,11 @@
 /// Macro for manually building a store in View.
 ///
 /// Use this macro to manually generate a Reducer in Simplex Architecture. This is useful for Dependency Injection and using ReducerState
-/// It is conformed to the `SimplexStoreBuilder` protocol by the `ScopedState` macro.
+/// It is conformed to the `SimplexStoreBuilder` protocol by the `ScopeState` macro.
 ///
 /// Example usage (Dependency Injection):
 /// ```
-/// @ScopedState
+/// @ScopeState
 /// struct MyView: View {
 ///     let store: Store<MyReducer>
 ///
@@ -41,7 +41,7 @@
 /// ```
 /// Example usage (ReducerState):
 /// ```
-/// @ScopedState
+/// @ScopeState
 /// struct MyView: View {
 ///     let store: Store<MyReducer>
 ///
@@ -80,4 +80,4 @@
 ///
 @attached(member, names: named(States))
 @attached(extension, conformances: SimplexStoreView)
-public macro ScopedState() = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopedState")
+public macro ScopeState() = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopeState")

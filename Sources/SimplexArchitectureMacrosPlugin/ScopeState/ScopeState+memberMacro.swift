@@ -3,7 +3,7 @@ import SwiftSyntax
 import SwiftSyntaxMacros
 import SwiftSyntaxBuilder
 
-public struct ScopedState: MemberMacro {
+public struct ScopeState: MemberMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax, Context: MacroExpansionContext
     >(

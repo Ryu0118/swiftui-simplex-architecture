@@ -2,12 +2,12 @@ import SwiftSyntax
 import SwiftSyntaxMacros
 import SwiftDiagnostics
 
-public enum ScopedStateMacroDiagnostic {
+public enum ScopeStateMacroDiagnostic {
     case requiresStruct
     case invalidArgument
 }
 
-extension ScopedStateMacroDiagnostic: DiagnosticMessage {
+extension ScopeStateMacroDiagnostic: DiagnosticMessage {
     func diagnose(at node: some SyntaxProtocol) -> Diagnostic {
         Diagnostic(node: Syntax(node), message: self)
     }
@@ -15,7 +15,7 @@ extension ScopedStateMacroDiagnostic: DiagnosticMessage {
     public var message: String {
         switch self {
         case .requiresStruct:
-            return "'ScopedState' macro can only be applied to struct"
+            return "'ScopeState' macro can only be applied to struct"
         case .invalidArgument:
             return "invalid arguments"
         }
@@ -24,18 +24,18 @@ extension ScopedStateMacroDiagnostic: DiagnosticMessage {
     public var severity: DiagnosticSeverity { .error }
 
     public var diagnosticID: MessageID {
-        MessageID(domain: "Swift", id: "ScopedState.\(self)")
+        MessageID(domain: "Swift", id: "ScopeState.\(self)")
     }
 }
 
-public extension ScopedState {
+public extension ScopeState {
     static func decodeExpansion(
         of attribute: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) -> StructDeclSyntax? {
         guard let structDecl = declaration.as(StructDeclSyntax.self) else {
-            context.diagnose(ScopedStateMacroDiagnostic.requiresStruct.diagnose(at: attribute))
+            context.diagnose(ScopeStateMacroDiagnostic.requiresStruct.diagnose(at: attribute))
             return nil
         }
         return structDecl
