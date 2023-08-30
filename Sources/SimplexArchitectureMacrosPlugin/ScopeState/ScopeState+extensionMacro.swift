@@ -13,12 +13,12 @@ extension ScopeState: ExtensionMacro {
             return []
         }
         if let inheritedTypes = structDecl.inheritanceClause?.inheritedTypes,
-           inheritedTypes.contains(where: { inherited in inherited.type.trimmedDescription == "SimplexStoreView" }) {
+           inheritedTypes.contains(where: { inherited in inherited.type.trimmedDescription == "ActionSendable" }) {
             return []
         }
         let declSyntax: DeclSyntax =
             """
-            extension \(type.trimmed): SimplexStoreView {}
+            extension \(type.trimmed): ActionSendable {}
             """
         return [
             declSyntax.cast(ExtensionDeclSyntax.self)
