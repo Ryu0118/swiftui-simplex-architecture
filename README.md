@@ -53,7 +53,7 @@ struct MyReducer: ReducerProtocol {
     }
 }
 
-@ScopedState
+@ScopeState
 struct MyView: View {
     @State var counter = 0
 
@@ -101,7 +101,7 @@ struct MyReducer: ReducerProtocol {
     }
 }
 
-@ScopedState
+@ScopeState
 struct MyView: View {
     @State var counter = 0
 
@@ -161,7 +161,7 @@ struct MyReducer: ReducerProtocol {
     }
 }
 
-@ScopedState
+@ScopeState
 struct MyView: View {
     @State var email: String = ""
     @State var password: String = ""
