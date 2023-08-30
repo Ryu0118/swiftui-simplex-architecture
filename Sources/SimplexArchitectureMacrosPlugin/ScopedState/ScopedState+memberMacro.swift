@@ -18,7 +18,8 @@ public struct ScopedState: MemberMacro {
         in context: Context
     ) throws -> [DeclSyntax] {
         guard let structDecl = decodeExpansion(of: node, attachedTo: declaration, in: context) else {
-
+            return []
+        }
         let variables = declaration
             .memberBlock
             .members
@@ -35,7 +36,7 @@ public struct ScopedState: MemberMacro {
                         $0.attributeName.trimmed.description == "ObservedObject" ||
                         $0.attributeName.trimmed.description == "StateObject" ||
                         $0.attributeName.trimmed.description == "FocusState"
-                    } 
+                    }
             }
             .filter { $0.variableName != "store" && $0.variableName != "_store" }
             .map { $0.with(\.attributes, []) }
@@ -52,7 +53,6 @@ public struct ScopedState: MemberMacro {
         } else {
             keyPathPairs
         }
-
         let structName = structDecl.name.text
         let modifier = structDecl.modifiers.compactMap { $0.as(DeclModifierSyntax.self)?.name.text }.first ?? "internal"
 
