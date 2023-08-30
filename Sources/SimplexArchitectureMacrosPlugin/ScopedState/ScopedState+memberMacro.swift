@@ -39,7 +39,7 @@ public struct ScopedState: MemberMacro {
                     }
             }
             .filter { $0.variableName != "store" && $0.variableName != "_store" }
-            .map { $0.with(\.attributes, []) }
+            .map { $0.with(\.attributes, []).with(\.modifiers, []) }
 
         var keyPathPairs = stateVariables
             .compactMap(\.variableName)
