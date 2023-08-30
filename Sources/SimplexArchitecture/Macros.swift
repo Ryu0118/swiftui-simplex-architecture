@@ -83,33 +83,3 @@
 @attached(member, names: named(States), named(Reducer))
 @attached(extension)
 public macro ManualStoreBuilder<Reducer: ReducerProtocol>(reducer: Reducer.Type) = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ManualStoreBuilder")
-
-/// Macro for creating a reducer.
-///
-/// Use this macro to define a reducer that handles state updates for a specific View.
-/// It is conformed to the `ReducerProtocol` protocol by the `Reducer` macro.
-///
-/// Example usage:
-/// ```
-/// @Reducer("MyView")
-/// struct MyReducer {
-///     enum Action {
-///         case someAction
-///     }
-///
-///     func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
-///         switch action {
-///         case .someAction:
-///             state.reducerState.counter += 1
-///             return .none
-///         }
-///     }
-/// }
-/// ```
-///
-/// - Parameters:
-///   - target: Name of the View that conforms to SimplexStoreView.
-///
-@attached(member, names: named(State), named(Target))
-@attached(extension)
-public macro Reducer(_ target: String) = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ReducerBuilderMacro")
