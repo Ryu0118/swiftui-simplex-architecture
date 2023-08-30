@@ -1,24 +1,24 @@
 import Foundation
 
-public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Target.Reducer.State == StateContainer<Target> {
-    private let reducer: Target.Reducer
-    private var container: StateContainer<Target>
+public final class Send<Reducer: ReducerProtocol>: @unchecked Sendable {
+    private let reducer: Reducer
+    private var container: StateContainer<Reducer.Target>
 
     @usableFromInline
     let lock = NSRecursiveLock()
 
     init(
-        reducer: consuming Target.Reducer,
-        target: consuming Target
-    ) where Target.Reducer.ReducerState == Never {
+        reducer: consuming Reducer,
+        target: consuming Reducer.Target
+    ) where Reducer.ReducerState == Never {
         self.reducer = reducer
         self.container = StateContainer(target)
     }
 
     init(
-        reducer: consuming Target.Reducer,
-        target: consuming Target,
-        reducerState: consuming Target.Reducer.ReducerState
+        reducer: consuming Reducer,
+        target: consuming Reducer.Target,
+        reducerState: consuming Reducer.ReducerState
     ) {
         self.reducer = reducer
         self.container = StateContainer(target, reducerState: reducerState)
@@ -28,12 +28,12 @@ public final class Send<Target: SimplexStoreView>: @unchecked Sendable where Tar
 // MARK: - Send Public Methods
 public extension Send {
     @inlinable
-    func callAsFunction(_ action: consuming Target.Reducer.Action) async {
+    func callAsFunction(_ action: consuming Reducer.Action) async {
         await send(action).wait()
     }
 
     @inlinable
-    func callAsFunction(_ action: consuming Target.Reducer.ReducerAction) async {
+    func callAsFunction(_ action: consuming Reducer.ReducerAction) async {
         await send(action).wait()
     }
 }
@@ -42,7 +42,7 @@ public extension Send {
 extension Send {
     @inlinable
     @discardableResult
-    func callAsFunction(_ action: consuming Target.Reducer.Action) -> SendTask {
+    func callAsFunction(_ action: consuming Reducer.Action) -> SendTask {
         send(action)
     }
 }
@@ -50,7 +50,7 @@ extension Send {
 // MARK: - Send Private Methods
 extension Send {
     @usableFromInline
-    func send(_ action: consuming Target.Reducer.Action) -> SendTask {
+    func send(_ action: consuming Reducer.Action) -> SendTask {
         let sideEffect = withLock {
             reducer.reduce(into: &container, action: action)
         }
@@ -63,7 +63,7 @@ extension Send {
     }
 
     @usableFromInline
-    func send(_ action: consuming Target.Reducer.ReducerAction) -> SendTask {
+    func send(_ action: consuming Reducer.ReducerAction) -> SendTask {
         let sideEffect = withLock {
             reducer.reduce(into: &container, action: action)
         }
@@ -104,7 +104,7 @@ extension Send {
         return SendTask(task: task)
     }
 
-    func runEffect(_ sideEffect: borrowing SideEffect<Target.Reducer>) -> [Task<Void, Never>] {
+    func runEffect(_ sideEffect: borrowing SideEffect<Reducer>) -> [Task<Void, Never>] {
         switch sideEffect.kind {
         case .run(let priority, let operation, let `catch`):
             let task = Task.detached(priority: priority ?? .medium) {

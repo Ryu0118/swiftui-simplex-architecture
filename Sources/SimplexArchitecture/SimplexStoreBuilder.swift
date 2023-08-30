@@ -1,11 +1,11 @@
 public protocol SimplexStoreBuilder<Reducer>: SimplexStoreView {
-    var _store: Store<Self>? { get nonmutating set }
-    func makeStore() -> Store<Self>
+    var _store: Store<Reducer>? { get nonmutating set }
+    func makeStore() -> Store<Reducer>
 }
 
 public extension SimplexStoreBuilder {
     @inlinable
-    var store: Store<Self> {
+    var store: Store<Reducer> {
         get {
             if let _store {
                 return _store

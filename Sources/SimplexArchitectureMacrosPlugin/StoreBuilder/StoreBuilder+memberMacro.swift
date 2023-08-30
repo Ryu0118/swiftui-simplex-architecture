@@ -55,30 +55,6 @@ public struct StoreBuilder: MemberMacro {
             keyPathPairs
         }
 
-//        let observableStatesVariable = declaration.memberBlock.members
-//            .compactMap { $0.decl.as(VariableDeclSyntax.self)}
-//            .filter {
-//                $0.attributes?
-//                    .compactMap { $0
-//                        .as(AttributeSyntax.self)?
-//                        .attributeName
-//                        .as(SimpleTypeIdentifierSyntax.self)?
-//                        .name
-//                        .text
-//                    }
-//                    .contains("ObservableState")
-//                ?? false
-//            }
-//            .compactMap(\.variableName)
-
-//        let observableKeyPaths = observableStatesVariable
-//            .map { "\\.\($0)" }
-//            .joined(separator: ", ")
-//
-//        let observableProjectedKeyPaths = observableStatesVariable
-//            .map { "\\.$\($0)" }
-//            .joined(separator: ", ")
-
         let structName = structDecl.identifier.text
         let modifier = structDecl.modifiers?.compactMap { $0.as(DeclModifierSyntax.self)?.name.text }.first ?? "internal"
         var decls = [DeclSyntax]()
@@ -86,7 +62,7 @@ public struct StoreBuilder: MemberMacro {
         if !variables.compactMap(\.variableName).contains(where: { $0 == "_store" }) {
             decls.append(
                 DeclSyntax(
-                    "@State \(raw: modifier) var _store: SimplexArchitecture.Store<\(raw: structName)>?"
+                    "@State \(raw: modifier) var _store: SimplexArchitecture.Store<\(raw: structName), \(raw: reducerType)>?"
                 )
             )
         }
@@ -96,7 +72,7 @@ public struct StoreBuilder: MemberMacro {
                     "\(raw: modifier) typealias Reducer = \(raw: reducerType)"
                 ),
                 DeclSyntax(
-                    "\(raw: modifier) func makeStore() -> SimplexArchitecture.Store<\(raw: structName)> { Store(reducer: \(raw: reducerInstance), target: self) }"
+                    "\(raw: modifier) func makeStore() -> SimplexArchitecture.Store<\(raw: reducerType)> { Store(reducer: \(raw: reducerInstance), target: self) }"
                 ),
                 DeclSyntax(
                     StructDeclSyntax(
