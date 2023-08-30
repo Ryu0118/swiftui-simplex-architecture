@@ -1,7 +1,7 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-extension ManualStoreBuilder: ConformanceMacro {
+extension ScopedState: ConformanceMacro {
     public static func expansion<Declaration, Context>(
         of node: AttributeSyntax,
         providingConformancesOf declaration: Declaration,
