@@ -3,7 +3,7 @@ import SwiftSyntaxMacros
 import SwiftDiagnostics
 
 public enum ScopeStateMacroDiagnostic {
-    case requiresStruct
+    case requiresStructOrClass
     case invalidArgument
 }
 
@@ -14,7 +14,7 @@ extension ScopeStateMacroDiagnostic: DiagnosticMessage {
 
     public var message: String {
         switch self {
-        case .requiresStruct:
+        case .requiresStructOrClass:
             return "'ScopeState' macro can only be applied to struct"
         case .invalidArgument:
             return "invalid arguments"
@@ -33,11 +33,7 @@ public extension ScopeState {
         of attribute: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
-    ) -> StructDeclSyntax? {
-        guard let structDecl = declaration.as(StructDeclSyntax.self) else {
-            context.diagnose(ScopeStateMacroDiagnostic.requiresStruct.diagnose(at: attribute))
-            return nil
-        }
-        return structDecl
+    ) -> Bool {
+        declaration.as(StructDeclSyntax.self) != nil || declaration.as(ClassDeclSyntax.self) != nil
     }
 }

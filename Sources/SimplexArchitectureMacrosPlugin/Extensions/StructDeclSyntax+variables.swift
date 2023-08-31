@@ -1,9 +1,8 @@
 import SwiftSyntax
 
-extension StructDeclSyntax {
+extension DeclGroupSyntax {
     var variables: [VariableDeclSyntax] {
-        self
-            .memberBlock
+        self.memberBlock
             .members
             .compactMap { $0.decl.as(VariableDeclSyntax.self) }
     }

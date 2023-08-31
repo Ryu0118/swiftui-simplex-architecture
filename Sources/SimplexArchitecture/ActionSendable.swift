@@ -1,7 +1,7 @@
 import SwiftUI
 
-public protocol ActionSendable<Reducer>: View {
-    associatedtype Reducer: ReducerProtocol<Self> where Reducer.Target == Self
+public protocol ActionSendable<Reducer> {
+    associatedtype Reducer: ReducerProtocol<Self>
     associatedtype States: StatesProtocol
 
     var store: Store<Reducer> { get }
@@ -18,7 +18,7 @@ public extension ActionSendable where Reducer.ReducerState == Never {
         if store.send == nil {
             store.sendIfReducerStateNever(action: action, target: self)
         } else {
-            store.sendIfNeeded(action: action)!
+            store.sendIfNeeded(action: action) ?? SendTask(task: nil)
         }
     }
 }
@@ -31,7 +31,7 @@ public extension ActionSendable {
         if store.send == nil {
             store.sendIfReducerStateExists(action: action, target: self)
         } else {
-            store.sendIfNeeded(action: action)!
+            store.sendIfNeeded(action: action) ?? SendTask(task: nil)
         }
     }
 }

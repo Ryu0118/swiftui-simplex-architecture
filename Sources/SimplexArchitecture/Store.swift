@@ -15,7 +15,7 @@ public final class Store<Reducer: ReducerProtocol> {
     }
 
     public init(
-        reducer: @escaping @autoclosure () -> Reducer
+        reducer: @autoclosure @escaping () -> Reducer
     ) where Reducer.ReducerState == Never {
         self.storeType = .lazy(reducer: reducer)
     }
@@ -44,7 +44,7 @@ extension Store {
                 defer { self.send = send }
                 return send(action)
             case .normal, .lazy:
-                fatalError("Unreachable")
+                return SendTask(task: nil)
             }
         }
     }
@@ -69,7 +69,7 @@ extension Store where Reducer.ReducerState == Never {
                 let send = Send(reducer: reducer(), target: target)
                 defer { self.send = send }
                 return send(action)
-            default: fatalError("Unreachable")
+            default: return SendTask(task: nil)
             }
         }
     }
@@ -79,9 +79,7 @@ private extension Store {
     enum StoreType {
         case normal
 
-        case lazy(
-            reducer: () -> Reducer
-        )
+        case lazy(reducer: () -> Reducer)
 
         case containReducerState(
             reducer: () -> Reducer,

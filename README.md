@@ -56,6 +56,8 @@ struct MyReducer: ReducerProtocol {
 @ScopeState
 struct MyView: View {
     @State var counter = 0
+    
+    let store: Store<MyReducer> = Store(reducer: MyReducer())
 
     var body: some View {
         VStack {
