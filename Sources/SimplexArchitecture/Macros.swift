@@ -79,5 +79,5 @@
 ///   - reducer: The type of the reducer that handles state updates in the store. It should conform to the `ReducerProtocol`.
 ///
 @attached(member, names: named(States))
-@attached(extension, conformances: SimplexStoreView)
+@attached(extension, conformances: ActionSendable)
 public macro ScopeState() = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopeState")

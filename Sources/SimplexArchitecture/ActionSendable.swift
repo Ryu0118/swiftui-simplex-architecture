@@ -1,6 +1,6 @@
 import SwiftUI
 
-public protocol SimplexStoreView<Reducer>: View {
+public protocol ActionSendable<Reducer>: View {
     associatedtype Reducer: ReducerProtocol<Self> where Reducer.Target == Self
     associatedtype States: StatesProtocol
 
@@ -8,11 +8,11 @@ public protocol SimplexStoreView<Reducer>: View {
 }
 
 public protocol StatesProtocol<Target> {
-    associatedtype Target: SimplexStoreView
+    associatedtype Target: ActionSendable
     static var keyPathMap: [PartialKeyPath<Self>: PartialKeyPath<Target>] { get }
 }
 
-public extension SimplexStoreView where Reducer.ReducerState == Never {
+public extension ActionSendable where Reducer.ReducerState == Never {
     @discardableResult
     func send(_ action: consuming Reducer.Action) -> SendTask {
         if store.send == nil {
@@ -23,7 +23,7 @@ public extension SimplexStoreView where Reducer.ReducerState == Never {
     }
 }
 
-public extension SimplexStoreView {
+public extension ActionSendable {
     /// Send an action to the store
     @discardableResult
     @_disfavoredOverload
