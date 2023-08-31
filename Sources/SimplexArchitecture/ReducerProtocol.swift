@@ -2,14 +2,13 @@
 ///
 /// ReducerProtocol is automatically conformed by the Reducer(_ target:) macro.
 /// ```
-/// @Reducer("MyView")
-/// struct MyReducer {
+/// struct MyReducer: ReducerProtocol {
 ///     enum Action {
 ///         case increment
 ///         case decrement
 ///     }
 ///
-///     func reduce(into state: inout State, action: Action) -> SideEffect<MyReducer> {
+///     func reduce(into state: inout StateContainer<MyVIew>, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
 ///         case .increment:
 ///             state.counter += 1
@@ -21,9 +20,10 @@
 ///     }
 /// }
 ///
-/// @StoreBuilder(reducer: MyReducer())
+/// @ScopeState
 /// struct MyView: View {
 ///     @State var counter = 0
+///     let store = Store(reducer: MyReducer())
 ///
 ///     var body: some View {
 ///         VStack {
@@ -42,8 +42,7 @@
 /// Also, `ReducerState` is useful to reduce unnecessary View updates. View is not updated when `ReducerState` changes. It can be used only with `Reducer`.
 ///
 /// ```
-/// @Reducer("MyView")
-/// struct MyReducer {
+/// struct MyReducer: ReducerProtocol {
 ///     enum Action {
 ///         case increment
 ///         case decrement
@@ -53,7 +52,7 @@
 ///         var totalCalledCount = 0
 ///     }
 ///
-///     func reduce(into state: inout State, action: Action) -> SideEffect<MyReducer> {
+///     func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
 ///         state.reducerState.totalCalledCount += 1
 ///         switch action {
 ///         case .increment:
@@ -66,7 +65,7 @@
 ///     }
 /// }
 ///
-/// @ScopeState(reducer: MyReducer.self)
+/// @ScopeState
 /// struct MyView: View {
 ///     @State var counter = 0
 ///
@@ -92,7 +91,7 @@
 ///
 public protocol ReducerProtocol<Target> {
     /// Target for the Reducer to change state, which must conform to ActionSendable and is automatically conformed to by the StoreBuilder or ScopeState macros
-    associatedtype Target: ActionSendable where Target.Reducer == Self
+    associatedtype Target: ActionSendable<Self>
     /// State used by Reducer. Since the View is not update when the value of ReducerState is changed, it is used for the purpose of improving performance, etc.
     /// The default is Never.
     associatedtype ReducerState = Never

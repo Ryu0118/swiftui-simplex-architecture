@@ -15,7 +15,7 @@ extension ScopeStateMacroDiagnostic: DiagnosticMessage {
     public var message: String {
         switch self {
         case .requiresStructOrClass:
-            return "'ScopeState' macro can only be applied to struct"
+            return "'ScopeState' macro can only be applied to struct or class"
         case .invalidArgument:
             return "invalid arguments"
         }
