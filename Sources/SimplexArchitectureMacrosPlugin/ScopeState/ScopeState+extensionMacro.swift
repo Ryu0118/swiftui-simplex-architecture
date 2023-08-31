@@ -9,10 +9,11 @@ extension ScopeState: ExtensionMacro {
         conformingTo protocols: [SwiftSyntax.TypeSyntax],
         in context: some SwiftSyntaxMacros.MacroExpansionContext
     ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
-        guard let structDecl = declaration.as(StructDeclSyntax.self) else {
+        guard decodeExpansion(of: node, attachedTo: declaration, in: context) else {
             return []
         }
-        if let inheritedTypes = structDecl.inheritanceClause?.inheritedTypes,
+
+        if let inheritedTypes = declaration.inheritanceClause?.inheritedTypes,
            inheritedTypes.contains(where: { inherited in inherited.type.trimmedDescription == "ActionSendable" }) {
             return []
         }

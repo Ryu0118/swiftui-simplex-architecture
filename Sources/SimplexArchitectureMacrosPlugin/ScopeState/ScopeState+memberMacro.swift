@@ -11,7 +11,7 @@ public struct ScopeState: MemberMacro {
         providingMembersOf declaration: Declaration,
         in context: Context
     ) throws -> [DeclSyntax] {
-        guard let structDecl = decodeExpansion(of: node, attachedTo: declaration, in: context) else {
+        guard decodeExpansion(of: node, attachedTo: declaration, in: context) else {
             return []
         }
 
@@ -25,16 +25,15 @@ public struct ScopeState: MemberMacro {
             "FocusState",
             "EnvironmentObject",
             "GestureState",
-            "AppStorage"
+            "AppStorage",
+            "Published"
         ]
 
-        let stateVariables = structDecl.variables
+        let stateVariables = declaration.variables
             .filter(propertyWrappers: detecting)
             .map { $0.with(\.attributes, []).with(\.modifiers, []) }
 
-        let keyPathPairs = structDecl.variables
-            .filter(propertyWrappers: detecting)
-            .map { $0.with(\.attributes, []).with(\.modifiers, []) }
+        let keyPathPairs = stateVariables
             .compactMap(\.variableName)
             .map { "\\.\($0): \\.\($0)" }
             .joined(separator: ", ")
@@ -46,9 +45,10 @@ public struct ScopeState: MemberMacro {
                 }
             }
 
-        let modifier = structDecl.modifiers.compactMap {
-            $0.as(DeclModifierSyntax.self)?.name.text
-        }.first ?? "internal"
+        let modifier = declaration.modifiers
+            .compactMap { $0.as(DeclModifierSyntax.self)?.name.text }
+            .filter { $0 != "final" }
+            .first ?? "internal"
 
         return [
             DeclSyntax(
@@ -63,7 +63,7 @@ public struct ScopeState: MemberMacro {
                     MemberBlockItemListSyntax {
                         MemberBlockItemSyntax(
                             decl: DeclSyntax(
-                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: structDecl.name.text)>] = [\(raw: keyPathPairs)]"
+                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: declaration.name ?? "")>] = [\(raw: keyPathPairs)]"
                             )
                         )
                     }
