@@ -1,9 +1,8 @@
-/// Macro for manually building a store in View.
+/// Macro to create States structure by extracting properties to which property wrappers such as @State, @Binding @Published, etc. are applied.
 ///
-/// Use this macro to manually generate a Reducer in Simplex Architecture. This is useful for Dependency Injection and using ReducerState
-/// It is conformed to the `SimplexStoreBuilder` protocol by the `ScopeState` macro.
+/// It is conformed to the `ActionSendable` protocol by the `ScopeState` macro.
 ///
-/// Example usage (Dependency Injection):
+/// Here is a example code.
 /// ```
 /// @ScopeState
 /// struct MyView: View {
@@ -39,7 +38,7 @@
 ///     }
 /// }
 /// ```
-/// Example usage (ReducerState):
+/// Here is a sample code if you want to use ReducerState.
 /// ```
 /// @ScopeState
 /// struct MyView: View {
@@ -75,9 +74,6 @@
 ///     }
 /// }
 /// ```
-/// - Parameters:
-///   - reducer: The type of the reducer that handles state updates in the store. It should conform to the `ReducerProtocol`.
-///
 @attached(member, names: named(States))
 @attached(extension, conformances: ActionSendable)
 public macro ScopeState() = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopeState")
