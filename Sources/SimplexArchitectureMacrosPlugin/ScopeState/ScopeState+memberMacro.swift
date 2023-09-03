@@ -26,7 +26,8 @@ public struct ScopeState: MemberMacro {
             "EnvironmentObject",
             "GestureState",
             "AppStorage",
-            "Published"
+            "Published",
+            "SceneStorage"
         ]
 
         let stateVariables = declaration.variables
@@ -35,6 +36,7 @@ public struct ScopeState: MemberMacro {
 
         let keyPathPairs = stateVariables
             .compactMap(\.variableName)
+            .filter { !$0.isEmpty }
             .map { "\\.\($0): \\.\($0)" }
             .joined(separator: ", ")
             .modifying {
