@@ -1,6 +1,5 @@
 /// A protocol that defines a reducer for a target type.
 ///
-/// ReducerProtocol is automatically conformed by the Reducer(_ target:) macro.
 /// ```
 /// struct MyReducer: ReducerProtocol {
 ///     enum Action {
