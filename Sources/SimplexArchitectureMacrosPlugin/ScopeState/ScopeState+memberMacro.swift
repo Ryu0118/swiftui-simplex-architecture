@@ -30,11 +30,11 @@ public struct ScopeState: MemberMacro {
             "SceneStorage"
         ]
 
-        let stateVariables = declaration.variables
+        let states = declaration.variables
             .filter(propertyWrappers: detecting)
             .map { $0.with(\.attributes, []).with(\.modifiers, []) }
 
-        let keyPathPairs = stateVariables
+        let keyPathPairs = states
             .compactMap(\.variableName)
             .filter { !$0.isEmpty }
             .map { "\\.\($0): \\.\($0)" }
@@ -61,7 +61,7 @@ public struct ScopeState: MemberMacro {
                         InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "StatesProtocol"))
                     }
                 ) {
-                    MemberBlockItemListSyntax(stateVariables.map { MemberBlockItemSyntax(decl: $0) })
+                    MemberBlockItemListSyntax(states.map { MemberBlockItemSyntax(decl: $0) })
                     MemberBlockItemListSyntax {
                         MemberBlockItemSyntax(
                             decl: DeclSyntax(

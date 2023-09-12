@@ -30,7 +30,7 @@
 ///     let authRepository: AuthRepository
 ///     let selfRepository: SelfRepository
 ///
-///     func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
+///     func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
 ///         case .someAction:
 ///             return .none
@@ -65,7 +65,7 @@
 ///         var counter: Int
 ///     }
 ///
-///     func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
+///     func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
 ///         case .someAction:
 ///             state.reducerState.counter += 1

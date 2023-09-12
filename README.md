@@ -41,7 +41,7 @@ struct MyReducer: ReducerProtocol {
         case increment
         case decrement
     }
-    func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .increment:
             state.counter += 1
@@ -88,7 +88,7 @@ struct MyReducer: ReducerProtocol {
         var totalCalledCount = 0
     }
 
-    func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
         state.reducerState.totalCalledCount += 1
         switch action {
         case .increment:
@@ -141,7 +141,7 @@ struct MyReducer: ReducerProtocol {
 
     let authClient: AuthClient
 
-    func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .login:
             return .run { [email = state.email, password = state.password] send in
@@ -154,7 +154,7 @@ struct MyReducer: ReducerProtocol {
         }
     }
 
-    func reduce(into state: inout StateContainer<MyView>, action: ReducerAction) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: ReducerAction) -> SideEffect<Self> {
         switch action {
         case let .loginResponse(result):
             ...

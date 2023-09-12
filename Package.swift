@@ -7,10 +7,10 @@ import CompilerPluginSupport
 let package = Package(
     name: "swiftui-simplex-architecture",
     platforms: [
-        .iOS(.v16),
-        .macOS(.v13),
-        .tvOS(.v16),
-        .watchOS(.v9)
+        .iOS(.v13),
+        .macOS(.v10_15),
+        .tvOS(.v13),
+        .watchOS(.v6),
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
@@ -21,6 +21,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", branch: "main"),
+        .package(url: "https://github.com/pointfreeco/swift-case-paths.git", exact: "1.0.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -29,6 +30,7 @@ let package = Package(
             name: "SimplexArchitecture",
             dependencies: [
                 "SimplexArchitectureMacrosPlugin",
+                .product(name: "CasePaths", package: "swift-case-paths")
             ]
         ),
         .macro(
