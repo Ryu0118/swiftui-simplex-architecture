@@ -41,7 +41,7 @@ struct MyReducer: ReducerProtocol {
         case increment
         case decrement
     }
-    func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .increment:
             state.counter += 1
@@ -73,6 +73,8 @@ struct MyView: View {
 }
 ```
 
+#### ReducerState
+
 Use ReducerState if you want to keep the state only in the Reducer.
 ReducerState is also effective to improve performance because the View is not updated even if the value is changed.
 
@@ -88,7 +90,7 @@ struct MyReducer: ReducerProtocol {
         var totalCalledCount = 0
     }
 
-    func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
         state.reducerState.totalCalledCount += 1
         switch action {
         case .increment:
@@ -126,6 +128,9 @@ struct MyView: View {
     }
 }
 ```
+
+#### ReducerAction
+
 If there are Actions that you do not want to expose to View, ReducerAction is effective.
 This is the sample code:
 
@@ -141,7 +146,7 @@ struct MyReducer: ReducerProtocol {
 
     let authClient: AuthClient
 
-    func reduce(into state: inout StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .login:
             return .run { [email = state.email, password = state.password] send in
@@ -154,7 +159,7 @@ struct MyReducer: ReducerProtocol {
         }
     }
 
-    func reduce(into state: inout StateContainer<MyView>, action: ReducerAction) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<MyView>, action: ReducerAction) -> SideEffect<Self> {
         switch action {
         case let .loginResponse(result):
             ...
@@ -181,8 +186,60 @@ struct MyView: View {
                 send(.login)
             }
         }
-        .onAppear {
-            send(.loginResponse)) // ❌ Type 'MyReducer.Action' has no member 'loginResponse'
+    }
+}
+```
+
+#### Pullback Action
+
+If you want to send the Action of the child Reducer to the parent Reducer, use pullback.
+This is the sample code.
+
+```Swift
+@ScopeState
+struct ParentView: View {
+    let store: Store<ParentReducer> = Store(reducer: ParentReducer())
+
+    var body: some View {
+        ChildView()
+            .pullback(to: /ParentReducer.Action.child, parent: self)
+    }
+}
+
+struct ParentReducer: ReducerProtocol {
+    enum Action {
+        case child(ChildReducer.Action)
+    }
+
+    func reduce(into state: StateContainer<ParentView>, action: Action) -> SideEffect<ParentReducer> {
+        switch action {
+        case .child(.onButtonTapped):
+            // do something
+            return .none
+        }
+    }
+}
+
+@ScopeState
+struct ChildView: View, ActionSendable {
+    let store: Store<ChildReducer> = Store(reducer: ChildReducer())
+
+    var body: some View {
+        Button("Child View") {
+            send(.onButtonTapped)
+        }
+    }
+}
+
+struct ChildReducer: ReducerProtocol {
+    enum Action: Pullbackable {
+        case onButtonTapped
+    }
+
+    func reduce(into state: StateContainer<ChildView>, action: Action) -> SideEffect<ChildReducer> {
+        switch action {
+        case .onButtonTapped:
+            return .none
         }
     }
 }

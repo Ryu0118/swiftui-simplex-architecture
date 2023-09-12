@@ -1,12 +1,30 @@
 {
   "pins" : [
     {
+      "identity" : "swift-case-paths",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Ryu0118/swift-case-paths.git",
+      "state" : {
+        "branch" : "fix-macro",
+        "revision" : "49c6dc7c8e9cb56288ee4dd0b14024a896e49b1e"
+      }
+    },
+    {
       "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax.git",
       "state" : {
         "branch" : "main",
         "revision" : "c28f9940ba2b89b25f1e754762df0253ca20ccdf"
+      }
+    },
+    {
+      "identity" : "xctest-dynamic-overlay",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      "state" : {
+        "revision" : "50843cbb8551db836adec2290bb4bc6bac5c1865",
+        "version" : "0.9.0"
       }
     }
   ],

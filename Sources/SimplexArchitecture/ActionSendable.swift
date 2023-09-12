@@ -1,58 +1,97 @@
 import SwiftUI
+import CasePaths
 
+/// A protocol for  send actions to a store.
 public protocol ActionSendable<Reducer> {
     associatedtype Reducer: ReducerProtocol<Self>
     associatedtype States: StatesProtocol
 
+    /// The store to which actions will be sent.
     var store: Store<Reducer> { get }
-}
-
-public protocol StatesProtocol<Target> {
-    associatedtype Target: ActionSendable
-    static var keyPathMap: [PartialKeyPath<Self>: PartialKeyPath<Target>] { get }
-}
-
-public extension ActionSendable where Reducer.ReducerState == Never {
-    @discardableResult
-    func send(_ action: consuming Reducer.Action) -> SendTask {
-        threadCheck()
-        return if store.send == nil {
-            store.sendIfReducerStateNever(action: action, target: self)
-        } else {
-            store.sendIfNeeded(action: action) ?? SendTask(task: nil)
-        }
-    }
 }
 
 public extension ActionSendable {
     /// Send an action to the store
     @discardableResult
-    @_disfavoredOverload
     func send(_ action: consuming Reducer.Action) -> SendTask {
-        threadCheck()
-        return if store.send == nil {
-            store.sendIfReducerStateExists(action: action, target: self)
+        if store.container == nil {
+            store.sendAction(action, target: self)
         } else {
-            store.sendIfNeeded(action: action) ?? SendTask(task: nil)
+            store.sendIfNeeded(action)
         }
     }
 }
 
-private extension ActionSendable {
-    @inline(__always)
-    func threadCheck() {
-        #if DEBUG
-        guard !Thread.isMainThread else {
-            return
-        }
-        runtimeWarning(
-            """
-            "ActionSendable.send" was called on a non-main thread.
+public extension ActionSendable where Reducer.Action: Pullbackable {
+    /// Pullbacks the `Action` to the specified case path in the parent's reducer.
+    ///
+    /// - Parameters:
+    ///   - casePath: The case path to which the action will be pulled back.
+    ///   - parent: The parent `ActionSendable` to which the action will be sent.
+    /// - Returns: Self
+    @inlinable
+    @discardableResult
+    func pullback<Parent: ActionSendable>(
+        to casePath: CasePath<Parent.Reducer.Action, Reducer.Action>,
+        parent: Parent
+    ) -> Self where Reducer.ReducerState == Never {
+        store.pullback(to: casePath, parent: parent)
+        return self
+    }
 
-            The "Store" class is not thread-safe, and so all interactions with an instance of \
-            "Store" must be done on the main thread.
-            """
-        )
-        #endif
+    /// Pullbacks the `Action` to the specified case path with an associated identifier in the parent's reducer.
+    /// This specifies an id to identify which View sent the Action in the ForEach.
+    ///
+    /// - Parameters:
+    ///   - casePath: The case path with an associated identifier to which the action will be pulled back.
+    ///   - parent: The parent `ActionSendable` to which the action will be sent.
+    ///   - id: The identifier associated with the action.
+    /// - Returns: Self.
+    @inlinable
+    @discardableResult
+    func pullback<Parent: ActionSendable, ID: Hashable>(
+        to casePath: CasePath<Parent.Reducer.Action, (id: ID, action: Reducer.Action)>,
+        parent: Parent,
+        id: ID
+    ) -> Self where Reducer.ReducerState == Never {
+        store.pullback(to: casePath, parent: parent, id: id)
+        return self
+    }
+
+    /// Pullbacks the `Action` to the specified case path in the parent's reducer.
+    ///
+    /// - Parameters:
+    ///   - casePath: The case path to which the action will be pulled back.
+    ///   - parent: The parent `ActionSendable` to which the action will be sent.
+    /// - Returns: Self
+    @_disfavoredOverload
+    @inlinable
+    @discardableResult
+    func pullback<Parent: ActionSendable>(
+        to casePath: CasePath<Parent.Reducer.Action, Reducer.ReducerAction>,
+        parent: Parent
+    ) -> Self where Reducer.ReducerState == Never {
+        store.pullback(to: casePath, parent: parent)
+        return self
+    }
+
+    /// Pullbacks the `ReducerAction`  to the specified case path with an associated identifier in the parent's reducer.
+    /// This specifies an id to identify which View sent the Action in the ForEach.
+    ///
+    /// - Parameters:
+    ///   - casePath: The case path with an associated identifier to which the action will be pulled back.
+    ///   - parent: The parent `ActionSendable` to which the action will be sent.
+    ///   - id: The identifier associated with the action.
+    /// - Returns: Self.
+    @_disfavoredOverload
+    @inlinable
+    @discardableResult
+    func pullback<Parent: ActionSendable, ID: Hashable>(
+        to casePath: CasePath<Parent.Reducer.Action, (id: ID, action: Reducer.ReducerAction)>,
+        parent: Parent,
+        id: ID
+    ) -> Self where Reducer.ReducerState == Never {
+        store.pullback(to: casePath, parent: parent, id: id)
+        return self
     }
 }
