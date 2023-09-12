@@ -7,9 +7,7 @@ extension Store {
         _ action: consuming Reducer.Action,
         target: consuming Reducer.Target
     ) -> SendTask {
-        let container =
-            if let container
-        {
+        let container = if let container {
             container
         } else {
             StateContainer(target, reducerState: initialReducerState?())
@@ -25,9 +23,7 @@ extension Store {
         _ action: consuming Reducer.ReducerAction,
         target: consuming Reducer.Target
     ) -> SendTask {
-        let container =
-            if let container
-        {
+        let container = if let container {
             container
         } else {
             StateContainer(target, reducerState: initialReducerState?())
