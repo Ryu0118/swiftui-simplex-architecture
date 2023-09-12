@@ -1,10 +1,11 @@
-import Foundation
 import CasePaths
+import Foundation
 
 // MARK: - Pullback
-extension Store {
+
+public extension Store {
     @inlinable
-    public func pullback<Parent: ActionSendable>(
+    func pullback<Parent: ActionSendable>(
         to casePath: consuming CasePath<Parent.Reducer.Action, Reducer.Action>,
         parent: Parent
     ) {
@@ -14,7 +15,7 @@ extension Store {
     }
 
     @inlinable
-    public func pullback<Parent: ActionSendable, ID: Hashable>(
+    func pullback<Parent: ActionSendable, ID: Hashable>(
         to casePath: consuming CasePath<Parent.Reducer.Action, (id: ID, action: Reducer.Action)>,
         parent: Parent,
         id: consuming ID
@@ -25,7 +26,7 @@ extension Store {
     }
 
     @inlinable
-    public func pullback<Parent: ActionSendable>(
+    func pullback<Parent: ActionSendable>(
         to casePath: consuming CasePath<Parent.Reducer.Action, Reducer.ReducerAction>,
         parent: Parent
     ) {
@@ -35,7 +36,7 @@ extension Store {
     }
 
     @inlinable
-    public func pullback<Parent: ActionSendable, ID: Hashable>(
+    func pullback<Parent: ActionSendable, ID: Hashable>(
         to casePath: consuming CasePath<Parent.Reducer.Action, (id: ID, action: Reducer.ReducerAction)>,
         parent: Parent,
         id: consuming ID

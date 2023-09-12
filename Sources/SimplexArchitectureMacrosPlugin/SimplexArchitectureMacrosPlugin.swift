@@ -1,11 +1,11 @@
 #if canImport(SwiftCompilerPlugin)
-import SwiftSyntaxMacros
-import SwiftCompilerPlugin
+    import SwiftCompilerPlugin
+    import SwiftSyntaxMacros
 
-@main
-struct SimplexArchitectureMacrosPlugin: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [
-        ScopeState.self
-    ]
-}
+    @main
+    struct SimplexArchitectureMacrosPlugin: CompilerPlugin {
+        let providingMacros: [Macro.Type] = [
+            ScopeState.self,
+        ]
+    }
 #endif

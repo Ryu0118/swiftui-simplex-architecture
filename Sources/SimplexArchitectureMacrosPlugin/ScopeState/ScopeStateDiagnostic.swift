@@ -1,6 +1,6 @@
+import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
-import SwiftDiagnostics
 
 public enum ScopeStateMacroDiagnostic {
     case requiresStructOrClass
@@ -30,9 +30,9 @@ extension ScopeStateMacroDiagnostic: DiagnosticMessage {
 
 public extension ScopeState {
     static func decodeExpansion(
-        of attribute: AttributeSyntax,
+        of _: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
-        in context: some MacroExpansionContext
+        in _: some MacroExpansionContext
     ) -> Bool {
         declaration.as(StructDeclSyntax.self) != nil || declaration.as(ClassDeclSyntax.self) != nil
     }

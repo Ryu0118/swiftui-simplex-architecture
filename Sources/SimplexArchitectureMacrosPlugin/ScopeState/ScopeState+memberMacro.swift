@@ -1,11 +1,12 @@
 import Foundation
 import SwiftSyntax
-import SwiftSyntaxMacros
 import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 
 public struct ScopeState: MemberMacro {
     public static func expansion<
-        Declaration: DeclGroupSyntax, Context: MacroExpansionContext
+        Declaration: DeclGroupSyntax,
+        Context: MacroExpansionContext
     >(
         of node: AttributeSyntax,
         providingMembersOf declaration: Declaration,
@@ -27,7 +28,7 @@ public struct ScopeState: MemberMacro {
             "GestureState",
             "AppStorage",
             "Published",
-            "SceneStorage"
+            "SceneStorage",
         ]
 
         let states = declaration.variables
@@ -70,7 +71,7 @@ public struct ScopeState: MemberMacro {
                         )
                     }
                 }
-            )
+            ),
         ]
     }
 }

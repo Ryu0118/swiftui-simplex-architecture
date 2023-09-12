@@ -3,8 +3,13 @@ import Foundation
 extension Store {
     @usableFromInline
     @discardableResult
-    func sendAction(_ action: consuming Reducer.Action, target: consuming Reducer.Target) -> SendTask {
-        let container = if let container {
+    func sendAction(
+        _ action: consuming Reducer.Action,
+        target: consuming Reducer.Target
+    ) -> SendTask {
+        let container =
+            if let container
+        {
             container
         } else {
             StateContainer(target, reducerState: initialReducerState?())
@@ -16,8 +21,13 @@ extension Store {
     }
 
     @usableFromInline
-    func sendAction(_ action: consuming Reducer.ReducerAction, target: consuming Reducer.Target) -> SendTask {
-        let container = if let container {
+    func sendAction(
+        _ action: consuming Reducer.ReducerAction,
+        target: consuming Reducer.Target
+    ) -> SendTask {
+        let container =
+            if let container
+        {
             container
         } else {
             StateContainer(target, reducerState: initialReducerState?())
@@ -29,11 +39,12 @@ extension Store {
     }
 
     @usableFromInline
-    func sendAction(_ action: Reducer.Action, container: StateContainer<Reducer.Target>) -> SendTask {
+    func sendAction(
+        _ action: Reducer.Action,
+        container: StateContainer<Reducer.Target>
+    ) -> SendTask {
         defer {
-            if let _ = Reducer.Action.self as? Pullbackable.Type,
-               let pullbackAction
-            {
+            if let _ = Reducer.Action.self as? Pullbackable.Type, let pullbackAction {
                 pullbackAction(action)
             }
         }
@@ -46,14 +57,16 @@ extension Store {
         if case .none = sideEffect.kind {
             return .never
         } else {
-            let send = self.send ?? Send(
-                sendAction: { [weak self] action in
-                    self?.sendAction(action, container: container) ?? .never
-                },
-                sendReducerAction: { [weak self] reducerAction in
-                    self?.sendAction(reducerAction, container: container) ?? .never
-                }
-            )
+            let send =
+                self.send
+                    ?? Send(
+                        sendAction: { [weak self] action in
+                            self?.sendAction(action, container: container) ?? .never
+                        },
+                        sendReducerAction: { [weak self] reducerAction in
+                            self?.sendAction(reducerAction, container: container) ?? .never
+                        }
+                    )
 
             return executeTasks(
                 runEffect(sideEffect, send: send)
@@ -62,7 +75,10 @@ extension Store {
     }
 
     @usableFromInline
-    func sendAction(_ action: Reducer.ReducerAction, container: StateContainer<Reducer.Target>) -> SendTask {
+    func sendAction(
+        _ action: Reducer.ReducerAction,
+        container: StateContainer<Reducer.Target>
+    ) -> SendTask {
         defer {
             if let _ = Reducer.ReducerAction.self as? Pullbackable.Type,
                let pullbackReducerAction
@@ -124,17 +140,17 @@ extension Store {
     @inline(__always)
     func threadCheck() {
         #if DEBUG
-        guard !Thread.isMainThread else {
-            return
-        }
-        runtimeWarning(
-            """
-            "ActionSendable.send" was called on a non-main thread.
+            guard !Thread.isMainThread else {
+                return
+            }
+            runtimeWarning(
+                """
+                "ActionSendable.send" was called on a non-main thread.
 
-            The "Store" class is not thread-safe, and so all interactions with an instance of \
-            "Store" must be done on the main thread.
-            """
-        )
+                The "Store" class is not thread-safe, and so all interactions with an instance of \
+                "Store" must be done on the main thread.
+                """
+            )
         #endif
     }
 }

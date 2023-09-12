@@ -76,4 +76,5 @@
 /// ```
 @attached(member, names: named(States))
 @attached(extension, conformances: ActionSendable)
-public macro ScopeState() = #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopeState")
+public macro ScopeState() =
+    #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopeState")

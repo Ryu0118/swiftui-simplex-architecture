@@ -6,7 +6,7 @@ extension ScopeState: ExtensionMacro {
         of node: SwiftSyntax.AttributeSyntax,
         attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
         providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
-        conformingTo protocols: [SwiftSyntax.TypeSyntax],
+        conformingTo _: [SwiftSyntax.TypeSyntax],
         in context: some SwiftSyntaxMacros.MacroExpansionContext
     ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
         guard decodeExpansion(of: node, attachedTo: declaration, in: context) else {
@@ -14,7 +14,10 @@ extension ScopeState: ExtensionMacro {
         }
 
         if let inheritedTypes = declaration.inheritanceClause?.inheritedTypes,
-           inheritedTypes.contains(where: { inherited in inherited.type.trimmedDescription == "ActionSendable" }) {
+           inheritedTypes.contains(where: { inherited in
+               inherited.type.trimmedDescription == "ActionSendable"
+           })
+        {
             return []
         }
         let declSyntax: DeclSyntax =
@@ -22,7 +25,7 @@ extension ScopeState: ExtensionMacro {
             extension \(type.trimmed): ActionSendable {}
             """
         return [
-            declSyntax.cast(ExtensionDeclSyntax.self)
+            declSyntax.cast(ExtensionDeclSyntax.self),
         ]
     }
 }

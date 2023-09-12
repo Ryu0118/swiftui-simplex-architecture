@@ -117,5 +117,8 @@ public protocol ReducerProtocol<Target> {
 }
 
 public extension ReducerProtocol where ReducerAction == Never {
-    func reduce(into state: StateContainer<Target>, action: ReducerAction) -> SideEffect<Self> {}
+    func reduce(
+        into _: StateContainer<Target>,
+        action _: ReducerAction
+    ) -> SideEffect<Self> {}
 }
