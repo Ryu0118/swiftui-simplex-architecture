@@ -2,9 +2,8 @@ import SwiftSyntax
 
 extension DeclGroupSyntax {
     var variables: [VariableDeclSyntax] {
-        self.memberBlock
+        memberBlock
             .members
             .compactMap { $0.decl.as(VariableDeclSyntax.self) }
     }
 }
-

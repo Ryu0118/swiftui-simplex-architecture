@@ -1,5 +1,5 @@
-import SwiftUI
 import CasePaths
+import SwiftUI
 
 /// A protocol for  send actions to a store.
 public protocol ActionSendable<Reducer> {

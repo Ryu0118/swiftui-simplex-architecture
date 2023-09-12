@@ -5,10 +5,10 @@ public struct SendTask: Sendable {
     static let never = SendTask(task: nil)
 
     @usableFromInline
-    let task: Task<(), Never>?
+    let task: Task<Void, Never>?
 
     @inlinable
-    init(task: consuming Task<(), Never>?) {
+    init(task: consuming Task<Void, Never>?) {
         self.task = task
     }
 

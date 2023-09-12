@@ -5,7 +5,7 @@ public extension TaskResult where Failure == any Error {
     @inlinable
     init(catching body: () async throws -> Success) async {
         do {
-            self = .success(try await body())
+            self = try .success(await body())
         } catch {
             self = .failure(error)
         }

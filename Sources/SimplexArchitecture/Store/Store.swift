@@ -73,7 +73,7 @@ extension Store {
 
     func runEffect(_ sideEffect: borrowing SideEffect<Reducer>, send: Send<Reducer>) -> [SendTask] {
         switch sideEffect.kind {
-        case .run(let priority, let operation, let `catch`):
+        case let .run(priority, operation, `catch`):
             let task = Task.detached(priority: priority ?? .medium) {
                 do {
                     try await operation(send)

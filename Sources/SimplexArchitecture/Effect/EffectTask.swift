@@ -23,7 +23,7 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
 
     @usableFromInline
     init(effectKind: EffectKind) {
-        self.kind = effectKind
+        kind = effectKind
     }
 }
 

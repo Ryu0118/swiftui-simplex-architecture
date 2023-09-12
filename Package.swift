@@ -1,8 +1,8 @@
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-import PackageDescription
 import CompilerPluginSupport
+import PackageDescription
 
 let package = Package(
     name: "swiftui-simplex-architecture",
@@ -17,11 +17,11 @@ let package = Package(
         .library(
             name: "SimplexArchitecture",
             targets: ["SimplexArchitecture"]
-        )
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", branch: "main"),
-        .package(url: "https://github.com/pointfreeco/swift-case-paths.git", exact: "1.0.0")
+        .package(url: "https://github.com/pointfreeco/swift-case-paths.git", exact: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -30,7 +30,7 @@ let package = Package(
             name: "SimplexArchitecture",
             dependencies: [
                 "SimplexArchitectureMacrosPlugin",
-                .product(name: "CasePaths", package: "swift-case-paths")
+                .product(name: "CasePaths", package: "swift-case-paths"),
             ]
         ),
         .macro(
@@ -39,7 +39,7 @@ let package = Package(
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax")
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
             ]
         ),
         .testTarget(
@@ -48,7 +48,7 @@ let package = Package(
                 "SimplexArchitecture",
                 "SimplexArchitectureMacrosPlugin",
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]
         ),
     ]

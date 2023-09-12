@@ -26,16 +26,14 @@ public final class StateContainer<Target: ActionSendable> {
 
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.States, U>) -> U {
         _read {
-            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U>
-            {
+            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield _entity[keyPath: viewKeyPath]
             } else {
                 fatalError()
             }
         }
         _modify {
-            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U>
-            {
+            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield &_entity[keyPath: viewKeyPath]
             } else {
                 fatalError()
