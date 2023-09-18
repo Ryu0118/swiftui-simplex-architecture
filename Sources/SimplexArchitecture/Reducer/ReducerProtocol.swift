@@ -122,3 +122,19 @@ public extension ReducerProtocol where ReducerAction == Never {
         action _: ReducerAction
     ) -> SideEffect<Self> {}
 }
+
+extension ReducerProtocol {
+    @inlinable
+    func reduce(
+        into state: StateContainer<Target>,
+        action: CombineAction<Self>
+    ) -> SideEffect<Self> {
+        switch action.kind {
+        case .viewAction(let action):
+            reduce(into: state, action: action)
+
+        case .reducerAction(let action):
+            reduce(into: state, action: action)
+        }
+    }
+}

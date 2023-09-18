@@ -18,6 +18,7 @@ public struct Send<Reducer: ReducerProtocol>: Sendable {
         sendAction(action)
     }
 
+    @_disfavoredOverload
     @discardableResult
     @inlinable
     func callAsFunction(_ action: Reducer.ReducerAction) -> SendTask {
@@ -30,6 +31,7 @@ public struct Send<Reducer: ReducerProtocol>: Sendable {
         await sendAction(action).wait()
     }
 
+    @_disfavoredOverload
     @MainActor
     @inlinable
     public func callAsFunction(_ action: Reducer.ReducerAction) async {

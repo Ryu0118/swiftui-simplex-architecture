@@ -1,4 +1,5 @@
 import Foundation
+import XCTestDynamicOverlay
 
 // StateContainer is not thread-safe. Therefore, StateContainer must use NSLock or NSRecursiveLock for exclusions when changing values.
 // In Send.swift, NSRecursiveLock is used for exclusions when executing the `reduce(into:action)`.
@@ -9,35 +10,46 @@ public final class StateContainer<Target: ActionSendable> {
         _modify { yield &_reducerState! }
     }
 
-    private var _reducerState: Target.Reducer.ReducerState?
-    private var _entity: Target
-
-    init(_ entity: consuming Target) {
-        self._entity = entity
-    }
+    var _reducerState: Target.Reducer.ReducerState?
+    var entity: Target
+    @TestOnly var states: Target.States?
 
     init(
         _ entity: consuming Target,
-        reducerState: consuming Target.Reducer.ReducerState?
+        states: Target.States? = nil,
+        reducerState: consuming Target.Reducer.ReducerState? = nil
     ) {
-        self._entity = entity
+        self.entity = entity
+        self.states = states
         self._reducerState = reducerState
     }
 
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.States, U>) -> U {
         _read {
+            guard !_XCTIsTesting else {
+                yield states![keyPath: keyPath]
+                return
+            }
             if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
-                yield _entity[keyPath: viewKeyPath]
+                yield entity[keyPath: viewKeyPath]
             } else {
                 fatalError()
             }
         }
         _modify {
+            guard !_XCTIsTesting else {
+                yield &states![keyPath: keyPath]
+                return
+            }
             if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
-                yield &_entity[keyPath: viewKeyPath]
+                yield &entity[keyPath: viewKeyPath]
             } else {
                 fatalError()
             }
         }
+    }
+
+    func copy() -> Self {
+        Self(entity, states: states, reducerState: _reducerState)
     }
 }
