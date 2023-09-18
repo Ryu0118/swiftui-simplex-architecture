@@ -20,7 +20,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-syntax.git", exact: "509.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-case-paths.git", exact: "1.0.0"),
     ],
     targets: [
