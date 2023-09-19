@@ -1,6 +1,6 @@
 import Foundation
 
 public protocol StatesProtocol<Target> {
-    associatedtype Target: ActionSendable where Target.States == Self
+    associatedtype Target: ActionSendable
     static var keyPathMap: [PartialKeyPath<Self>: PartialKeyPath<Target>] { get }
 }
