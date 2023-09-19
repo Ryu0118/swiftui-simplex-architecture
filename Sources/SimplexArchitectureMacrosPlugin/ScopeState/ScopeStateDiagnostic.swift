@@ -36,8 +36,7 @@ public extension ScopeState {
     ) -> Bool {
         if declaration.as(StructDeclSyntax.self) != nil || declaration.as(ClassDeclSyntax.self) != nil {
             return true
-        } 
-        else if declaration.as(ActorDeclSyntax.self) != nil
+        } else if declaration.as(ActorDeclSyntax.self) != nil
             || declaration.as(ProtocolDeclSyntax.self) != nil
             || declaration.as(ExtensionDeclSyntax.self) != nil
         {

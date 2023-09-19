@@ -7,6 +7,7 @@ struct ActionTransition<Reducer: ReducerProtocol> {
         let state: Reducer.Target.States?
         let reducerState: Reducer.ReducerState?
     }
+
     /// The previous state.
     let previous: Self.State
     /// The next state.

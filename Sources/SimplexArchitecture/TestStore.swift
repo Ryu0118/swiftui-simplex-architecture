@@ -6,7 +6,6 @@ import Foundation
 /// TestStore is a utility class for testing stores that use Reducer protocols.
 /// It provides methods for sending actions and verifying state changes.
 public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
-
     // MARK: - Properties
 
     /// The running state container.

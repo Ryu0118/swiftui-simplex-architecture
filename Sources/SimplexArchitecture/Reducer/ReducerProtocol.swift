@@ -130,10 +130,10 @@ extension ReducerProtocol {
         action: CombineAction<Self>
     ) -> SideEffect<Self> {
         switch action.kind {
-        case .viewAction(let action):
+        case let .viewAction(action):
             reduce(into: state, action: action)
 
-        case .reducerAction(let action):
+        case let .reducerAction(action):
             reduce(into: state, action: action)
         }
     }

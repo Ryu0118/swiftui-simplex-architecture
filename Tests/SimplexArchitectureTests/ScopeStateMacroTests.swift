@@ -1,8 +1,8 @@
+import MacroTesting
 @testable import SimplexArchitecture
 @testable import SimplexArchitectureMacrosPlugin
 import SwiftUI
 import XCTest
-import MacroTesting
 
 final class ScopeStateMacroTests: XCTestCase {
     override func invokeTest() {
@@ -150,7 +150,6 @@ final class ScopeStateMacroTests: XCTestCase {
             }
             """#
         }
-
     }
 
     func testFileprivateExpansion() {

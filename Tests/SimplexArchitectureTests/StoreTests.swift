@@ -108,7 +108,7 @@ private struct TestReducer: ReducerProtocol {
         case c2
     }
 
-    func reduce(into state: StateContainer<TestView>, action: ReducerAction) -> SideEffect<TestReducer> {
+    func reduce(into _: StateContainer<TestView>, action: ReducerAction) -> SideEffect<TestReducer> {
         switch action {
         case .c3:
             return .send(.c4)
@@ -118,8 +118,7 @@ private struct TestReducer: ReducerProtocol {
         }
     }
 
-
-    func reduce(into state: StateContainer<TestView>, action: Action) -> SideEffect<Self> {
+    func reduce(into _: StateContainer<TestView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .c1:
             return .none
