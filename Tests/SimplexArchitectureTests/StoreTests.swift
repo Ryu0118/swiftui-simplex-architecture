@@ -1,6 +1,7 @@
 @testable import SimplexArchitecture
 import SwiftUI
 import XCTest
+import CasePaths
 
 final class StoreTests: XCTestCase {
     fileprivate var store: Store<TestReducer>!
@@ -95,15 +96,100 @@ final class StoreTests: XCTestCase {
 
         XCTAssertNotNil(sendTask2.task)
     }
+
+    func testPullbackAction() throws {
+        let parent = ParentView()
+        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        store.setContainerIfNeeded(for: TestView())
+        XCTAssertNil(store.pullbackAction)
+        store.pullback(to: /ParentReducer.Action.child, parent: parent)
+        store.sendIfNeeded(.c1)
+        XCTAssertNotNil(store.pullbackAction)
+        XCTAssertEqual(parent.store.container?.count, 1)
+    }
+
+    func testPullbackReducerAction() throws {
+        let parent = ParentView()
+        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        store.setContainerIfNeeded(for: TestView())
+        XCTAssertNil(store.pullbackReducerAction)
+        store.pullback(to: /ParentReducer.Action.childReducerAction, parent: parent)
+        store.sendIfNeeded(.c4)
+        XCTAssertNotNil(store.pullbackReducerAction)
+        XCTAssertEqual(parent.store.container?.count, 1)
+    }
+
+    func testPullbackActionForId() throws {
+        let parent = ParentView()
+        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        store.setContainerIfNeeded(for: TestView())
+        XCTAssertNil(store.pullbackAction)
+        let uuid = UUID()
+        store.pullback(to: /ParentReducer.Action.childId, parent: parent, id: uuid)
+        store.sendIfNeeded(.c1)
+        XCTAssertNotNil(store.pullbackAction)
+        XCTAssertEqual(parent.store.container?.id, uuid)
+    }
+
+    func testPullbackReducerActionForId() throws {
+        let parent = ParentView()
+        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        store.setContainerIfNeeded(for: TestView())
+        XCTAssertNil(store.pullbackReducerAction)
+        let uuid = UUID()
+        store.pullback(to: /ParentReducer.Action.childIdReducerAction, parent: parent, id: uuid)
+        store.sendIfNeeded(.c4)
+        XCTAssertNotNil(store.pullbackReducerAction)
+        XCTAssertEqual(parent.store.container?.id, uuid)
+    }
+}
+
+@ScopeState
+private struct ParentView: View {
+    @State var count = 0
+    @State var id: UUID?
+    let store: Store<ParentReducer> = .init(reducer: ParentReducer())
+    var body: some View {
+        EmptyView()
+    }
+}
+
+private struct ParentReducer: ReducerProtocol {
+    enum Action {
+        case child(TestReducer.Action)
+        case childReducerAction(TestReducer.ReducerAction)
+        case childId(id: UUID, action: TestReducer.Action)
+        case childIdReducerAction(id: UUID, action: TestReducer.ReducerAction)
+    }
+
+    func reduce(into state: StateContainer<ParentView>, action: Action) -> SideEffect<ParentReducer> {
+        switch action {
+        case .child:
+            state.count += 1
+            return .none
+
+        case .childReducerAction:
+            state.count += 1
+            return .none
+
+        case .childId(let id, _):
+            state.id = id
+            return .none
+
+        case .childIdReducerAction(let id, _):
+            state.id = id
+            return .none
+        }
+    }
 }
 
 private struct TestReducer: ReducerProtocol {
-    enum ReducerAction {
+    enum ReducerAction: Equatable, Pullbackable {
         case c3
         case c4
     }
 
-    enum Action: Equatable {
+    enum Action: Equatable, Pullbackable {
         case c1
         case c2
     }
