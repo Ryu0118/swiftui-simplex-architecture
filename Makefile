@@ -7,4 +7,7 @@ format:
 .PHONY: format
 format:
 	$(MINTRUN) swiftformat .
-	
+
+.PHONY: test
+test:
+	swift test -v
