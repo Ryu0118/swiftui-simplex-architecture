@@ -6,8 +6,8 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
         case none
         case run(
             priority: TaskPriority?,
-            operation: (_ send: Send<Reducer>) async throws -> Void,
-            catch: ((_ error: any Error, _ send: Send<Reducer>) async -> Void)?
+            operation: @Sendable (_ send: Send<Reducer>) async throws -> Void,
+            catch: (@Sendable (_ error: any Error, _ send: Send<Reducer>) async -> Void)?
         )
         case sendAction(Reducer.Action)
         case sendReducerAction(Reducer.ReducerAction)
@@ -36,8 +36,8 @@ public extension SideEffect {
     @inlinable
     static func run(
         priority: TaskPriority? = nil,
-        _ operation: @escaping (_ send: Send<Reducer>) async throws -> Void,
-        catch: ((_ error: any Error, _ send: Send<Reducer>) async -> Void)? = nil
+        _ operation: @Sendable  @escaping (_ send: Send<Reducer>) async throws -> Void,
+        catch: (@Sendable (_ error: any Error, _ send: Send<Reducer>) async -> Void)? = nil
     ) -> Self {
         .init(effectKind: .run(priority: priority, operation: operation, catch: `catch`))
     }
