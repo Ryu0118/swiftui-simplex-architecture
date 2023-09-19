@@ -34,7 +34,7 @@ struct ActionTransition<Reducer: ReducerProtocol> {
         asStateContainer(from: target, state: previous)
     }
 
-    private func asStateContainer(from target: Reducer.Target, state _: Self.State) -> StateContainer<Reducer.Target> {
-        .init(target, states: next.state, reducerState: next.reducerState)
+    private func asStateContainer(from target: Reducer.Target, state: Self.State) -> StateContainer<Reducer.Target> {
+        .init(target, states: state.state, reducerState: state.reducerState)
     }
 }
