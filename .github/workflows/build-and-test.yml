@@ -11,13 +11,13 @@ jobs:
     strategy:
       fail-fast: false    
       matrix:
-        os: [macos-latest]
+        os: [macos-13.5]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '15.0'
+          xcode-version: '15.0-beta'
 
       - name: Checkout
         uses: actions/checkout@v3
