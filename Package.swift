@@ -22,6 +22,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", exact: "509.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-case-paths.git", exact: "1.0.0"),
+        .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", exact: "1.0.0"),
+        .package(url: "https://github.com/pointfreeco/swift-dependencies.git", exact: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -31,6 +33,8 @@ let package = Package(
             dependencies: [
                 "SimplexArchitectureMacrosPlugin",
                 .product(name: "CasePaths", package: "swift-case-paths"),
+                .product(name: "CustomDump", package: "swift-custom-dump"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
             ]
         ),
         .macro(

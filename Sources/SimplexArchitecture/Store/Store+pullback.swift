@@ -3,7 +3,7 @@ import Foundation
 
 // MARK: - Pullback
 
-public extension Store {
+extension Store {
     @inlinable
     func pullback<Parent: ActionSendable>(
         to casePath: consuming CasePath<Parent.Reducer.Action, Reducer.Action>,

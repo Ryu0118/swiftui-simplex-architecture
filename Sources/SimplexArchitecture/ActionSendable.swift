@@ -14,11 +14,29 @@ public extension ActionSendable {
     /// Send an action to the store
     @discardableResult
     func send(_ action: consuming Reducer.Action) -> SendTask {
-        if store.container == nil {
+        threadCheck()
+        return if store.container == nil {
             store.sendAction(action, target: self)
         } else {
             store.sendIfNeeded(action)
         }
+    }
+
+    @inline(__always)
+    func threadCheck() {
+        #if DEBUG
+            guard !Thread.isMainThread else {
+                return
+            }
+            runtimeWarning(
+                """
+                "ActionSendable.send" was called on a non-main thread.
+
+                The "Store" class is not thread-safe, and so all interactions with an instance of \
+                "Store" must be done on the main thread.
+                """
+            )
+        #endif
     }
 }
 

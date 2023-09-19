@@ -1,4 +1,5 @@
 import Foundation
+import XCTestDynamicOverlay
 
 extension Store {
     @usableFromInline
@@ -7,15 +8,10 @@ extension Store {
         _ action: consuming Reducer.Action,
         target: consuming Reducer.Target
     ) -> SendTask {
-        let container = if let container {
-            container
-        } else {
-            StateContainer(target, reducerState: initialReducerState?())
-        }
-
-        defer { self.container = container }
-
-        return sendAction(action, container: container)
+        sendAction(
+            action,
+            container: setContainerIfNeeded(for: target)
+        )
     }
 
     @usableFromInline
@@ -23,15 +19,10 @@ extension Store {
         _ action: consuming Reducer.ReducerAction,
         target: consuming Reducer.Target
     ) -> SendTask {
-        let container = if let container {
-            container
-        } else {
-            StateContainer(target, reducerState: initialReducerState?())
-        }
-
-        defer { self.container = container }
-
-        return sendAction(action, container: container)
+        sendAction(
+            action,
+            container: setContainerIfNeeded(for: target)
+        )
     }
 
     @usableFromInline
@@ -45,29 +36,7 @@ extension Store {
             }
         }
 
-        threadCheck()
-
-        let sideEffect = withLock {
-            reducer.reduce(into: container, action: action)
-        }
-        if case .none = sideEffect.kind {
-            return .never
-        } else {
-            let send =
-                self.send
-                    ?? Send(
-                        sendAction: { [weak self] action in
-                            self?.sendAction(action, container: container) ?? .never
-                        },
-                        sendReducerAction: { [weak self] reducerAction in
-                            self?.sendAction(reducerAction, container: container) ?? .never
-                        }
-                    )
-
-            return executeTasks(
-                runEffect(sideEffect, send: send)
-            )
-        }
+        return sendAction(.action(action), container: container)
     }
 
     @usableFromInline
@@ -83,22 +52,38 @@ extension Store {
             }
         }
 
-        threadCheck()
+        return sendAction(.action(action), container: container)
+    }
 
-        let sideEffect = withLock {
-            reducer.reduce(into: container, action: action)
+    @inline(__always)
+    func sendAction(
+        _ action: CombineAction<Reducer>,
+        container: StateContainer<Reducer.Target>
+    ) -> SendTask {
+        let sideEffect: SideEffect<Reducer>
+        // If Unit Testing is in progress and an action is sent from SideEffect
+        if _XCTIsTesting, let effectContext = EffectContext.id {
+            let before = container.copy()
+            sideEffect = withLock {
+                reducer.reduce(into: container, action: action)
+            }
+            sentFromEffectActions.append(
+                ActionTransition(
+                    previous: .init(state: before.states, reducerState: before._reducerState),
+                    next: .init(state: container.states, reducerState: before._reducerState),
+                    effect: sideEffect,
+                    effectContext: effectContext,
+                    for: action
+                )
+            )
+        } else {
+            sideEffect = withLock { reducer.reduce(into: container, action: action) }
         }
+
         if case .none = sideEffect.kind {
             return .never
         } else {
-            let send = self.send ?? Send(
-                sendAction: { [weak self] action in
-                    self?.sendAction(action, container: container) ?? .never
-                },
-                sendReducerAction: { [weak self] reducerAction in
-                    self?.sendAction(reducerAction, container: container) ?? .never
-                }
-            )
+            let send = self.send ?? makeSend(for: container)
 
             return executeTasks(
                 runEffect(sideEffect, send: send)
@@ -133,20 +118,14 @@ extension Store {
         return try operation()
     }
 
-    @inline(__always)
-    func threadCheck() {
-        #if DEBUG
-            guard !Thread.isMainThread else {
-                return
+    func makeSend(for container: StateContainer<Reducer.Target>) -> Send<Reducer> {
+        Send(
+            sendAction: { [weak self] action in
+                self?.sendAction(action, container: container) ?? .never
+            },
+            sendReducerAction: { [weak self] reducerAction in
+                self?.sendAction(reducerAction, container: container) ?? .never
             }
-            runtimeWarning(
-                """
-                "ActionSendable.send" was called on a non-main thread.
-
-                The "Store" class is not thread-safe, and so all interactions with an instance of \
-                "Store" must be done on the main thread.
-                """
-            )
-        #endif
+        )
     }
 }

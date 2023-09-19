@@ -62,21 +62,25 @@ public extension SideEffect {
         .init(effectKind: .serialAction(actions))
     }
 
+    @_disfavoredOverload
     @inlinable
     static func concurrent(_ actions: Reducer.ReducerAction...) -> Self {
         .init(effectKind: .concurrentReducerAction(actions))
     }
 
+    @_disfavoredOverload
     @inlinable
     static func serial(_ actions: Reducer.ReducerAction...) -> Self {
         .init(effectKind: .serialReducerAction(actions))
     }
 
+    @_disfavoredOverload
     @inlinable
     static func concurrent(_ actions: CombineAction<Reducer>...) -> Self {
         .init(effectKind: .concurrentCombineAction(actions))
     }
 
+    @_disfavoredOverload
     @inlinable
     static func serial(_ actions: CombineAction<Reducer>...) -> Self {
         .init(effectKind: .serialCombineAction(actions))

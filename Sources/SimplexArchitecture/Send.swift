@@ -1,3 +1,4 @@
+/// A type that can send actions back into the system when used from run(priority:operation:catch:fileID:line:).
 public struct Send<Reducer: ReducerProtocol>: Sendable {
     @usableFromInline
     let sendAction: @Sendable (Reducer.Action) -> SendTask
@@ -18,18 +19,22 @@ public struct Send<Reducer: ReducerProtocol>: Sendable {
         sendAction(action)
     }
 
+    @_disfavoredOverload
     @discardableResult
     @inlinable
     func callAsFunction(_ action: Reducer.ReducerAction) -> SendTask {
         sendReducerAction(action)
     }
 
+    /// Sends an action back into the system from an effect.
     @MainActor
     @inlinable
     public func callAsFunction(_ action: Reducer.Action) async {
         await sendAction(action).wait()
     }
 
+    /// Sends an reducer action back into the system from an effect.
+    @_disfavoredOverload
     @MainActor
     @inlinable
     public func callAsFunction(_ action: Reducer.ReducerAction) async {
