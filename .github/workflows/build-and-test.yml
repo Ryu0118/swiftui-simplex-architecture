@@ -25,13 +25,13 @@ jobs:
       - name: Build
         env:
           scheme: ${{ 'swiftui-simplex-architecture' }}
-          platform: ${{ 'iOS' }}
+          platform: ${{ 'macOS' }}
         run: |
           xcodebuild build-for-testing -scheme "$scheme" -destination "platform=$platform"
   
       - name: Test
         env:
           scheme: ${{ 'swiftui-simplex-architecture' }}
-          platform: ${{ 'iOS' }}
+          platform: ${{ 'macOS' }}
         run: |
           xcodebuild test-without-building -scheme "$scheme" -destination "platform=$platform"
