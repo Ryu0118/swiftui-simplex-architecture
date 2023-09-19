@@ -30,13 +30,7 @@ extension Store {
         _ action: Reducer.Action,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        defer {
-            if let _ = Reducer.Action.self as? Pullbackable.Type, let pullbackAction {
-                pullbackAction(action)
-            }
-        }
-
-        return sendAction(.action(action), container: container)
+        sendAction(.action(action), container: container)
     }
 
     @usableFromInline
@@ -44,15 +38,7 @@ extension Store {
         _ action: Reducer.ReducerAction,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        defer {
-            if let _ = Reducer.ReducerAction.self as? Pullbackable.Type,
-               let pullbackReducerAction
-            {
-                pullbackReducerAction(action)
-            }
-        }
-
-        return sendAction(.action(action), container: container)
+        sendAction(.action(action), container: container)
     }
 
     @inline(__always)
@@ -60,6 +46,29 @@ extension Store {
         _ action: CombineAction<Reducer>,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
+        defer {
+            switch action.kind {
+            case .viewAction(let action):
+                guard let pullbackAction else {
+                    break
+                }
+                if let _ = Reducer.Action.self as? Pullbackable.Type {
+                    pullbackAction(action)
+                } else {
+                    runtimeWarning("\(Reducer.Action.self) must be conformed to Pullbackable in order to pullback to parent reducer")
+                }
+            case .reducerAction(let action):
+                guard let pullbackReducerAction else {
+                    break
+                }
+                if let _ = Reducer.ReducerAction.self as? Pullbackable.Type {
+                    pullbackReducerAction(action)
+                } else {
+                    runtimeWarning("\(Reducer.ReducerAction.self) must be conformed to Pullbackable in order to pullback to parent reducer")
+                }
+            }
+        }
+
         let sideEffect: SideEffect<Reducer>
         // If Unit Testing is in progress and an action is sent from SideEffect
         if _XCTIsTesting, let effectContext = EffectContext.id {
