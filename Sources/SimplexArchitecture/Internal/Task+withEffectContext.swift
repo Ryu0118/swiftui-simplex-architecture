@@ -1,6 +1,7 @@
 import Foundation
 
 extension Task where Failure == any Error {
+    // Granted when there is no EffectContext in the Task.
     @discardableResult
     static func withEffectContext(
         priority: TaskPriority? = nil,
@@ -19,6 +20,7 @@ extension Task where Failure == any Error {
 }
 
 extension Task where Failure == Never {
+    // Granted when there is no EffectContext in the Task.
     @discardableResult
     static func withEffectContext(
         priority: TaskPriority? = nil,

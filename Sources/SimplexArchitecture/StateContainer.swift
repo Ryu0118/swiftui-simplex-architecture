@@ -1,8 +1,8 @@
 import Foundation
 import XCTestDynamicOverlay
 
-// StateContainer is not thread-safe. Therefore, StateContainer must use NSLock or NSRecursiveLock for exclusions when changing values.
-// In Send.swift, NSRecursiveLock is used for exclusions when executing the `reduce(into:action)`.
+/// StateContainer is not thread-safe. Therefore, StateContainer must use NSLock or NSRecursiveLock for exclusions when changing values.
+/// In Store, NSRecursiveLock is used for exclusions when executing the `reduce(into:action)`.
 @dynamicMemberLookup
 public final class StateContainer<Target: ActionSendable> {
     public var reducerState: Target.Reducer.ReducerState {

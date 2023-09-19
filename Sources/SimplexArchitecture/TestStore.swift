@@ -3,10 +3,19 @@ import CustomDump
 import Dependencies
 import Foundation
 
+/// TestStore is a utility class for testing stores that use Reducer protocols.
+/// It provides methods for sending actions and verifying state changes.
 public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
+
+    // MARK: - Properties
+
+    /// The running state container.
     var runningContainer: StateContainer<Reducer.Target>?
+
+    /// An array of tested actions.
     var testedActions: [ActionTransition<Reducer>] = []
 
+    /// An array of untested actions.
     var untestedActions: [ActionTransition<Reducer>] {
         target.store.sentFromEffectActions.filter { actionTransition in
             !testedActions.contains {
@@ -16,8 +25,15 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     }
 
     let target: Reducer.Target
+
+    /// The states of the target.
     let states: Reducer.Target.States
 
+    /// Initializes a new test store.
+    ///
+    /// - Parameters:
+    ///   - target: The target Reducer.
+    ///   - states: The states of the target Reducer.
     init(
         target: Reducer.Target,
         states: Reducer.Target.States
@@ -47,6 +63,12 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         }
     }
 
+    /// Asserts an action was received from an effect and asserts how the state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action expected from an effect.
+    ///   - timeout: The amount of time to wait for the expected action.
+    ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
     public func receive(
         _ action: Reducer.ReducerAction,
         timeout: TimeInterval = 5,
@@ -63,6 +85,12 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         )
     }
 
+    /// Asserts an action was received from an effect and asserts how the state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action expected from an effect.
+    ///   - timeout: The amount of time to wait for the expected action.
+    ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
     public func receive(
         _ action: Reducer.Action,
         timeout: TimeInterval = 5,
@@ -107,9 +135,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
                 break
             }
 
-            if let firstIndex = untestedActions.firstIndex(where: { $0.action == action }),
-               let stateTransition = untestedActions[safe: firstIndex]
-            {
+            if let stateTransition = untestedActions.first(where: { $0.action == action }) {
                 let expectedContainer = stateTransition.asNextStateContainer(from: target)
                 let actualContainer = stateTransition.asPreviousStateContainer(from: target)
 
@@ -126,7 +152,8 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         }
     }
 
-    func receiveWithoutStateCheck(
+    /// Asserts an action was received from an effect. Does not assert state changes.
+    public func receiveWithoutStateCheck(
         _ action: Reducer.Action,
         timeout: TimeInterval = 5,
         file: StaticString = #file,
@@ -153,9 +180,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
                 break
             }
 
-            if let firstIndex = untestedActions.firstIndex(where: { $0.action == .action(action) }),
-               let stateTransition = untestedActions[safe: firstIndex]
-            {
+            if let stateTransition = untestedActions.first(where: { $0.action == .action(action) }) {
                 testedActions.append(stateTransition)
                 break
             }
@@ -164,16 +189,27 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         }
     }
 
+    /// Sends an action to the store and asserts when state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action.
+    ///   - assert: A closure that asserts state changed by sending the action to
+    ///     the store. The mutable state sent to this closure must be modified to match the state of
+    ///     the store after processing the given action. Do not provide a closure if no change is
+    ///     expected.
+    /// - Returns: A ``SendTask`` that represents the lifecycle of the effect executed when
+    ///   sending the action.
+    @discardableResult
     @MainActor
     public func send(
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
-    ) async {
+    ) async -> SendTask {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        target.store.sendIfNeeded(action)
+        let sendTask = target.store.sendIfNeeded(action)
 
         expected?(actualContainer)
 
@@ -181,18 +217,30 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
 
         await Task.megaYield()
+        return sendTask
     }
 
+    /// Sends an action to the store and asserts when state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action.
+    ///   - assert: A closure that asserts state changed by sending the action to
+    ///     the store. The mutable state sent to this closure must be modified to match the state of
+    ///     the store after processing the given action. Do not provide a closure if no change is
+    ///     expected.
+    /// - Returns: A ``SendTask`` that represents the lifecycle of the effect executed when
+    ///   sending the action.
+    @discardableResult
     @MainActor
     public func send(
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
-    ) async where Reducer.Target.States: Equatable {
+    ) async -> SendTask where Reducer.Target.States: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        target.store.sendIfNeeded(action)
+        let sendTask = target.store.sendIfNeeded(action)
 
         expected?(actualContainer)
 
@@ -200,18 +248,31 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
 
         await Task.megaYield()
+
+        return sendTask
     }
 
+    /// Sends an action to the store and asserts when state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action.
+    ///   - assert: A closure that asserts state changed by sending the action to
+    ///     the store. The mutable state sent to this closure must be modified to match the state of
+    ///     the store after processing the given action. Do not provide a closure if no change is
+    ///     expected.
+    /// - Returns: A ``SendTask`` that represents the lifecycle of the effect executed when
+    ///   sending the action.
+    @discardableResult
     @MainActor
     public func send(
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
-    ) async where Reducer.ReducerState: Equatable {
+    ) async -> SendTask where Reducer.ReducerState: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        target.store.sendIfNeeded(action)
+        let sendTask = target.store.sendIfNeeded(action)
 
         expected?(actualContainer)
 
@@ -219,18 +280,30 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
 
         await Task.megaYield()
+        return sendTask
     }
 
+    /// Sends an action to the store and asserts when state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action.
+    ///   - assert: A closure that asserts state changed by sending the action to
+    ///     the store. The mutable state sent to this closure must be modified to match the state of
+    ///     the store after processing the given action. Do not provide a closure if no change is
+    ///     expected.
+    /// - Returns: A ``SendTask`` that represents the lifecycle of the effect executed when
+    ///   sending the action.
+    @discardableResult
     @MainActor
     public func send(
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
-    ) async where Reducer.ReducerState: Equatable, Reducer.Target.States: Equatable {
+    ) async -> SendTask where Reducer.ReducerState: Equatable, Reducer.Target.States: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        target.store.sendIfNeeded(action)
+        let sendTask = target.store.sendIfNeeded(action)
 
         expected?(actualContainer)
 
@@ -238,12 +311,12 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         assertReducerNoDifference(expected: actualContainer, actual: actualContainer)
 
         await Task.megaYield()
+
+        return sendTask
     }
 }
 
-// MARK: - +Assert
-
-private extension TestStore {
+extension TestStore {
     private func assertStatesNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
         actual actualContainer: StateContainer<Reducer.Target>
@@ -294,6 +367,10 @@ private extension TestStore {
 }
 
 public extension ActionSendable where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
+    /// Creates and returns a new test store.
+    ///
+    /// - Parameter states: The initial states for testing.
+    /// - Returns: A new TestStore instance.
     func testStore(states: States) -> TestStore<Reducer> {
         TestStore(target: self, states: states)
     }
