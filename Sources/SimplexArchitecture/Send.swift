@@ -13,12 +13,14 @@ public struct Send<Reducer: ReducerProtocol>: Sendable {
         self.sendReducerAction = sendReducerAction
     }
 
+    @MainActor
     @discardableResult
     @inlinable
     func callAsFunction(_ action: Reducer.Action) -> SendTask {
         sendAction(action)
     }
 
+    @MainActor
     @_disfavoredOverload
     @discardableResult
     @inlinable

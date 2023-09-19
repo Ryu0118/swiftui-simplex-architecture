@@ -14,7 +14,7 @@ struct ActionTransition<Reducer: ReducerProtocol> {
     let next: Self.State
     /// The associated side effect.
     let effect: SideEffect<Reducer>
-    /// The unique effect context that represents parent effect.
+    /// The unique effect context that represents root effect.
     let effectContext: UUID
     /// The Action that cause a change of state
     let action: CombineAction<Reducer>
@@ -23,7 +23,7 @@ struct ActionTransition<Reducer: ReducerProtocol> {
     ///   - previous: The previous state.
     ///   - next: The next state.
     ///   - effect: The unique effect context that represents parent effect.
-    ///   - effectContext: The unique effect context that represents parent effect.
+    ///   - effectContext: The unique effect context that represents root effect.
     ///   - action: The action responsible for the transition.
     init(
         previous: Self.State,
