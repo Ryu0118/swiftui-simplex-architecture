@@ -47,6 +47,7 @@ public extension SideEffect {
         .init(effectKind: .sendAction(action))
     }
 
+    @_disfavoredOverload
     @inlinable
     static func send(_ action: Reducer.ReducerAction) -> Self {
         .init(effectKind: .sendReducerAction(action))

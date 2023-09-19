@@ -50,7 +50,7 @@ public struct ScopeState: MemberMacro {
 
         let modifier = declaration.modifiers
             .compactMap { $0.as(DeclModifierSyntax.self)?.name.text }
-            .filter { $0 != "final" }
+            .filter { $0 != "final" && $0 != "private" }
             .first ?? "internal"
 
         return [

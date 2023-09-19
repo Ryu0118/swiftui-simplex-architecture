@@ -96,7 +96,7 @@ final class ReducerTests: XCTestCase {
     }
 }
 
-struct TestReducer: ReducerProtocol {
+private struct TestReducer: ReducerProtocol {
     struct ReducerState: Equatable {
         var count = 0
         var string = "string"
@@ -176,7 +176,7 @@ struct TestReducer: ReducerProtocol {
 }
 
 @ScopeState
-struct TestView: View {
+private struct TestView: View {
     @State var count = 0
     let store: Store<TestReducer>
 
