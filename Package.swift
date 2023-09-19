@@ -24,6 +24,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-case-paths.git", exact: "1.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", exact: "1.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", exact: "1.0.0"),
+        .package(url: "https://github.com/pointfreeco/swift-macro-testing", exact: "0.1.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -53,6 +54,7 @@ let package = Package(
                 "SimplexArchitectureMacrosPlugin",
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+                .product(name: "MacroTesting", package: "swift-macro-testing")
             ]
         ),
     ]
