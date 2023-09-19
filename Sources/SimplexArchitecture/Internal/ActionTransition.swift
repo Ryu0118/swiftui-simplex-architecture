@@ -15,26 +15,26 @@ struct ActionTransition<Reducer: ReducerProtocol> {
     init(
         previous: Self.State,
         next: Self.State,
-        sideEffect: SideEffect<Reducer>,
+        effect: SideEffect<Reducer>,
         effectContext: UUID,
         for action: CombineAction<Reducer>
     ) {
         self.previous = previous
         self.next = next
-        effect = sideEffect
+        self.effect = effect
         self.effectContext = effectContext
         self.action = action
     }
 
-    func toNextStateContainer(from target: Reducer.Target) -> StateContainer<Reducer.Target> {
-        toStateContainer(from: target, state: next)
+    func asNextStateContainer(from target: Reducer.Target) -> StateContainer<Reducer.Target> {
+        asStateContainer(from: target, state: next)
     }
 
-    func toPreviousStateContainer(from target: Reducer.Target) -> StateContainer<Reducer.Target> {
-        toStateContainer(from: target, state: previous)
+    func asPreviousStateContainer(from target: Reducer.Target) -> StateContainer<Reducer.Target> {
+        asStateContainer(from: target, state: previous)
     }
 
-    private func toStateContainer(from target: Reducer.Target, state _: Self.State) -> StateContainer<Reducer.Target> {
+    private func asStateContainer(from target: Reducer.Target, state _: Self.State) -> StateContainer<Reducer.Target> {
         .init(target, states: next.state, reducerState: next.reducerState)
     }
 }

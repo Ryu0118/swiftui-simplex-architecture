@@ -71,7 +71,7 @@ extension Store {
                 ActionTransition(
                     previous: .init(state: before.states, reducerState: before._reducerState),
                     next: .init(state: container.states, reducerState: before._reducerState),
-                    sideEffect: sideEffect,
+                    effect: sideEffect,
                     effectContext: effectContext,
                     for: action
                 )

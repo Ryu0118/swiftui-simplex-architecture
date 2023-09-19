@@ -17,14 +17,6 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
         case concurrentReducerAction([Reducer.ReducerAction])
         case serialCombineAction([CombineAction<Reducer>])
         case concurrentCombineAction([CombineAction<Reducer>])
-
-        @inlinable
-        var isNone: Bool {
-            if case .none = self {
-                return true
-            }
-            return false
-        }
     }
 
     let kind: EffectKind

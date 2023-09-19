@@ -110,8 +110,8 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             if let firstIndex = untestedActions.firstIndex(where: { $0.action == action }),
                let stateTransition = untestedActions[safe: firstIndex]
             {
-                let expectedContainer = stateTransition.toNextStateContainer(from: target)
-                let actualContainer = stateTransition.toPreviousStateContainer(from: target)
+                let expectedContainer = stateTransition.asNextStateContainer(from: target)
+                let actualContainer = stateTransition.asPreviousStateContainer(from: target)
 
                 expected?(actualContainer)
 
