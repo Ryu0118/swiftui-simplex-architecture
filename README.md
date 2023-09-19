@@ -34,7 +34,7 @@ let package = Package(
 ```
 
 ## Usage
-#### Basic Usage
+### Basic Usage
 ```Swift
 struct MyReducer: ReducerProtocol {
     enum Action {
@@ -73,7 +73,7 @@ struct MyView: View {
 }
 ```
 
-#### ReducerState
+### ReducerState
 
 Use ReducerState if you want to keep the state only in the Reducer.
 ReducerState is also effective to improve performance because the View is not updated even if the value is changed.
@@ -129,7 +129,7 @@ struct MyView: View {
 }
 ```
 
-#### ReducerAction
+### ReducerAction
 
 If there are Actions that you do not want to expose to View, ReducerAction is effective.
 This is the sample code:
@@ -190,7 +190,7 @@ struct MyView: View {
 }
 ```
 
-#### Pullback Action
+### Pullback Action
 
 If you want to send the Action of the child Reducer to the parent Reducer, use pullback.
 This is the sample code.
@@ -242,5 +242,20 @@ struct ChildReducer: ReducerProtocol {
             return .none
         }
     }
+}
+```
+
+### Testing
+You can write a test like this.
+```Swift
+let testStore = TestView().testStore(states: .init())
+await testStore.send(.increment) {
+    $0.count = 1
+}
+
+let testStore = TestView().testStore(states: .init())
+await testStore.send(.send)
+await testStore.receive(.increment) {
+    $0.count = 1
 }
 ```
