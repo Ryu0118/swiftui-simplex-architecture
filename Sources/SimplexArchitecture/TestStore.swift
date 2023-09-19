@@ -70,7 +70,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     ///   - timeout: The amount of time to wait for the expected action.
     ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
     public func receive(
-        _ action: Reducer.ReducerAction,
+        _ action: Reducer.Action,
         timeout: TimeInterval = 5,
         expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
         file: StaticString = #file,
@@ -91,8 +91,9 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     ///   - action: An action expected from an effect.
     ///   - timeout: The amount of time to wait for the expected action.
     ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
+    @_disfavoredOverload
     public func receive(
-        _ action: Reducer.Action,
+        _ action: Reducer.ReducerAction,
         timeout: TimeInterval = 5,
         expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
         file: StaticString = #file,

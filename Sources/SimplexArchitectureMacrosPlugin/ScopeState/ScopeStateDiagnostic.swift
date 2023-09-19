@@ -30,10 +30,19 @@ extension ScopeStateMacroDiagnostic: DiagnosticMessage {
 
 public extension ScopeState {
     static func decodeExpansion(
-        of _: AttributeSyntax,
+        of syntax: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
-        in _: some MacroExpansionContext
+        in context: some MacroExpansionContext
     ) -> Bool {
-        declaration.as(StructDeclSyntax.self) != nil || declaration.as(ClassDeclSyntax.self) != nil
+        if declaration.as(StructDeclSyntax.self) != nil || declaration.as(ClassDeclSyntax.self) != nil {
+            return true
+        } 
+        else if declaration.as(ActorDeclSyntax.self) != nil
+            || declaration.as(ProtocolDeclSyntax.self) != nil
+            || declaration.as(ExtensionDeclSyntax.self) != nil
+        {
+            context.diagnose(ScopeStateMacroDiagnostic.requiresStructOrClass.diagnose(at: syntax))
+        }
+        return false
     }
 }

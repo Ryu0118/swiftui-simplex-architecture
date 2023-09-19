@@ -118,7 +118,7 @@ extension Store {
         case let .sendAction(action):
             return [
                 SendTask(
-                    task: Task.withEffectContext {
+                    task: Task.withEffectContext { @MainActor in
                         send(action)
                     }
                 ),
@@ -127,7 +127,7 @@ extension Store {
         case let .sendReducerAction(action):
             return [
                 SendTask(
-                    task: Task.withEffectContext {
+                    task: Task.withEffectContext { @MainActor in
                         send(action)
                     }
                 ),
