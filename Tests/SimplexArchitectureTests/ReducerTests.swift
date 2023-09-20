@@ -98,17 +98,14 @@ final class ReducerTests: XCTestCase {
 
     func testDependencies() async {
         let testStore = TestView(
-            store: Store(
-                reducer: withDependencies {
-                    $0.continuousClock = ImmediateClock()
-                } operation: {
-                    TestReducer()
-                },
+            store: .init(
+                reducer: TestReducer()
+                    .dependency(\.test, value: .init {})
+                ,
                 initialReducerState: .init()
             )
         ).testStore(states: .init())
-
-        await testStore.send(.runEffectWithDependencies)
+        await testStore.send(.testDependencies)
         await testStore.receive(.increment) {
             $0.count = 1
         }
@@ -131,6 +128,24 @@ final class ReducerTests: XCTestCase {
         await testStore.receive(.increment) {
             $0.count = 1
         }
+    }
+}
+
+struct TestDependency: DependencyKey {
+    public var asyncThrows: @Sendable () async throws -> Void
+
+    public init(asyncThrows: @Sendable @escaping () async throws -> Void) {
+        self.asyncThrows = asyncThrows
+    }
+
+    public static let liveValue: TestDependency = .init(asyncThrows: { throw CancellationError() })
+    public static let testValue: TestDependency = .init(asyncThrows: {})
+}
+
+extension DependencyValues {
+    var test: TestDependency {
+        get { self[TestDependency.self] }
+        set { self[TestDependency.self] = newValue }
     }
 }
 
@@ -157,9 +172,11 @@ private struct TestReducer: ReducerProtocol {
         case invokeDecrement
         case send
         case runEffectWithDependencies
+        case testDependencies
     }
 
     @Dependency(\.continuousClock) private var clock
+    @Dependency(\.test) var test
 
     func reduce(into state: StateContainer<TestView>, action: ReducerAction) -> SideEffect<Self> {
         switch action {
@@ -216,6 +233,12 @@ private struct TestReducer: ReducerProtocol {
         case .runEffectWithDependencies:
             return .run { send in
                 try await clock.sleep(for: .seconds(1))
+                await send(.increment)
+            }
+
+        case .testDependencies:
+            return .run { send in
+                try await test.asyncThrows()
                 await send(.increment)
             }
         }

@@ -20,12 +20,12 @@ public final class Store<Reducer: ReducerProtocol> {
     @usableFromInline var pullbackAction: ((Reducer.Action) -> Void)?
     @usableFromInline var pullbackReducerAction: ((Reducer.ReducerAction) -> Void)?
 
-    let reducer: Reducer
+    let reduce: (StateContainer<Reducer.Target>, CombineAction<Reducer>) -> SideEffect<Reducer>
     var initialReducerState: (() -> Reducer.ReducerState)?
 
     /// Initialize  `Store` with the given reducer when the `ReducerState` is `Never`.
     public init(reducer: Reducer) where Reducer.ReducerState == Never {
-        self.reducer = reducer
+        self.reduce = reducer.reduce
     }
 
     /// Initialize `Store` with the given `Reducer` and initial `ReducerState`.
@@ -33,7 +33,22 @@ public final class Store<Reducer: ReducerProtocol> {
         reducer: Reducer,
         initialReducerState: @autoclosure @escaping () -> Reducer.ReducerState
     ) {
-        self.reducer = reducer
+        self.reduce = reducer.reduce
+        self.initialReducerState = initialReducerState
+    }
+
+    public init<R: _ReducerModifier<Reducer>>(
+        reducer: R
+    ) where Reducer.ReducerState == Never {
+        self.reduce = reducer.reduce
+    }
+
+    /// Initialize `Store` with the given `Reducer` and initial `ReducerState`.
+    public init<R: _ReducerModifier<Reducer>>(
+        reducer: R,
+        initialReducerState: @autoclosure @escaping () -> Reducer.ReducerState
+    ) {
+        self.reduce = reducer.reduce
         self.initialReducerState = initialReducerState
     }
 
