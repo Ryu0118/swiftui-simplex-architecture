@@ -11,6 +11,9 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     /// The running state container.
     var runningContainer: StateContainer<Reducer.Target>?
 
+    /// The running tasks
+    var runningTasks: [SendTask] = []
+
     /// An array of tested actions.
     var testedActions: [ActionTransition<Reducer>] = []
 
@@ -59,6 +62,18 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
                 Unhandled Action remains. Use TestStore.receive to implement tests of \(unhandledActionStrings)
                 """
             )
+        }
+    }
+
+    /// Wait for all of the TestStore's remaining SendTasks to complete.
+    public func waitForAll() async {
+        await withTaskGroup(of: Void.self) { group in
+            for task in runningTasks {
+                group.addTask {
+                    await task.wait()
+                }
+            }
+            await group.waitForAll()
         }
     }
 
@@ -210,6 +225,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         let actualContainer = expectedContainer.copy()
 
         let sendTask = target.store.sendIfNeeded(action)
+        runningTasks.append(sendTask)
 
         expected?(actualContainer)
 
@@ -241,6 +257,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         let actualContainer = expectedContainer.copy()
 
         let sendTask = target.store.sendIfNeeded(action)
+        runningTasks.append(sendTask)
 
         expected?(actualContainer)
 
@@ -273,6 +290,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         let actualContainer = expectedContainer.copy()
 
         let sendTask = target.store.sendIfNeeded(action)
+        runningTasks.append(sendTask)
 
         expected?(actualContainer)
 
@@ -304,6 +322,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         let actualContainer = expectedContainer.copy()
 
         let sendTask = target.store.sendIfNeeded(action)
+        runningTasks.append(sendTask)
 
         expected?(actualContainer)
 

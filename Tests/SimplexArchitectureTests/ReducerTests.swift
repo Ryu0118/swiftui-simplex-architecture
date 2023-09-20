@@ -1,6 +1,7 @@
 @testable import SimplexArchitecture
 import SwiftUI
 import XCTest
+import Dependencies
 
 @MainActor
 final class ReducerTests: XCTestCase {
@@ -94,6 +95,43 @@ final class ReducerTests: XCTestCase {
             $0.count = 0
         }
     }
+
+    func testDependencies() async {
+        let testStore = TestView(
+            store: Store(
+                reducer: withDependencies {
+                    $0.continuousClock = ImmediateClock()
+                } operation: {
+                    TestReducer()
+                },
+                initialReducerState: .init()
+            )
+        ).testStore(states: .init())
+
+        await testStore.send(.runEffectWithDependencies)
+        await testStore.receive(.increment) {
+            $0.count = 1
+        }
+    }
+
+    func testWaitForAll() async {
+        let testStore = TestView(
+            store: Store(
+                reducer: withDependencies {
+                    $0.continuousClock = ImmediateClock()
+                } operation: {
+                    TestReducer()
+                },
+                initialReducerState: .init()
+            )
+        ).testStore(states: .init())
+
+        await testStore.send(.runEffectWithDependencies)
+        await testStore.waitForAll()
+        await testStore.receive(.increment) {
+            $0.count = 1
+        }
+    }
 }
 
 private struct TestReducer: ReducerProtocol {
@@ -118,7 +156,10 @@ private struct TestReducer: ReducerProtocol {
         case invokeIncrement
         case invokeDecrement
         case send
+        case runEffectWithDependencies
     }
+
+    @Dependency(\.continuousClock) private var clock
 
     func reduce(into state: StateContainer<TestView>, action: ReducerAction) -> SideEffect<Self> {
         switch action {
@@ -171,6 +212,12 @@ private struct TestReducer: ReducerProtocol {
 
         case .send:
             return .send(.increment)
+
+        case .runEffectWithDependencies:
+            return .run { send in
+                try await clock.sleep(for: .seconds(1))
+                await send(.increment)
+            }
         }
     }
 }

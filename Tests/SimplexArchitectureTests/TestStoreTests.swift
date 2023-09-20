@@ -6,21 +6,27 @@ final class TestStoreTests: XCTestCase {
     func testSend() async throws {
         let store = TestView().testStore(states: .init())
         XCTAssertNil(store.runningContainer)
-        await store.send(.increment) {
+        XCTAssertTrue(store.runningTasks.isEmpty)
+        let sendTask = await store.send(.increment) {
             $0.count = 1
         }
+        XCTAssertEqual(store.runningTasks, [sendTask])
         XCTAssertNotNil(store.runningContainer)
     }
 
     @MainActor
     func testReceive() async throws {
         let store = TestView().testStore(states: .init())
-        await store.send(.receiveTest)
+        XCTAssertTrue(store.runningTasks.isEmpty)
+
+        let sendTask = await store.send(.receiveTest)
         XCTAssertTrue(store.testedActions.isEmpty)
+        XCTAssertEqual(store.runningTasks, [sendTask])
+
         await store.receive(.increment) {
             $0.count = 1
         }
-        XCTAssertTrue(store.testedActions.count == 1)
+        XCTAssertEqual(store.testedActions.count, 1)
     }
 }
 
