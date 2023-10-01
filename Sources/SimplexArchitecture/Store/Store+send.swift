@@ -73,9 +73,7 @@ extension Store {
         // If Unit Testing is in progress and an action is sent from SideEffect
         if _XCTIsTesting, let effectContext = EffectContext.id {
             let before = container.copy()
-            sideEffect = withLock {
-                reduce(container, action)
-            }
+            sideEffect = reduce(container, action)
             sentFromEffectActions.append(
                 ActionTransition(
                     previous: .init(state: before.states, reducerState: before._reducerState),
@@ -86,7 +84,7 @@ extension Store {
                 )
             )
         } else {
-            sideEffect = withLock { reduce(container, action) }
+            sideEffect = reduce(container, action)
         }
 
         if case .none = sideEffect.kind {
