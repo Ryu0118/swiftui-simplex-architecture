@@ -118,13 +118,6 @@ extension Store {
         }
     }
 
-    @inlinable
-    func withLock<T>(_ operation: () throws -> T) rethrows -> T {
-        lock.lock()
-        defer { lock.unlock() }
-        return try operation()
-    }
-
     func makeSend(for container: StateContainer<Reducer.Target>) -> Send<Reducer> {
         Send(
             sendAction: { [weak self] action in
