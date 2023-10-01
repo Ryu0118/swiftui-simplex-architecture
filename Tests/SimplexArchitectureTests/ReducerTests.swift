@@ -99,9 +99,7 @@ final class ReducerTests: XCTestCase {
     func testDependencies() async {
         let testStore = TestView(
             store: .init(
-                reducer: TestReducer()
-                    .dependency(\.test, value: .init {})
-                ,
+                reducer: TestReducer().dependency(\.test, value: .init {}),
                 initialReducerState: .init()
             )
         ).testStore(states: .init())
@@ -251,6 +249,30 @@ private struct TestView: View {
     let store: Store<TestReducer>
 
     init(store: Store<TestReducer> = Store(reducer: TestReducer(), initialReducerState: .init())) {
+        self.store = store
+    }
+
+    var body: some View {
+        EmptyView()
+    }
+}
+
+private struct MyReducer: ReducerProtocol {
+    enum Action {
+        case hoge
+    }
+
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
+        .none
+    }
+}
+
+@ScopeState
+private struct MyView: View {
+    @State var count = 0
+    let store: Store<MyReducer>
+
+    init(store: Store<MyReducer> = Store(reducer: MyReducer())) {
         self.store = store
     }
 

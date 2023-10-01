@@ -37,14 +37,14 @@ public final class Store<Reducer: ReducerProtocol> {
         self.initialReducerState = initialReducerState
     }
 
-    public init<R: _ReducerModifier<Reducer>>(
+    public init<R: ReducerModifier<Reducer>>(
         reducer: R
     ) where Reducer.ReducerState == Never {
         self.reduce = reducer.reduce
     }
 
     /// Initialize `Store` with the given `Reducer` and initial `ReducerState`.
-    public init<R: _ReducerModifier<Reducer>>(
+    public init<R: ReducerModifier<Reducer>>(
         reducer: R,
         initialReducerState: @autoclosure @escaping () -> Reducer.ReducerState
     ) {
@@ -212,6 +212,11 @@ extension Store {
                 }
             }
             return [SendTask(task: task)]
+
+        case let .runEffects(effects):
+            return effects.reduce(into: [SendTask]()) { partialResult, effect in
+                partialResult += runEffect(effect, send: send)
+            }
 
         case .none:
             return []

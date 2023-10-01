@@ -28,6 +28,7 @@ public extension CombineAction {
         .init(kind: .viewAction(action: action))
     }
 
+    @_disfavoredOverload
     @inlinable
     static func action(
         _ action: Reducer.ReducerAction

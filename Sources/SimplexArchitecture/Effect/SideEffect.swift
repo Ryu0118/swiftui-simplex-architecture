@@ -17,6 +17,7 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
         case concurrentReducerAction([Reducer.ReducerAction])
         case serialCombineAction([CombineAction<Reducer>])
         case concurrentCombineAction([CombineAction<Reducer>])
+        case runEffects([SideEffect<Reducer>])
     }
 
     let kind: EffectKind
@@ -85,5 +86,10 @@ public extension SideEffect {
     @inlinable
     static func serial(_ actions: CombineAction<Reducer>...) -> Self {
         .init(effectKind: .serialCombineAction(actions))
+    }
+
+    @inlinable
+    static func runEffects(_ effects: [SideEffect<Reducer>]) -> Self {
+        .init(effectKind: .runEffects(effects))
     }
 }
