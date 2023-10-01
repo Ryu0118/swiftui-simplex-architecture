@@ -74,7 +74,7 @@ extension Store {
         if _XCTIsTesting, let effectContext = EffectContext.id {
             let before = container.copy()
             sideEffect = withLock {
-                reducer.reduce(into: container, action: action)
+                reduce(container, action)
             }
             sentFromEffectActions.append(
                 ActionTransition(
@@ -86,7 +86,7 @@ extension Store {
                 )
             )
         } else {
-            sideEffect = withLock { reducer.reduce(into: container, action: action) }
+            sideEffect = withLock { reduce(container, action) }
         }
 
         if case .none = sideEffect.kind {

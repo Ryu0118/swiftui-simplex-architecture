@@ -98,17 +98,12 @@ final class ReducerTests: XCTestCase {
 
     func testDependencies() async {
         let testStore = TestView(
-            store: Store(
-                reducer: withDependencies {
-                    $0.continuousClock = ImmediateClock()
-                } operation: {
-                    TestReducer()
-                },
+            store: .init(
+                reducer: TestReducer().dependency(\.test, value: .init {}),
                 initialReducerState: .init()
             )
         ).testStore(states: .init())
-
-        await testStore.send(.runEffectWithDependencies)
+        await testStore.send(.testDependencies)
         await testStore.receive(.increment) {
             $0.count = 1
         }
@@ -131,6 +126,24 @@ final class ReducerTests: XCTestCase {
         await testStore.receive(.increment) {
             $0.count = 1
         }
+    }
+}
+
+struct TestDependency: DependencyKey {
+    public var asyncThrows: @Sendable () async throws -> Void
+
+    public init(asyncThrows: @Sendable @escaping () async throws -> Void) {
+        self.asyncThrows = asyncThrows
+    }
+
+    public static let liveValue: TestDependency = .init(asyncThrows: { throw CancellationError() })
+    public static let testValue: TestDependency = .init(asyncThrows: {})
+}
+
+extension DependencyValues {
+    var test: TestDependency {
+        get { self[TestDependency.self] }
+        set { self[TestDependency.self] = newValue }
     }
 }
 
@@ -157,9 +170,11 @@ private struct TestReducer: ReducerProtocol {
         case invokeDecrement
         case send
         case runEffectWithDependencies
+        case testDependencies
     }
 
     @Dependency(\.continuousClock) private var clock
+    @Dependency(\.test) var test
 
     func reduce(into state: StateContainer<TestView>, action: ReducerAction) -> SideEffect<Self> {
         switch action {
@@ -218,6 +233,12 @@ private struct TestReducer: ReducerProtocol {
                 try await clock.sleep(for: .seconds(1))
                 await send(.increment)
             }
+
+        case .testDependencies:
+            return .run { send in
+                try await test.asyncThrows()
+                await send(.increment)
+            }
         }
     }
 }
@@ -228,6 +249,30 @@ private struct TestView: View {
     let store: Store<TestReducer>
 
     init(store: Store<TestReducer> = Store(reducer: TestReducer(), initialReducerState: .init())) {
+        self.store = store
+    }
+
+    var body: some View {
+        EmptyView()
+    }
+}
+
+private struct MyReducer: ReducerProtocol {
+    enum Action {
+        case hoge
+    }
+
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
+        .none
+    }
+}
+
+@ScopeState
+private struct MyView: View {
+    @State var count = 0
+    let store: Store<MyReducer>
+
+    init(store: Store<MyReducer> = Store(reducer: MyReducer())) {
         self.store = store
     }
 
