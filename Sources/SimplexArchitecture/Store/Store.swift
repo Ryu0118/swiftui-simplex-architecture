@@ -16,7 +16,6 @@ public final class Store<Reducer: ReducerProtocol> {
     // Buffer to store Actions recurrently invoked through SideEffect in a single Action sent from View
     @TestOnly var sentFromEffectActions: [ActionTransition<Reducer>] = []
 
-    @usableFromInline let lock = NSRecursiveLock()
     @usableFromInline var pullbackAction: ((Reducer.Action) -> Void)?
     @usableFromInline var pullbackReducerAction: ((Reducer.ReducerAction) -> Void)?
 
