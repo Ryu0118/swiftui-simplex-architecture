@@ -6,7 +6,7 @@ import Dependencies
 @MainActor
 final class ReducerTests: XCTestCase {
     func testReducer1() async {
-        let testStore = TestView().testStore(states: .init())
+        let testStore = TestView().testStore(viewState: .init())
         await testStore.send(.increment) {
             $0.count = 1
         }
@@ -16,7 +16,7 @@ final class ReducerTests: XCTestCase {
     }
 
     func testReducer2() async {
-        let testStore = TestView().testStore(states: .init(count: 2))
+        let testStore = TestView().testStore(viewState: .init(count: 2))
         await testStore.send(.increment) {
             $0.count = 3
         }
@@ -26,7 +26,7 @@ final class ReducerTests: XCTestCase {
     }
 
     func testRun() async {
-        let testStore = TestView().testStore(states: .init())
+        let testStore = TestView().testStore(viewState: .init())
         await testStore.send(.run)
         await testStore.receive(.increment) {
             $0.count = 1
@@ -37,7 +37,7 @@ final class ReducerTests: XCTestCase {
     }
 
     func testSend() async {
-        let testStore = TestView().testStore(states: .init())
+        let testStore = TestView().testStore(viewState: .init())
         await testStore.send(.send)
         await testStore.receive(.increment) {
             $0.count = 1
@@ -45,7 +45,7 @@ final class ReducerTests: XCTestCase {
     }
 
     func testSerialAction() async {
-        let testStore = TestView().testStore(states: .init())
+        let testStore = TestView().testStore(viewState: .init())
         await testStore.send(.serial)
         await testStore.receive(.increment) {
             $0.count = 1
@@ -56,14 +56,14 @@ final class ReducerTests: XCTestCase {
     }
 
     func testConcurrentAction() async {
-        let testStore = TestView().testStore(states: .init())
+        let testStore = TestView().testStore(viewState: .init())
         await testStore.send(.concurrent)
         await testStore.receiveWithoutStateCheck(.increment, timeout: 0.5)
         await testStore.receiveWithoutStateCheck(.decrement, timeout: 0.5)
     }
 
     func testReducerState1() async {
-        let testStore = TestView().testStore(states: .init())
+        let testStore = TestView().testStore(viewState: .init())
         await testStore.send(.modifyReducerState1) {
             $0.reducerState.count = 1
             $0.reducerState.string = "hoge"
@@ -76,7 +76,7 @@ final class ReducerTests: XCTestCase {
                 reducer: TestReducer(),
                 initialReducerState: .init(count: 2, string: "hoge")
             )
-        ).testStore(states: .init())
+        ).testStore(viewState: .init())
 
         await testStore.send(.modifyReducerState2) {
             $0.reducerState.count = 3
@@ -85,7 +85,7 @@ final class ReducerTests: XCTestCase {
     }
 
     func testReducerAction() async {
-        let testStore = TestView().testStore(states: .init())
+        let testStore = TestView().testStore(viewState: .init())
         await testStore.send(.invokeIncrement)
         await testStore.receive(.incrementFromReducerAction) {
             $0.count = 1
@@ -102,7 +102,7 @@ final class ReducerTests: XCTestCase {
                 reducer: TestReducer().dependency(\.test, value: .init {}),
                 initialReducerState: .init()
             )
-        ).testStore(states: .init())
+        ).testStore(viewState: .init())
         await testStore.send(.testDependencies)
         await testStore.receive(.increment) {
             $0.count = 1
@@ -119,7 +119,7 @@ final class ReducerTests: XCTestCase {
                 },
                 initialReducerState: .init()
             )
-        ).testStore(states: .init())
+        ).testStore(viewState: .init())
 
         await testStore.send(.runEffectWithDependencies)
         await testStore.waitForAll()
@@ -243,7 +243,7 @@ private struct TestReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 private struct TestView: View {
     @State var count = 0
     let store: Store<TestReducer>
@@ -267,7 +267,7 @@ private struct MyReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 private struct MyView: View {
     @State var count = 0
     let store: Store<MyReducer>

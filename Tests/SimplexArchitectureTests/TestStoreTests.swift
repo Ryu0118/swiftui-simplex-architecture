@@ -4,7 +4,7 @@ import XCTest
 
 final class TestStoreTests: XCTestCase {
     func testSend() async throws {
-        let store = TestView().testStore(states: .init())
+        let store = TestView().testStore(viewState: .init())
         XCTAssertNil(store.runningContainer)
         XCTAssertTrue(store.runningTasks.isEmpty)
         let sendTask = await store.send(.increment) {
@@ -16,7 +16,7 @@ final class TestStoreTests: XCTestCase {
 
     @MainActor
     func testReceive() async throws {
-        let store = TestView().testStore(states: .init())
+        let store = TestView().testStore(viewState: .init())
         XCTAssertTrue(store.runningTasks.isEmpty)
 
         let sendTask = await store.send(.receiveTest)
@@ -53,7 +53,7 @@ private struct TestReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 private struct TestView: View {
     @State var count = 0
     let store: Store<TestReducer>

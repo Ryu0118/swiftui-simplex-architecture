@@ -4,26 +4,26 @@ import XCTest
 
 final class StateContainerTests: XCTestCase {
     func testInitialize() throws {
-        let container = StateContainer(TestView(), states: .init())
+        let container = StateContainer(TestView(), viewState: .init())
         XCTAssertNotNil(container.entity)
-        XCTAssertNotNil(container.states)
+        XCTAssertNotNil(container.viewState)
         XCTAssertNil(container._reducerState)
     }
 
     func testStateChange() throws {
-        let container = StateContainer(TestView(), states: .init())
+        let container = StateContainer(TestView(), viewState: .init())
         XCTAssertEqual(container.count, 0)
-        XCTAssertEqual(container.states?.count ?? .max, 0)
+        XCTAssertEqual(container.viewState?.count ?? .max, 0)
         container.count += 1
         XCTAssertEqual(container.count, 1)
-        XCTAssertEqual(container.states?.count ?? .max, 1)
+        XCTAssertEqual(container.viewState?.count ?? .max, 1)
     }
 
     func testCopy() throws {
-        let container = StateContainer(TestView(), states: .init(), reducerState: .init(count: 100))
+        let container = StateContainer(TestView(), viewState: .init(), reducerState: .init(count: 100))
         let copy = container.copy()
         XCTAssertEqual(String(customDumping: container.entity), String(customDumping: copy.entity))
-        XCTAssertEqual(String(customDumping: container.states), String(customDumping: copy.states))
+        XCTAssertEqual(String(customDumping: container.viewState), String(customDumping: copy.viewState))
         XCTAssertEqual(container.reducerState, copy.reducerState)
     }
 }
@@ -48,7 +48,7 @@ private struct TestReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 private struct TestView: View {
     @State var count = 0
     let store: Store<TestReducer>

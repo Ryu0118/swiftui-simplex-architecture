@@ -3,7 +3,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct ScopeState: MemberMacro {
+public struct ViewStateMacro: MemberMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax,
         Context: MacroExpansionContext
@@ -31,11 +31,11 @@ public struct ScopeState: MemberMacro {
             "SceneStorage",
         ]
 
-        let states = declaration.variables
+        let viewState = declaration.variables
             .filter(propertyWrappers: detecting)
             .map { $0.with(\.attributes, []).with(\.modifiers, []) }
 
-        let keyPathPairs = states
+        let keyPathPairs = viewState
             .compactMap(\.variableName)
             .filter { !$0.isEmpty }
             .map { "\\.\($0): \\.\($0)" }
@@ -57,16 +57,16 @@ public struct ScopeState: MemberMacro {
             DeclSyntax(
                 StructDeclSyntax(
                     modifiers: [DeclModifierSyntax(name: .identifier(modifier))],
-                    name: "States",
+                    name: "ViewState",
                     inheritanceClause: InheritanceClauseSyntax {
-                        InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "StatesProtocol"))
+                        InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ViewStateProtocol"))
                     }
                 ) {
-                    MemberBlockItemListSyntax(states.map { MemberBlockItemSyntax(decl: $0) })
+                    MemberBlockItemListSyntax(viewState.map { MemberBlockItemSyntax(decl: $0) })
                     MemberBlockItemListSyntax {
                         MemberBlockItemSyntax(
                             decl: DeclSyntax(
-                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<\(raw: declaration.name ?? "")>] = [\(raw: keyPathPairs)]"
+                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<\(raw: declaration.name ?? "")>] = [\(raw: keyPathPairs)]"
                             )
                         )
                     }

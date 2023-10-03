@@ -53,7 +53,7 @@ struct MyReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 struct MyView: View {
     @State var counter = 0
     
@@ -105,7 +105,7 @@ struct MyReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 struct MyView: View {
     @State var counter = 0
 
@@ -168,7 +168,7 @@ struct MyReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 struct MyView: View {
     @State var email: String = ""
     @State var password: String = ""
@@ -196,7 +196,7 @@ If you want to send the Action of the child Reducer to the parent Reducer, use p
 This is the sample code.
 
 ```Swift
-@ScopeState
+@ViewState
 struct ParentView: View {
     let store: Store<ParentReducer> = Store(reducer: ParentReducer())
 
@@ -220,7 +220,7 @@ struct ParentReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 struct ChildView: View, ActionSendable {
     let store: Store<ChildReducer> = Store(reducer: ChildReducer())
 
@@ -248,12 +248,12 @@ struct ChildReducer: ReducerProtocol {
 ### Testing
 You can write a test like this.
 ```Swift
-let testStore = TestView().testStore(states: .init())
+let testStore = TestView().testStore(viewState: .init())
 await testStore.send(.increment) {
     $0.count = 1
 }
 
-let testStore = TestView().testStore(states: .init())
+let testStore = TestView().testStore(viewState: .init())
 await testStore.send(.send)
 await testStore.receive(.increment) {
     $0.count = 1

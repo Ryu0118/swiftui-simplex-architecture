@@ -4,10 +4,10 @@ import MacroTesting
 import SwiftUI
 import XCTest
 
-final class ScopeStateMacroTests: XCTestCase {
+final class ViewStateMacroTests: XCTestCase {
     override func invokeTest() {
         withMacroTesting(
-            macros: ["ScopeState": ScopeState.self]
+            macros: ["ViewState": ViewStateMacro.self]
         ) {
             super.invokeTest()
         }
@@ -16,16 +16,16 @@ final class ScopeStateMacroTests: XCTestCase {
     func testDiagnostic() {
         assertMacro {
             """
-            @ScopeState
+            @ViewState
             public actor Test {
             }
             """
         } matches: {
             """
-            @ScopeState
-            ┬──────────
-            ├─ 🛑 'ScopeState' macro can only be applied to struct or class
-            ╰─ 🛑 'ScopeState' macro can only be applied to struct or class
+            @ViewState
+            ┬─────────
+            ├─ 🛑 'ViewState' macro can only be applied to struct or class
+            ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             public actor Test {
             }
             """
@@ -33,16 +33,16 @@ final class ScopeStateMacroTests: XCTestCase {
 
         assertMacro {
             """
-            @ScopeState
+            @ViewState
             public protocol Test {
             }
             """
         } matches: {
             """
-            @ScopeState
-            ┬──────────
-            ├─ 🛑 'ScopeState' macro can only be applied to struct or class
-            ╰─ 🛑 'ScopeState' macro can only be applied to struct or class
+            @ViewState
+            ┬─────────
+            ├─ 🛑 'ViewState' macro can only be applied to struct or class
+            ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             public protocol Test {
             }
             """
@@ -50,16 +50,16 @@ final class ScopeStateMacroTests: XCTestCase {
 
         assertMacro {
             """
-            @ScopeState
+            @ViewState
             public extension Test {
             }
             """
         } matches: {
             """
-            @ScopeState
-            ┬──────────
-            ├─ 🛑 'ScopeState' macro can only be applied to struct or class
-            ╰─ 🛑 'ScopeState' macro can only be applied to struct or class
+            @ViewState
+            ┬─────────
+            ├─ 🛑 'ViewState' macro can only be applied to struct or class
+            ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             public extension Test {
             }
             """
@@ -69,7 +69,7 @@ final class ScopeStateMacroTests: XCTestCase {
     func testPublicExpansion() {
         assertMacro {
             """
-            @ScopeState
+            @ViewState
             public struct TestView: View {
                 @State var count = 0
                 let store: Store<TestReducer>
@@ -97,9 +97,9 @@ final class ScopeStateMacroTests: XCTestCase {
                     EmptyView()
                 }
 
-                public struct States: StatesProtocol {
+                public struct ViewState: ViewStateProtocol {
                     var count = 0
-                    public static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<TestView>] = [\.count: \.count]
+                    public static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<TestView>] = [\.count: \.count]
                 }
             }
 
@@ -112,7 +112,7 @@ final class ScopeStateMacroTests: XCTestCase {
     func testInternalExpansion() {
         assertMacro {
             """
-            @ScopeState
+            @ViewState
             struct TestView: View {
                 @State var count = 0
                 let store: Store<TestReducer>
@@ -140,9 +140,9 @@ final class ScopeStateMacroTests: XCTestCase {
                     EmptyView()
                 }
 
-                internal struct States: StatesProtocol {
+                internal struct ViewState: ViewStateProtocol {
                     var count = 0
-                    internal static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<TestView>] = [\.count: \.count]
+                    internal static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<TestView>] = [\.count: \.count]
                 }
             }
 
@@ -155,7 +155,7 @@ final class ScopeStateMacroTests: XCTestCase {
     func testFileprivateExpansion() {
         assertMacro {
             """
-            @ScopeState
+            @ViewState
             fileprivate struct TestView: View {
                 @State fileprivate var count = 0
                 let store: Store<TestReducer>
@@ -183,9 +183,9 @@ final class ScopeStateMacroTests: XCTestCase {
                     EmptyView()
                 }
 
-                internal struct States: StatesProtocol {
+                internal struct ViewState: ViewStateProtocol {
                     var count = 0
-                    internal static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<TestView>] = [\.count: \.count]
+                    internal static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<TestView>] = [\.count: \.count]
                 }
             }
 
@@ -198,7 +198,7 @@ final class ScopeStateMacroTests: XCTestCase {
     func testPrivateExpansion() {
         assertMacro {
             """
-            @ScopeState
+            @ViewState
             private struct TestView: View {
                 @State private var count = 0
                 let store: Store<TestReducer>
@@ -226,9 +226,9 @@ final class ScopeStateMacroTests: XCTestCase {
                     EmptyView()
                 }
 
-                internal struct States: StatesProtocol {
+                internal struct ViewState: ViewStateProtocol {
                     var count = 0
-                    internal static let keyPathMap: [PartialKeyPath<States>: PartialKeyPath<TestView>] = [\.count: \.count]
+                    internal static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<TestView>] = [\.count: \.count]
                 }
             }
 

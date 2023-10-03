@@ -5,7 +5,7 @@ import Foundation
 ///
 /// Here is a sample code.
 /// ```
-/// @ScopeState
+/// @ViewState
 /// struct ParentView: View {
 ///     let store: Store<ParentReducer> = Store(reducer: ParentReducer())
 ///
@@ -29,7 +29,7 @@ import Foundation
 ///     }
 /// }
 ///
-/// @ScopeState
+/// @ViewState
 /// struct ChildView: View, ActionSendable {
 ///     let store: Store<ChildReducer> = Store(reducer: ChildReducer())
 ///

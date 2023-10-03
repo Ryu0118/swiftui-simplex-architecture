@@ -4,7 +4,7 @@ import SwiftUI
 /// A protocol for  send actions to a store.
 public protocol ActionSendable<Reducer> {
     associatedtype Reducer: ReducerProtocol<Self>
-    associatedtype States: StatesProtocol
+    associatedtype ViewState: ViewStateProtocol
 
     /// The store to which actions will be sent.
     var store: Store<Reducer> { get }
