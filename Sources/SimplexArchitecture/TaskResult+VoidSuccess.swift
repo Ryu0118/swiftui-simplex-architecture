@@ -4,7 +4,7 @@ public struct VoidSuccess: Codable, Sendable, Hashable {
 }
 
 /// An extension on `TaskResult` where the success type is `VoidSuccess`.
-public extension TaskResult where Success == VoidSuccess, Failure == any Error {
+extension TaskResult where Success == VoidSuccess {
     /// Creates a new task result by evaluating an async throwing closure.
     ///
     /// This initializer is used to handle asynchronous operations that produce a result of type `Void`.
