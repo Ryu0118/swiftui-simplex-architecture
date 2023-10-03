@@ -1,20 +1,24 @@
 @testable import SimplexArchitecture
 import SwiftUI
-import Dependencies
 import XCTest
 
+@MainActor
 final class DependenciesOverrideModifierTests: XCTestCase {
     func testModifier() async {
+        let isCalled = LockIsolated(false)
         let base = BaseView(
             store: Store(
                 reducer: _DependenciesOverrideModifier(base: BaseReducer()) {
-                    $0.test = .init(asyncThrows: {})
+                    $0.test = .init(asyncThrows: {
+                        isCalled.setValue(true)
+                    })
                 }
             )
         )
         let container = base.store.setContainerIfNeeded(for: base, viewState: .init())
         await base.send(.test).wait()
         XCTAssertEqual(container.count, 1)
+        XCTAssertTrue(isCalled.value)
     }
 }
 

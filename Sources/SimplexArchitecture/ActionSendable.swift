@@ -22,6 +22,35 @@ public extension ActionSendable {
         }
     }
 
+    @discardableResult
+    func send(_ action: consuming Reducer.Action, animation: Animation?) -> SendTask {
+        threadCheck()
+        return if store.container == nil {
+            withAnimation(animation) {
+                store.sendAction(action, target: self)
+            }
+        } else {
+            withAnimation(animation) {
+                store.sendIfNeeded(action)
+            }
+        }
+    }
+
+    /// Send an action to the store with transaction
+    @discardableResult
+    func send(_ action: consuming Reducer.Action, transaction: Transaction) -> SendTask {
+        threadCheck()
+        return if store.container == nil {
+            withTransaction(transaction) {
+                store.sendAction(action, target: self)
+            }
+        } else {
+            withTransaction(transaction) {
+                store.sendIfNeeded(action)
+            }
+        }
+    }
+
     @inline(__always)
     func threadCheck() {
         #if DEBUG

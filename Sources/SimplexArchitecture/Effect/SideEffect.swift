@@ -37,10 +37,23 @@ public extension SideEffect {
     @inlinable
     static func run(
         priority: TaskPriority? = nil,
-        _ operation: @Sendable  @escaping (_ send: Send<Reducer>) async throws -> Void,
+        _ operation: @Sendable @escaping (_ send: Send<Reducer>) async throws -> Void,
         catch: (@Sendable (_ error: any Error, _ send: Send<Reducer>) async -> Void)? = nil
     ) -> Self {
-        .init(effectKind: .run(priority: priority, operation: operation, catch: `catch`))
+        // If the .dependency modifier is used, the dependency must be conveyed to the escape context.
+        withEscapedDependencies { continuation in
+            .init(
+                effectKind: .run(
+                    priority: priority,
+                    operation: { send in
+                        try await continuation.yield {
+                            try await operation(send)
+                        }
+                    },
+                    catch: `catch`
+                )
+            )
+        }
     }
 
     @inlinable

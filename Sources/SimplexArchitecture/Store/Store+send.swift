@@ -69,9 +69,12 @@ extension Store {
             }
         }
 
+
         let sideEffect: SideEffect<Reducer>
         // If Unit Testing is in progress and an action is sent from SideEffect
-        if _XCTIsTesting, let effectContext = EffectContext.id {
+        #if DEBUG
+        @Dependency(\.isTesting) var isTesting
+        if let effectContext = EffectContext.id, isTesting {
             let before = container.copy()
             sideEffect = reduce(container, action)
             sentFromEffectActions.append(
@@ -86,6 +89,9 @@ extension Store {
         } else {
             sideEffect = reduce(container, action)
         }
+        #else
+        sideEffect = reduce(container, action)
+        #endif
 
         if case .none = sideEffect.kind {
             return .never
