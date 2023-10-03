@@ -19,7 +19,7 @@
 ///     }
 /// }
 ///
-/// @ScopeState
+/// @ViewState
 /// struct MyView: View {
 ///     @State var counter = 0
 ///     let store = Store(reducer: MyReducer())
@@ -64,7 +64,7 @@
 ///     }
 /// }
 ///
-/// @ScopeState
+/// @ViewState
 /// struct MyView: View {
 ///     @State var counter = 0
 ///
@@ -89,7 +89,7 @@
 /// ```
 ///
 public protocol ReducerProtocol<Target> {
-    /// Target for the Reducer to change state, which must conform to ActionSendable and is automatically conformed to by the StoreBuilder or ScopeState macros
+    /// Target for the Reducer to change state, which must conform to ActionSendable and is automatically conformed to by the StoreBuilder or ViewState macros
     associatedtype Target: ActionSendable<Self>
     /// State used by Reducer. Since the View is not update when the value of ReducerState is changed, it is used for the purpose of improving performance, etc.
     /// The default is Never.

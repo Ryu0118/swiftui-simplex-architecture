@@ -12,7 +12,7 @@ final class DependenciesOverrideModifierTests: XCTestCase {
                 }
             )
         )
-        let container = base.store.setContainerIfNeeded(for: base, states: .init())
+        let container = base.store.setContainerIfNeeded(for: base, viewState: .init())
         await base.send(.test).wait()
         XCTAssertEqual(container.count, 1)
     }
@@ -40,7 +40,7 @@ struct BaseReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 struct BaseView: View {
     @State var count: Int = 0
     let store: Store<BaseReducer>

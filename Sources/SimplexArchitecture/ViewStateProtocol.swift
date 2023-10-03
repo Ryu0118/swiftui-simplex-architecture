@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol StatesProtocol<Target> {
+public protocol ViewStateProtocol<Target> {
     associatedtype Target: ActionSendable
     static var keyPathMap: [PartialKeyPath<Self>: PartialKeyPath<Target>] { get }
 }

@@ -5,7 +5,7 @@
     @main
     struct SimplexArchitectureMacrosPlugin: CompilerPlugin {
         let providingMacros: [Macro.Type] = [
-            ScopeState.self,
+            ViewStateMacro.self,
         ]
     }
 #endif

@@ -53,12 +53,12 @@ public final class Store<Reducer: ReducerProtocol> {
 
     public func getContainer(
         for target: Reducer.Target,
-        states: Reducer.Target.States? = nil
+        viewState: Reducer.Target.ViewState? = nil
     ) -> StateContainer<Reducer.Target> {
         if let container {
             container
         } else {
-            StateContainer(target, states: states, reducerState: initialReducerState?())
+            StateContainer(target, viewState: viewState, reducerState: initialReducerState?())
         }
     }
 
@@ -66,12 +66,12 @@ public final class Store<Reducer: ReducerProtocol> {
     @discardableResult
     public func setContainerIfNeeded(
         for target: Reducer.Target,
-        states: Reducer.Target.States? = nil
+        viewState: Reducer.Target.ViewState? = nil
     ) -> StateContainer<Reducer.Target> {
         if let container {
             return container
         } else {
-            let container = getContainer(for: target, states: states)
+            let container = getContainer(for: target, viewState: viewState)
             self.container = container
             return container
         }

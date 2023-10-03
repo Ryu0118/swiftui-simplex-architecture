@@ -28,7 +28,7 @@ private struct TestReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 private struct TestView: View {
     let store: Store<TestReducer>
 

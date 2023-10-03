@@ -1,10 +1,10 @@
-/// Macro to create States structure by extracting properties to which property wrappers such as @State, @Binding @Published, etc. are applied.
+/// Macro to create ViewState structure by extracting properties to which property wrappers such as @State, @Binding @Published, etc. are applied.
 ///
-/// It is conformed to the `ActionSendable` protocol by the `ScopeState` macro.
+/// It is conformed to the `ActionSendable` protocol by the `ViewState` macro.
 ///
 /// Here is a example code.
 /// ```
-/// @ScopeState
+/// @ViewState
 /// struct MyView: View {
 ///     let store: Store<MyReducer>
 ///
@@ -40,7 +40,7 @@
 /// ```
 /// Here is a sample code if you want to use ReducerState.
 /// ```
-/// @ScopeState
+/// @ViewState
 /// struct MyView: View {
 ///     let store: Store<MyReducer>
 ///
@@ -74,7 +74,7 @@
 ///     }
 /// }
 /// ```
-@attached(member, names: named(States))
+@attached(member, names: named(ViewState))
 @attached(extension, conformances: ActionSendable)
-public macro ScopeState() =
-    #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ScopeState")
+public macro ViewState() =
+    #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ViewStateMacro")

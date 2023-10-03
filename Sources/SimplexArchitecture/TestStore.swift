@@ -28,20 +28,20 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 
     let target: Reducer.Target
 
-    /// The states of the target.
-    let states: Reducer.Target.States
+    /// The viewState of the target.
+    let viewState: Reducer.Target.ViewState
 
     /// Initializes a new test store.
     ///
     /// - Parameters:
     ///   - target: The target Reducer.
-    ///   - states: The states of the target Reducer.
+    ///   - viewState: The viewState of the target Reducer.
     init(
         target: Reducer.Target,
-        states: Reducer.Target.States
+        viewState: Reducer.Target.ViewState
     ) {
         self.target = target
-        self.states = states
+        self.viewState = viewState
     }
 
     deinit {
@@ -156,7 +156,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 
                 expected?(actualContainer)
 
-                assertStatesNoDifference(expected: expectedContainer, actual: actualContainer)
+                assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
                 assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
 
                 testedActions.append(stateTransition)
@@ -220,7 +220,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
     ) async -> SendTask {
-        let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
+        let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
@@ -229,7 +229,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 
         expected?(actualContainer)
 
-        assertStatesNoDifference(expected: expectedContainer, actual: actualContainer)
+        assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
         assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
 
         await Task.megaYield()
@@ -251,8 +251,8 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     public func send(
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
-    ) async -> SendTask where Reducer.Target.States: Equatable {
-        let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
+    ) async -> SendTask where Reducer.Target.ViewState: Equatable {
+        let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
@@ -261,7 +261,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 
         expected?(actualContainer)
 
-        assertStatesNoDifference(expected: expectedContainer, actual: actualContainer)
+        assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
         assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
 
         await Task.megaYield()
@@ -285,7 +285,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
     ) async -> SendTask where Reducer.ReducerState: Equatable {
-        let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
+        let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
@@ -294,7 +294,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 
         expected?(actualContainer)
 
-        assertStatesNoDifference(expected: expectedContainer, actual: actualContainer)
+        assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
         assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
 
         await Task.megaYield()
@@ -316,8 +316,8 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     public func send(
         _ action: Reducer.Action,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
-    ) async -> SendTask where Reducer.ReducerState: Equatable, Reducer.Target.States: Equatable {
-        let expectedContainer = target.store.setContainerIfNeeded(for: target, states: states)
+    ) async -> SendTask where Reducer.ReducerState: Equatable, Reducer.Target.ViewState: Equatable {
+        let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
@@ -326,7 +326,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 
         expected?(actualContainer)
 
-        assertStatesNoDifference(expected: actualContainer, actual: actualContainer)
+        assertViewStateNoDifference(expected: actualContainer, actual: actualContainer)
         assertReducerNoDifference(expected: actualContainer, actual: actualContainer)
 
         await Task.megaYield()
@@ -336,26 +336,26 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 }
 
 extension TestStore {
-    private func assertStatesNoDifference(
+    private func assertViewStateNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
         actual actualContainer: StateContainer<Reducer.Target>
-    ) where Reducer.Target.States: Equatable {
-        if let expectedStates = expectedContainer.states,
-           let actualStates = actualContainer.states
+    ) where Reducer.Target.ViewState: Equatable {
+        if let expectedViewState = expectedContainer.viewState,
+           let actualViewState = actualContainer.viewState
         {
-            XCTAssertNoDifference(expectedStates, actualStates)
+            XCTAssertNoDifference(expectedViewState, actualViewState)
         }
     }
 
-    private func assertStatesNoDifference(
+    private func assertViewStateNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
         actual actualContainer: StateContainer<Reducer.Target>
     ) {
-        if let expectedStates = expectedContainer.states,
-           let actualStates = actualContainer.states
+        if let expectedViewState = expectedContainer.viewState,
+           let actualViewState = actualContainer.viewState
         {
-            let expectedDump = String(customDumping: expectedStates)
-            let actualDump = String(customDumping: actualStates)
+            let expectedDump = String(customDumping: expectedViewState)
+            let actualDump = String(customDumping: actualViewState)
             XCTAssertNoDifference(expectedDump, actualDump)
         }
     }
@@ -388,9 +388,9 @@ extension TestStore {
 public extension ActionSendable where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
     /// Creates and returns a new test store.
     ///
-    /// - Parameter states: The initial states for testing.
+    /// - Parameter viewState: The initial viewState for testing.
     /// - Returns: A new TestStore instance.
-    func testStore(states: States) -> TestStore<Reducer> {
-        TestStore(target: self, states: states)
+    func testStore(viewState: ViewState) -> TestStore<Reducer> {
+        TestStore(target: self, viewState: viewState)
     }
 }

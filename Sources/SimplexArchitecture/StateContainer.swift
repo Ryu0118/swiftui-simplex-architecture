@@ -11,25 +11,25 @@ public final class StateContainer<Target: ActionSendable> {
 
     var _reducerState: Target.Reducer.ReducerState?
     var entity: Target
-    @TestOnly var states: Target.States?
+    @TestOnly var viewState: Target.ViewState?
 
     init(
         _ entity: consuming Target,
-        states: Target.States? = nil,
+        viewState: Target.ViewState? = nil,
         reducerState: consuming Target.Reducer.ReducerState? = nil
     ) {
         self.entity = entity
-        self.states = states
+        self.viewState = viewState
         self._reducerState = reducerState
     }
 
-    public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.States, U>) -> U {
+    public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.ViewState, U>) -> U {
         _read {
             guard !_XCTIsTesting else {
-                yield states![keyPath: keyPath]
+                yield viewState![keyPath: keyPath]
                 return
             }
-            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
+            if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield entity[keyPath: viewKeyPath]
             } else {
                 fatalError()
@@ -37,10 +37,10 @@ public final class StateContainer<Target: ActionSendable> {
         }
         _modify {
             guard !_XCTIsTesting else {
-                yield &states![keyPath: keyPath]
+                yield &viewState![keyPath: keyPath]
                 return
             }
-            if let viewKeyPath = Target.States.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
+            if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield &entity[keyPath: viewKeyPath]
             } else {
                 fatalError()
@@ -49,6 +49,6 @@ public final class StateContainer<Target: ActionSendable> {
     }
 
     func copy() -> Self {
-        Self(entity, states: states, reducerState: _reducerState)
+        Self(entity, viewState: viewState, reducerState: _reducerState)
     }
 }

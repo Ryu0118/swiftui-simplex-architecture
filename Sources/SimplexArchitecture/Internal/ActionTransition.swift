@@ -1,10 +1,10 @@
 import Foundation
 
-/// ``ActionTransition`` represents a transition between states in a reducer. It captures the previous and next states, the associated side effect,effect context, and the action triggering the transition.
+/// ``ActionTransition`` represents a transition between viewState in a reducer. It captures the previous and next viewState, the associated side effect,effect context, and the action triggering the transition.
 struct ActionTransition<Reducer: ReducerProtocol> {
     /// Represents a state. It includes the target state and the reducer state.
     struct State {
-        let state: Reducer.Target.States?
+        let state: Reducer.Target.ViewState?
         let reducerState: Reducer.ReducerState?
     }
 
@@ -61,7 +61,7 @@ struct ActionTransition<Reducer: ReducerProtocol> {
     ) -> StateContainer<Reducer.Target> {
         .init(
             target,
-            states: state.state,
+            viewState: state.state,
             reducerState: state.reducerState
         )
     }

@@ -76,8 +76,8 @@ extension Store {
             sideEffect = reduce(container, action)
             sentFromEffectActions.append(
                 ActionTransition(
-                    previous: .init(state: before.states, reducerState: before._reducerState),
-                    next: .init(state: container.states, reducerState: before._reducerState),
+                    previous: .init(state: before.viewState, reducerState: before._reducerState),
+                    next: .init(state: container.viewState, reducerState: before._reducerState),
                     effect: sideEffect,
                     effectContext: effectContext,
                     for: action

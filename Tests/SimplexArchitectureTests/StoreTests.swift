@@ -99,7 +99,7 @@ final class StoreTests: XCTestCase {
 
     func testPullbackAction() throws {
         let parent = ParentView()
-        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        parent.store.setContainerIfNeeded(for: parent, viewState: .init())
         store.setContainerIfNeeded(for: TestView())
         XCTAssertNil(store.pullbackAction)
         store.pullback(to: /ParentReducer.Action.child, parent: parent)
@@ -110,7 +110,7 @@ final class StoreTests: XCTestCase {
 
     func testPullbackReducerAction() throws {
         let parent = ParentView()
-        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        parent.store.setContainerIfNeeded(for: parent, viewState: .init())
         store.setContainerIfNeeded(for: TestView())
         XCTAssertNil(store.pullbackReducerAction)
         store.pullback(to: /ParentReducer.Action.childReducerAction, parent: parent)
@@ -121,7 +121,7 @@ final class StoreTests: XCTestCase {
 
     func testPullbackActionForId() throws {
         let parent = ParentView()
-        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        parent.store.setContainerIfNeeded(for: parent, viewState: .init())
         store.setContainerIfNeeded(for: TestView())
         XCTAssertNil(store.pullbackAction)
         let uuid = UUID()
@@ -133,7 +133,7 @@ final class StoreTests: XCTestCase {
 
     func testPullbackReducerActionForId() throws {
         let parent = ParentView()
-        parent.store.setContainerIfNeeded(for: parent, states: .init())
+        parent.store.setContainerIfNeeded(for: parent, viewState: .init())
         store.setContainerIfNeeded(for: TestView())
         XCTAssertNil(store.pullbackReducerAction)
         let uuid = UUID()
@@ -144,7 +144,7 @@ final class StoreTests: XCTestCase {
     }
 }
 
-@ScopeState
+@ViewState
 private struct ParentView: View {
     @State var count = 0
     @State var id: UUID?
@@ -215,7 +215,7 @@ private struct TestReducer: ReducerProtocol {
     }
 }
 
-@ScopeState
+@ViewState
 private struct TestView: View {
     let store: Store<TestReducer>
 
