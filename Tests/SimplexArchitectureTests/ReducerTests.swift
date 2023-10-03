@@ -1,7 +1,6 @@
 @testable import SimplexArchitecture
 import SwiftUI
 import XCTest
-import Dependencies
 
 @MainActor
 final class ReducerTests: XCTestCase {
@@ -137,7 +136,7 @@ struct TestDependency: DependencyKey {
     }
 
     public static let liveValue: TestDependency = .init(asyncThrows: { throw CancellationError() })
-    public static let testValue: TestDependency = .init(asyncThrows: {})
+    public static let testValue: TestDependency = .init(asyncThrows: unimplemented("testValue is umimplemented"))
 }
 
 extension DependencyValues {

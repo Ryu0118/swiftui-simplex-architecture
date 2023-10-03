@@ -6,7 +6,7 @@ public enum TaskResult<Success: Sendable>: Sendable {
     case failure(any Error)
 
     @inlinable
-    public init(catching body: () async throws -> Success) async {
+    public init(catching body: @Sendable () async throws -> Success) async {
         do {
             self = try .success(await body())
         } catch {
