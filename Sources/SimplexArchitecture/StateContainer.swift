@@ -12,6 +12,7 @@ public final class StateContainer<Target: ActionSendable> {
     var _reducerState: Target.Reducer.ReducerState?
     var entity: Target
     @TestOnly var viewState: Target.ViewState?
+    @Dependency(\.isTesting) private var isTesting
 
     init(
         _ entity: consuming Target,
@@ -25,10 +26,12 @@ public final class StateContainer<Target: ActionSendable> {
 
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.ViewState, U>) -> U {
         _read {
-            guard !_XCTIsTesting else {
+            #if DEBUG
+            guard !isTesting else {
                 yield viewState![keyPath: keyPath]
                 return
             }
+            #endif
             if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield entity[keyPath: viewKeyPath]
             } else {
@@ -36,10 +39,12 @@ public final class StateContainer<Target: ActionSendable> {
             }
         }
         _modify {
-            guard !_XCTIsTesting else {
+            #if DEBUG
+            guard !isTesting else {
                 yield &viewState![keyPath: keyPath]
                 return
             }
+            #endif
             if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield &entity[keyPath: viewKeyPath]
             } else {

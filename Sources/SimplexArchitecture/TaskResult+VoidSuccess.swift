@@ -4,7 +4,7 @@ public struct VoidSuccess: Codable, Sendable, Hashable {
 }
 
 /// An extension on `TaskResult` where the success type is `VoidSuccess`.
-public extension TaskResult where Success == VoidSuccess, Failure == any Error {
+public extension TaskResult where Success == VoidSuccess {
     /// Creates a new task result by evaluating an async throwing closure.
     ///
     /// This initializer is used to handle asynchronous operations that produce a result of type `Void`.
@@ -15,6 +15,7 @@ public extension TaskResult where Success == VoidSuccess, Failure == any Error {
     /// This initializer is often used within an async effect that's returned from a reducer.
     ///
     /// - Parameter body: An async, throwing closure.
+    @_disfavoredOverload
     init(catching body: @Sendable () async throws -> Void) async {
         do {
             try await body()

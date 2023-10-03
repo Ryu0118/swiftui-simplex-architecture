@@ -142,6 +142,44 @@ final class StoreTests: XCTestCase {
         XCTAssertNotNil(store.pullbackReducerAction)
         XCTAssertEqual(parent.store.container?.id, uuid)
     }
+
+    func testIsNotUsingViewState() throws {
+        let container = withDependencies {
+            $0.isTesting = false
+        } operation: {
+            store.setContainerIfNeeded(for: TestView(), viewState: .init())
+        }
+        XCTAssertNil(container.viewState)
+    }
+
+    func testUsingViewState() throws {
+        let container = withDependencies {
+            $0.isTesting = true
+        } operation: {
+            store.setContainerIfNeeded(for: TestView(), viewState: .init())
+        }
+        XCTAssertNotNil(container.viewState)
+    }
+
+    func testSendIsNotTesting() async throws {
+        let container = store.setContainerIfNeeded(for: TestView())
+        await withDependencies {
+            $0.isTesting = false
+        } operation: {
+            await store.sendAction(.action(.c3), container: container).wait()
+        }
+        XCTAssertEqual(store.sentFromEffectActions.count, 0)
+    }
+
+    func testSendIsTesting() async throws {
+        let container = store.setContainerIfNeeded(for: TestView())
+        await withDependencies {
+            $0.isTesting = true
+        } operation: {
+            await store.sendAction(.action(.c3), container: container).wait()
+        }
+        XCTAssertEqual(store.sentFromEffectActions.count, 1)
+    }
 }
 
 @ViewState

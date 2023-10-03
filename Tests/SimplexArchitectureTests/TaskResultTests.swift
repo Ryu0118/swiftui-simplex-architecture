@@ -2,8 +2,8 @@
 import XCTest
 
 final class TaskResultTests: XCTestCase {
-    func testCatching() {
-        let result1 = TaskResult {
+    func testCatching() async {
+        let result1 = await TaskResult {
             throw CancellationError()
         }
         switch result1 {
@@ -13,7 +13,7 @@ final class TaskResultTests: XCTestCase {
             XCTAssertTrue(error is CancellationError)
         }
 
-        let result2 = TaskResult {}
+        let result2 = await TaskResult {}
         switch result2 {
         case .success:
             break
