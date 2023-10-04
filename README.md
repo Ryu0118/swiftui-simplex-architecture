@@ -232,7 +232,7 @@ struct ChildView: View, ActionSendable {
 }
 
 struct ChildReducer: ReducerProtocol {
-    enum Action: Pullbackable {
+    enum Action {
         case onButtonTapped
     }
 

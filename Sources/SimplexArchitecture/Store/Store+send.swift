@@ -49,26 +49,13 @@ extension Store {
         defer {
             switch action.kind {
             case .viewAction(let action):
-                guard let pullbackAction else {
-                    break
-                }
-                if let _ = Reducer.Action.self as? Pullbackable.Type {
-                    pullbackAction(action)
-                } else {
-                    runtimeWarning("\(Reducer.Action.self) must be conformed to Pullbackable in order to pullback to parent reducer")
-                }
+                guard let pullbackAction else { break }
+                pullbackAction(action)
             case .reducerAction(let action):
-                guard let pullbackReducerAction else {
-                    break
-                }
-                if let _ = Reducer.ReducerAction.self as? Pullbackable.Type {
-                    pullbackReducerAction(action)
-                } else {
-                    runtimeWarning("\(Reducer.ReducerAction.self) must be conformed to Pullbackable in order to pullback to parent reducer")
-                }
+                guard let pullbackReducerAction else { break }
+                pullbackReducerAction(action)
             }
         }
-
 
         let sideEffect: SideEffect<Reducer>
         // If Unit Testing is in progress and an action is sent from SideEffect
