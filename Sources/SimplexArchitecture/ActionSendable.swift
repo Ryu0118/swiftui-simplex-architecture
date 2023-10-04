@@ -69,7 +69,7 @@ public extension ActionSendable {
     }
 }
 
-public extension ActionSendable where Reducer.Action: Pullbackable {
+public extension ActionSendable {
     /// Pullbacks the `Action` to the specified case path in the parent's reducer.
     ///
     /// - Parameters:

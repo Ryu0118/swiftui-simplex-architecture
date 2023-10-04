@@ -222,12 +222,12 @@ private struct ParentReducer: ReducerProtocol {
 }
 
 private struct TestReducer: ReducerProtocol {
-    enum ReducerAction: Equatable, Pullbackable {
+    enum ReducerAction: Equatable {
         case c3
         case c4
     }
 
-    enum Action: Equatable, Pullbackable {
+    enum Action: Equatable {
         case c1
         case c2
     }
