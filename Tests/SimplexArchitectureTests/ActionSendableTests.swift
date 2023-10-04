@@ -10,6 +10,22 @@ final class ActionSendableTests: XCTestCase {
         let sendTask2 = testView.send(.c2)
         XCTAssertNotNil(sendTask2.task)
     }
+
+    func testAnimationSend() {
+        let testView = TestView()
+        let sendTask1 = testView.send(.c1, animation: .default)
+        XCTAssertNil(sendTask1.task)
+        let sendTask2 = testView.send(.c2, animation: .default)
+        XCTAssertNotNil(sendTask2.task)
+    }
+
+    func testTransactionSend() {
+        let testView = TestView()
+        let sendTask1 = testView.send(.c1, transaction: .init(animation: .default))
+        XCTAssertNil(sendTask1.task)
+        let sendTask2 = testView.send(.c2, transaction: .init(animation: .default))
+        XCTAssertNotNil(sendTask2.task)
+    }
 }
 
 private struct TestReducer: ReducerProtocol {

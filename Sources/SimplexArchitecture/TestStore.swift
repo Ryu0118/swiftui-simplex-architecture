@@ -6,8 +6,6 @@ import Foundation
 /// TestStore is a utility class for testing stores that use Reducer protocols.
 /// It provides methods for sending actions and verifying state changes.
 public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
-    // MARK: - Properties
-
     /// The running state container.
     var runningContainer: StateContainer<Reducer.Target>?
 
@@ -26,6 +24,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         }
     }
 
+    let updateValuesForOperation: (inout DependencyValues) -> Void
     let target: Reducer.Target
 
     /// The viewState of the target.
@@ -38,10 +37,12 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     ///   - viewState: The viewState of the target Reducer.
     init(
         target: Reducer.Target,
-        viewState: Reducer.Target.ViewState
+        viewState: Reducer.Target.ViewState,
+        withDependencies updateValuesForOperation: @escaping (inout DependencyValues) -> Void
     ) {
         self.target = target
         self.viewState = viewState
+        self.updateValuesForOperation = updateValuesForOperation
     }
 
     deinit {
@@ -224,7 +225,9 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        let sendTask = target.store.sendIfNeeded(action)
+        let sendTask = withDependencies(updateValuesForOperation) {
+            target.store.sendIfNeeded(action)
+        }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
@@ -256,7 +259,9 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        let sendTask = target.store.sendIfNeeded(action)
+        let sendTask = withDependencies(updateValuesForOperation) {
+            target.store.sendIfNeeded(action)
+        }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
@@ -289,7 +294,9 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        let sendTask = target.store.sendIfNeeded(action)
+        let sendTask = withDependencies(updateValuesForOperation) {
+            target.store.sendIfNeeded(action)
+        }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
@@ -321,7 +328,9 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
-        let sendTask = target.store.sendIfNeeded(action)
+        let sendTask = withDependencies(updateValuesForOperation) {
+            target.store.sendIfNeeded(action)
+        }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
@@ -390,7 +399,10 @@ public extension ActionSendable where Reducer.Action: Equatable, Reducer.Reducer
     ///
     /// - Parameter viewState: The initial viewState for testing.
     /// - Returns: A new TestStore instance.
-    func testStore(viewState: ViewState) -> TestStore<Reducer> {
-        TestStore(target: self, viewState: viewState)
+    func testStore(
+        viewState: ViewState,
+        withDependencies updateValuesForOperation: @escaping (inout DependencyValues) -> Void = { _ in }
+    ) -> TestStore<Reducer> {
+        TestStore(target: self, viewState: viewState, withDependencies: updateValuesForOperation)
     }
 }
