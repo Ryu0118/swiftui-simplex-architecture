@@ -1,2 +1,4 @@
 .swiftpm/
-.build/
+.build
+Examples/Github-App/Github-App.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+Examples/Github-App/Github-App.xcodeproj/project.xcworkspace/xcuserdata/
