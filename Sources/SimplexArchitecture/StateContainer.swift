@@ -9,10 +9,11 @@ public final class StateContainer<Target: ActionSendable> {
         _modify { yield &_reducerState! }
     }
 
+    @Dependency(\.isTesting) private var isTesting
+    @TestOnly var viewState: Target.ViewState?
+
     var _reducerState: Target.Reducer.ReducerState?
     var entity: Target
-    @TestOnly var viewState: Target.ViewState?
-    @Dependency(\.isTesting) private var isTesting
 
     init(
         _ entity: consuming Target,

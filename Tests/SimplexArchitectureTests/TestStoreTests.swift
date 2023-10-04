@@ -14,7 +14,6 @@ final class TestStoreTests: XCTestCase {
         XCTAssertNotNil(store.runningContainer)
     }
 
-    @MainActor
     func testReceive() async throws {
         let store = TestView().testStore(viewState: .init())
         XCTAssertTrue(store.runningTasks.isEmpty)
@@ -28,6 +27,17 @@ final class TestStoreTests: XCTestCase {
         }
         XCTAssertEqual(store.testedActions.count, 1)
     }
+
+    func testWithDependencies() async throws {
+        let store = TestView().testStore(viewState: .init()) {
+            $0.test = .init(asyncThrows: {})
+        }
+
+        await store.send(.run)
+        await store.receive(.increment) {
+            $0.count = 1
+        }
+    }
 }
 
 private struct TestReducer: ReducerProtocol {
@@ -35,7 +45,10 @@ private struct TestReducer: ReducerProtocol {
         case increment
         case decrement
         case receiveTest
+        case run
     }
+
+    @Dependency(\.test) var test
 
     func reduce(into state: StateContainer<TestView>, action: Action) -> SideEffect<Self> {
         switch action {
@@ -49,6 +62,12 @@ private struct TestReducer: ReducerProtocol {
 
         case .receiveTest:
             return .send(.increment)
+
+        case .run:
+            return .run { send in
+                try await test.asyncThrows()
+                await send(.increment)
+            }
         }
     }
 }
