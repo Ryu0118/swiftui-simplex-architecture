@@ -57,7 +57,7 @@ public final class StateContainer<Target: ActionSendable> {
             } else {
                 fatalError(
                     """
-                    Failed to get \(keyPath) from WritableKeyPath<Target.
+                    Failed to get WritableKeyPath<Target, Value> from \(keyPath).
                     This operation does not normally fail
                     """
                 )
