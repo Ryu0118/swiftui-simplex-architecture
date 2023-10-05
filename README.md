@@ -144,7 +144,7 @@ struct MyReducer: ReducerProtocol {
         case loginResponse(TaskResult<Response>)
     }
 
-    let authClient: AuthClient
+    @Dependency(\.authClient) var authClient
 
     func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
         switch action {
@@ -176,7 +176,7 @@ struct MyView: View {
     let store: Store<MyReducer>
 
     init(authClient: AuthClient) {
-        store = Store(reducer: MyReducer(authClient: authClient))
+        store = Store(reducer: MyReducer())
     }
 
     var body: some View {

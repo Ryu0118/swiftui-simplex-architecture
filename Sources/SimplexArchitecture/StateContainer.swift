@@ -25,6 +25,7 @@ public final class StateContainer<Target: ActionSendable> {
         self._reducerState = reducerState
     }
 
+    /// Returns Target value from Target.ViewState key path
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.ViewState, U>) -> U {
         _read {
             #if DEBUG
@@ -36,7 +37,12 @@ public final class StateContainer<Target: ActionSendable> {
             if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield entity[keyPath: viewKeyPath]
             } else {
-                fatalError()
+                fatalError(
+                    """
+                    Failed to get WritableKeyPath<Target, Value> from \(keyPath).
+                    This operation does not normally fail
+                    """
+                )
             }
         }
         _modify {
@@ -49,7 +55,12 @@ public final class StateContainer<Target: ActionSendable> {
             if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
                 yield &entity[keyPath: viewKeyPath]
             } else {
-                fatalError()
+                fatalError(
+                    """
+                    Failed to get WritableKeyPath<Target, Value> from \(keyPath).
+                    This operation does not normally fail
+                    """
+                )
             }
         }
     }

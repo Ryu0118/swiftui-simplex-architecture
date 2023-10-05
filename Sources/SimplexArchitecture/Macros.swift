@@ -1,4 +1,4 @@
-/// Macro to create ViewState structure by extracting properties to which property wrappers such as @State, @Binding @Published, etc. are applied.
+/// Macro to create ViewState struct by extracting properties to which property wrappers such as @State, @Binding @Published, etc. are applied.
 ///
 /// It is conformed to the `ActionSendable` protocol by the `ViewState` macro.
 ///
@@ -27,8 +27,8 @@
 ///         case someAction
 ///     }
 ///
-///     let authRepository: AuthRepository
-///     let selfRepository: SelfRepository
+///     @Dependency(\.authRepository) var authRepository
+///     @Dependency(\.selfRepository) var selfRepository
 ///
 ///     func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
 ///         switch action {
@@ -44,7 +44,7 @@
 /// struct MyView: View {
 ///     let store: Store<MyReducer>
 ///
-///     init(authRepository: AuthRepository, selfRepository: SelfRepository) {
+///     init() {
 ///         store = Store(reducer: MyReducer(), initialReducerState: .init(counter: 0))
 ///     }
 ///

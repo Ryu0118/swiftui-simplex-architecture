@@ -8,11 +8,11 @@ public final class Store<Reducer: ReducerProtocol> {
     var container: StateContainer<Reducer.Target>? {
         didSet {
             guard let container else { return }
-            send = makeSend(for: container)
+            _send = makeSend(for: container)
         }
     }
 
-    var send: Send<Reducer>?
+    var _send: Send<Reducer>?
     // Buffer to store Actions recurrently invoked through SideEffect in a single Action sent from View
     @TestOnly var sentFromEffectActions: [ActionTransition<Reducer>] = []
 

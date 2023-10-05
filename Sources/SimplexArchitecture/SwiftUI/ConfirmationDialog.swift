@@ -48,12 +48,12 @@ public extension View {
                         switch button.action.type {
                         case let .send(action):
                             if let action = action {
-                                _ = target.store.sendAction(action, target: target)
+                                _ = target.store.send(action, target: target)
                             }
                         case let .animatedSend(action, animation):
                             if let action = action {
                                 _ = withAnimation(animation) {
-                                    target.store.sendAction(action, target: target)
+                                    target.store.send(action, target: target)
                                 }
                             }
                         }
