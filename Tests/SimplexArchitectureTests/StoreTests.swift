@@ -13,12 +13,12 @@ final class StoreTests: XCTestCase {
 
     func testSetContainerIfNeeded() throws {
         XCTAssertNil(store.container)
-        XCTAssertNil(store.send)
+        XCTAssertNil(store._send)
 
         store.setContainerIfNeeded(for: TestView())
 
         XCTAssertNotNil(store.container)
-        XCTAssertNotNil(store.send)
+        XCTAssertNotNil(store._send)
     }
 
     func testExecuteTasks() throws {
@@ -36,7 +36,7 @@ final class StoreTests: XCTestCase {
 
     func testRunEffect() throws {
         store.setContainerIfNeeded(for: TestView())
-        guard let send = store.send else {
+        guard let send = store._send else {
             XCTFail("send is nil")
             return
         }
@@ -79,11 +79,11 @@ final class StoreTests: XCTestCase {
 
     func testSendAction() async throws {
         let container = store.setContainerIfNeeded(for: TestView())
-        let sendTask1 = store.sendAction(.action(.c1), container: container)
+        let sendTask1 = store.send(.action(.c1), container: container)
         XCTAssertEqual(store.sentFromEffectActions.count, 0)
         XCTAssertNil(sendTask1.task)
 
-        let sendTask2 = store.sendAction(.action(.c2), container: container)
+        let sendTask2 = store.send(.action(.c2), container: container)
         XCTAssertNotNil(sendTask2.task)
     }
 
@@ -166,7 +166,7 @@ final class StoreTests: XCTestCase {
         await withDependencies {
             $0.isTesting = false
         } operation: {
-            await store.sendAction(.action(.c3), container: container).wait()
+            await store.send(.action(.c3), container: container).wait()
         }
         XCTAssertEqual(store.sentFromEffectActions.count, 0)
     }
@@ -176,7 +176,7 @@ final class StoreTests: XCTestCase {
         await withDependencies {
             $0.isTesting = true
         } operation: {
-            await store.sendAction(.action(.c3), container: container).wait()
+            await store.send(.action(.c3), container: container).wait()
         }
         XCTAssertEqual(store.sentFromEffectActions.count, 1)
     }

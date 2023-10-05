@@ -1,5 +1,6 @@
 import Foundation
 
+/// Structure for integrating Action and ReducerAction
 public struct CombineAction<Reducer: ReducerProtocol>: @unchecked Sendable {
     @usableFromInline
     enum ActionKind {

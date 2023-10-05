@@ -4,45 +4,45 @@ import XCTestDynamicOverlay
 extension Store {
     @usableFromInline
     @discardableResult
-    func sendAction(
+    func send(
         _ action: consuming Reducer.Action,
         target: consuming Reducer.Target
     ) -> SendTask {
-        sendAction(
+        send(
             action,
             container: setContainerIfNeeded(for: target)
         )
     }
 
     @usableFromInline
-    func sendAction(
+    func send(
         _ action: consuming Reducer.ReducerAction,
         target: consuming Reducer.Target
     ) -> SendTask {
-        sendAction(
+        send(
             action,
             container: setContainerIfNeeded(for: target)
         )
     }
 
     @usableFromInline
-    func sendAction(
+    func send(
         _ action: Reducer.Action,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        sendAction(.action(action), container: container)
+        send(.action(action), container: container)
     }
 
     @usableFromInline
-    func sendAction(
+    func send(
         _ action: Reducer.ReducerAction,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        sendAction(.action(action), container: container)
+        send(.action(action), container: container)
     }
 
     @inline(__always)
-    func sendAction(
+    func send(
         _ action: CombineAction<Reducer>,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
@@ -83,7 +83,7 @@ extension Store {
         if case .none = sideEffect.kind {
             return .never
         } else {
-            let send = self.send ?? makeSend(for: container)
+            let send = self._send ?? makeSend(for: container)
 
             return executeTasks(
                 runEffect(sideEffect, send: send)
@@ -95,7 +95,7 @@ extension Store {
     @discardableResult
     func sendIfNeeded(_ action: Reducer.Action) -> SendTask {
         if let container {
-            sendAction(action, container: container)
+            send(action, container: container)
         } else {
             .never
         }
@@ -105,7 +105,7 @@ extension Store {
     @discardableResult
     func sendIfNeeded(_ action: Reducer.ReducerAction) -> SendTask {
         if let container {
-            sendAction(action, container: container)
+            send(action, container: container)
         } else {
             .never
         }
@@ -114,10 +114,10 @@ extension Store {
     func makeSend(for container: StateContainer<Reducer.Target>) -> Send<Reducer> {
         Send(
             sendAction: { [weak self] action in
-                self?.sendAction(action, container: container) ?? .never
+                self?.send(action, container: container) ?? .never
             },
             sendReducerAction: { [weak self] reducerAction in
-                self?.sendAction(reducerAction, container: container) ?? .never
+                self?.send(reducerAction, container: container) ?? .never
             }
         )
     }

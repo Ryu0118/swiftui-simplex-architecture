@@ -397,8 +397,10 @@ extension TestStore {
 public extension ActionSendable where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
     /// Creates and returns a new test store.
     ///
-    /// - Parameter viewState: The initial viewState for testing.
-    /// - Returns: A new TestStore instance.
+    /// - Parameters:
+    ///   - viewState: The initial viewState for testing.
+    ///   - withDependencies: A closure for updating the current dependency values
+    /// - Returns: TestStore instance.
     func testStore(
         viewState: ViewState,
         withDependencies updateValuesForOperation: @escaping (inout DependencyValues) -> Void = { _ in }

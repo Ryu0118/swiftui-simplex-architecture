@@ -16,7 +16,7 @@ public extension ActionSendable {
     func send(_ action: consuming Reducer.Action) -> SendTask {
         threadCheck()
         return if store.container == nil {
-            store.sendAction(action, target: self)
+            store.send(action, target: self)
         } else {
             store.sendIfNeeded(action)
         }
@@ -27,7 +27,7 @@ public extension ActionSendable {
         threadCheck()
         return if store.container == nil {
             withAnimation(animation) {
-                store.sendAction(action, target: self)
+                store.send(action, target: self)
             }
         } else {
             withAnimation(animation) {
@@ -42,7 +42,7 @@ public extension ActionSendable {
         threadCheck()
         return if store.container == nil {
             withTransaction(transaction) {
-                store.sendAction(action, target: self)
+                store.send(action, target: self)
             }
         } else {
             withTransaction(transaction) {
