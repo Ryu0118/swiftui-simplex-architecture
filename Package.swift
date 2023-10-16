@@ -26,6 +26,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", exact: "1.0.0"),
         .package(url: "https://github.com/pointfreeco/swiftui-navigation.git", exact: "1.0.2"),
         .package(url: "https://github.com/pointfreeco/swift-macro-testing.git", exact: "0.1.0"),
+        .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -38,6 +39,13 @@ let package = Package(
                 .product(name: "CustomDump", package: "swift-custom-dump"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
                 .product(name: "SwiftUINavigation", package: "swiftui-navigation"),
+            ]
+        ),
+        .executableTarget(
+            name: "swiftui-simplex-architecture-benchmark",
+            dependencies: [
+                "SimplexArchitecture",
+                .product(name: "Benchmark", package: "swift-benchmark"),
             ]
         ),
         .macro(
