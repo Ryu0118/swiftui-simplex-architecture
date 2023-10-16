@@ -15,24 +15,14 @@ public extension ActionSendable {
     @discardableResult
     func send(_ action: consuming Reducer.Action) -> SendTask {
         threadCheck()
-        return if store.container == nil {
-            store.send(action, target: self)
-        } else {
-            store.sendIfNeeded(action)
-        }
+        return store.send(action, target: self)
     }
 
     @discardableResult
     func send(_ action: consuming Reducer.Action, animation: Animation?) -> SendTask {
         threadCheck()
-        return if store.container == nil {
-            withAnimation(animation) {
-                store.send(action, target: self)
-            }
-        } else {
-            withAnimation(animation) {
-                store.sendIfNeeded(action)
-            }
+        return withAnimation(animation) {
+            store.send(action, target: self)
         }
     }
 
@@ -40,14 +30,8 @@ public extension ActionSendable {
     @discardableResult
     func send(_ action: consuming Reducer.Action, transaction: Transaction) -> SendTask {
         threadCheck()
-        return if store.container == nil {
-            withTransaction(transaction) {
-                store.send(action, target: self)
-            }
-        } else {
-            withTransaction(transaction) {
-                store.sendIfNeeded(action)
-            }
+        return withTransaction(transaction) {
+            store.send(action, target: self)
         }
     }
 
