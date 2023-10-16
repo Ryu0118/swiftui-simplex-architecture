@@ -11,3 +11,7 @@ format:
 .PHONY: test
 test:
 	swift test -v
+
+.PHONY: benchmark
+benchmark:
+	swift run --configuration release swiftui-simplex-architecture-benchmark
