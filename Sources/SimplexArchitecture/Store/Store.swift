@@ -69,6 +69,7 @@ public final class Store<Reducer: ReducerProtocol> {
         viewState: Reducer.Target.ViewState? = nil
     ) -> StateContainer<Reducer.Target> {
         if let container {
+            container.entity = target
             return container
         } else {
             let container = getContainer(for: target, viewState: viewState)

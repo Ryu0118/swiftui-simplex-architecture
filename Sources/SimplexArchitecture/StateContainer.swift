@@ -13,6 +13,8 @@ public final class StateContainer<Target: ActionSendable> {
     @TestOnly var viewState: Target.ViewState?
 
     var _reducerState: Target.Reducer.ReducerState?
+
+    @usableFromInline
     var entity: Target
 
     init(
