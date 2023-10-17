@@ -443,6 +443,72 @@ final class ReducerMacroTests: XCTestCase {
         }
     }
 
+    func testNestedAction() {
+        assertMacro {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction {
+                    case alert(Alert)
+                    public enum Alert {
+                        case hoge(E1)
+                        public enum E1 {
+                            case fuga
+                        }
+                    }
+                }
+                public enum ReducerAction {
+                    case request
+                    case response(TaskResult<VoidSuccess>)
+                }
+            }
+            """
+        } matches: {
+            """
+            public struct MyReducer {
+                public enum ViewAction {
+                    case alert(Alert)
+                    public enum Alert {
+                        case hoge(E1)
+                        public enum E1 {
+                            case fuga
+                        }
+                    }
+                }
+                public enum ReducerAction {
+                    case request
+                    case response(TaskResult<VoidSuccess>)
+                }
+
+                public enum Action: ActionProtocol {
+                        case alert(Alert)
+                public typealias Alert = ViewAction.Alert
+
+                        case request
+                        case response(TaskResult<VoidSuccess>)
+                        public init(viewAction: ViewAction) {
+                            switch viewAction {
+                            case .alert(let arg1):
+                                self = .alert(arg1)
+                            }
+                        }
+                        public init(reducerAction: ReducerAction) {
+                            switch reducerAction {
+                            case .request:
+                                self = .request
+                            case .response(let arg1):
+                                self = .response(arg1)
+                            }
+                        }
+                }
+            }
+
+            extension MyReducer: ReducerProtocol {
+            }
+            """
+        }
+    }
+
     func testMacroExpansion() {
         assertMacro {
             """
@@ -479,6 +545,7 @@ final class ReducerMacroTests: XCTestCase {
                         case decrement
                         case increment(arg1: String, arg2: Int)
                         case decrement(arg1: String = "", arg2: Int? = nil)
+
                         case request
                         case response(TaskResult<VoidSuccess>)
                         public init(viewAction: ViewAction) {
