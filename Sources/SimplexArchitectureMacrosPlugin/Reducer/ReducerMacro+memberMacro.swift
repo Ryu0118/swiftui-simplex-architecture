@@ -131,10 +131,11 @@ public struct ReducerMacro: MemberMacro {
                     viewAction = enumDecl
                 case "ReducerAction":
                     reducerAction = enumDecl
-                default: break
+                default: return
                 }
             }
 
+        // ViewAction must not be nil
         guard let viewAction else {
             throw DiagnosticsError(
                 diagnostics: [
@@ -145,23 +146,34 @@ public struct ReducerMacro: MemberMacro {
             )
         }
 
+        // The Inheritance clause must be equal between ViewAction and ReducerAction
         if let reducerAction,
-           let viewActionInheritance = reducerAction.inheritanceClause,
            Set(viewAction.inheritedTypes) != Set(reducerAction.inheritedTypes)
         {
-            throw DiagnosticsError(
-                diagnostics: [
-                    ReducerMacroDiagnostic
-                        .noMatchInheritanceClause
-                        .diagnose(at: viewActionInheritance)
-                ]
-            )
+            if let inheritanceClause = reducerAction.inheritanceClause {
+                throw DiagnosticsError(
+                    diagnostics: [
+                        ReducerMacroDiagnostic
+                            .noMatchInheritanceClause
+                            .diagnose(at: inheritanceClause)
+                    ]
+                )
+            } else {
+                throw DiagnosticsError(
+                    diagnostics: [
+                        ReducerMacroDiagnostic
+                            .noMatchInheritanceClause
+                            .diagnose(at: reducerAction)
+                    ]
+                )
+            }
         }
 
         let viewActionCaseElements = viewAction.caseElements
         let reducerActionCaseElements = reducerAction?.caseElements ?? []
         let caseElements = viewActionCaseElements + reducerActionCaseElements
 
+        // Enum cases can be overloaded, but cases with the same arguments cannot be overloaded.
         try caseElements.duplicates().forEach { duplicateElement in
             throw DiagnosticsError(
                 diagnostics: [

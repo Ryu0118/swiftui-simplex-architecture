@@ -19,7 +19,7 @@ private struct TestReducer {
     enum ViewAction: Equatable {
         case increment
     }
-    
+
     func reduce(
         into state: StateContainer<TestState>,
         action: Action

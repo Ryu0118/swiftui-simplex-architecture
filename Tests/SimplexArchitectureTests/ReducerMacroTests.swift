@@ -41,6 +41,33 @@ final class ReducerMacroTests: XCTestCase {
             }
             """
         }
+
+        assertMacro {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction: Equatable {
+                    case decrement
+                }
+                public enum ReducerAction {
+                    case increment
+                }
+            }
+            """
+        } matches: {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction: Equatable {
+                    case decrement
+                }
+                public enum ReducerAction {
+                ╰─ 🛑 The inheritance clause must match between ViewAction and ReducerAction
+                    case increment
+                }
+            }
+            """
+        }
     }
 
     func testDuplicatedCases() {

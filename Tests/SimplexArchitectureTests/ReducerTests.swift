@@ -153,7 +153,7 @@ private struct TestReducer {
         var string = "string"
     }
 
-    enum ReducerAction {
+    enum ReducerAction: Equatable {
         case incrementFromReducerAction
         case decrementFromReducerAction
     }
