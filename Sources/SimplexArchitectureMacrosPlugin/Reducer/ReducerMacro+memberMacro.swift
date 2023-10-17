@@ -21,104 +21,28 @@ public struct ReducerMacro: MemberMacro {
             )
         }
 
+        try diagnosticTypealias(of: structDecl)
+        let (viewAction, reducerAction) = try getActions(of: structDecl)
         let reducerAccessModifier = declaration.modifiers.accessModifier
 
-        try declaration.memberBlock.members
-            .compactMap { $0.decl.as(TypeAliasDeclSyntax.self) }
-            .forEach { typealiasDecl in
-                switch typealiasDecl.name.text {
-                case "ViewAction", "ReducerAction":
-                    throw DiagnosticsError(
-                        diagnostics: [
-                            ReducerMacroDiagnostic
-                                .typealiasCannotBeUsed(name: typealiasDecl.name.text)
-                                .diagnose(at: typealiasDecl.name)
-                        ]
-                    )
-                default: break
-                }
-            }
+        let modifiedViewAction = changeAnyNestedDeclToTypealias(
+            action: viewAction,
+            reducerAccessModifier: reducerAccessModifier
+        )
 
-        var viewAction: EnumDeclSyntax?
-        var reducerAction: EnumDeclSyntax?
-
-        declaration.memberBlock.members
-            .compactMap { $0.decl.as(EnumDeclSyntax.self) }
-            .forEach { enumDecl in
-                switch enumDecl.name.text {
-                case "ViewAction":
-                    viewAction = enumDecl
-                case "ReducerAction":
-                    reducerAction = enumDecl
-                default: break
-                }
-            }
-
-        guard let viewAction else {
-            throw DiagnosticsError(
-                diagnostics: [
-                    ReducerMacroDiagnostic
-                        .cannotFindViewAction(reducer: structDecl.name.text)
-                        .diagnose(at: structDecl)
-                ]
-            )
-        }
-
-        let modifiedViewAction = changeDeclToTypealias(action: viewAction, reducerAccessModifier: reducerAccessModifier)
         let modifiedReducerAction: [MemberBlockItemListSyntax.Element] = if let reducerAction {
-            changeDeclToTypealias(action: reducerAction, reducerAccessModifier: reducerAccessModifier)
+            changeAnyNestedDeclToTypealias(
+                action: reducerAction,
+                reducerAccessModifier: reducerAccessModifier
+            )
         } else {
             []
         }
 
-        if let reducerAction,
-           let viewActionInheritance = reducerAction.inheritanceClause, 
-           Set(viewAction.inheritedTypes) != Set(reducerAction.inheritedTypes)
-        {
-            throw DiagnosticsError(
-                diagnostics: [
-                    ReducerMacroDiagnostic
-                        .noMatchInheritanceClause
-                        .diagnose(at: viewActionInheritance)
-                ]
-            )
-        }
+        let viewActionToAction = mapToAction(from: viewAction, switchTarget: "viewAction")
+        let reducerActionToAction = mapToAction(from: reducerAction, switchTarget: "reducerAction")
 
-        let allCases = viewAction.cases + (reducerAction?.cases ?? [])
-        let viewActionCaseElements = viewAction.caseElements
-        let reducerActionCaseElements = reducerAction?.caseElements ?? []
-        let caseElements = viewActionCaseElements + reducerActionCaseElements
-
-        try caseElements.duplicates().forEach { duplicateElement in
-            throw DiagnosticsError(
-                diagnostics: [
-                    ReducerMacroDiagnostic
-                        .duplicatedCase
-                        .diagnose(at: duplicateElement)
-                ]
-            )
-        }
-
-        let viewActionToAction = if !viewActionCaseElements.isEmpty {
-            """
-            switch viewAction {
-            \(mapToAction(from: viewAction))
-            }
-            """
-        } else {
-            "fatalError()"
-        }
-        let reducerActionToAction = if let reducerAction, !reducerActionCaseElements.isEmpty {
-            """
-            switch reducerAction {
-            \(mapToAction(from: reducerAction))
-            }
-            """
-        } else {
-            "fatalError()"
-        }
-
-        let reducerNeverAction: DeclSyntax? = if reducerAction == nil {
+        let emptyReducerAction: DeclSyntax? = if reducerAction == nil {
             DeclSyntax(
                EnumDeclSyntax(
                    modifiers: [DeclModifierSyntax(name: .identifier(reducerAccessModifier))],
@@ -130,7 +54,7 @@ public struct ReducerMacro: MemberMacro {
         }
 
         return [
-            reducerNeverAction,
+            emptyReducerAction,
             DeclSyntax(
                 EnumDeclSyntax(
                     modifiers: [DeclModifierSyntax(name: .identifier(reducerAccessModifier))],
@@ -175,42 +99,91 @@ public struct ReducerMacro: MemberMacro {
         ].compactMap { $0 }
     }
 
-    private static func changeDeclToTypealias(action: EnumDeclSyntax, reducerAccessModifier: String) -> [MemberBlockItemListSyntax.Element] {
+    private static func diagnosticTypealias(of structDecl: StructDeclSyntax) throws {
+        try structDecl.memberBlock.members
+            .compactMap { $0.decl.as(TypeAliasDeclSyntax.self) }
+            .forEach { typealiasDecl in
+                switch typealiasDecl.name.text {
+                case "ViewAction", "ReducerAction":
+                    throw DiagnosticsError(
+                        diagnostics: [
+                            ReducerMacroDiagnostic
+                                .typealiasCannotBeUsed(name: typealiasDecl.name.text)
+                                .diagnose(at: typealiasDecl.name)
+                        ]
+                    )
+                default: break
+                }
+            }
+    }
+
+    private static func getActions(
+        of structDecl: StructDeclSyntax
+    ) throws -> (viewAction: EnumDeclSyntax, reducerAction: EnumDeclSyntax?) {
+        var viewAction: EnumDeclSyntax?
+        var reducerAction: EnumDeclSyntax?
+
+        structDecl.memberBlock.members
+            .compactMap { $0.decl.as(EnumDeclSyntax.self) }
+            .forEach { enumDecl in
+                switch enumDecl.name.text {
+                case "ViewAction":
+                    viewAction = enumDecl
+                case "ReducerAction":
+                    reducerAction = enumDecl
+                default: break
+                }
+            }
+
+        guard let viewAction else {
+            throw DiagnosticsError(
+                diagnostics: [
+                    ReducerMacroDiagnostic
+                        .cannotFindViewAction(reducer: structDecl.name.text)
+                        .diagnose(at: structDecl)
+                ]
+            )
+        }
+
+        if let reducerAction,
+           let viewActionInheritance = reducerAction.inheritanceClause,
+           Set(viewAction.inheritedTypes) != Set(reducerAction.inheritedTypes)
+        {
+            throw DiagnosticsError(
+                diagnostics: [
+                    ReducerMacroDiagnostic
+                        .noMatchInheritanceClause
+                        .diagnose(at: viewActionInheritance)
+                ]
+            )
+        }
+
+        let viewActionCaseElements = viewAction.caseElements
+        let reducerActionCaseElements = reducerAction?.caseElements ?? []
+        let caseElements = viewActionCaseElements + reducerActionCaseElements
+
+        try caseElements.duplicates().forEach { duplicateElement in
+            throw DiagnosticsError(
+                diagnostics: [
+                    ReducerMacroDiagnostic
+                        .duplicatedCase
+                        .diagnose(at: duplicateElement)
+                ]
+            )
+        }
+
+        return (viewAction, reducerAction)
+    }
+
+    private static func changeAnyNestedDeclToTypealias(action: EnumDeclSyntax, reducerAccessModifier: String) -> [MemberBlockItemListSyntax.Element] {
         action.memberBlock.members.compactMap {
-            if let enumDecl = $0.decl.as(EnumDeclSyntax.self),
-               !enumDecl.name.text.contains(action.name.text)
+            if let name = $0.hasName?.name.text,
+               !name.contains(action.name.text)
             {
                 $0.with(
                     \.decl,
                      """
-                     \n\(raw: reducerAccessModifier) typealias \(raw: enumDecl.name.text) = \(raw: action.name.text).\(raw: enumDecl.name.text)
-                     """
-                )
-            } else if let structDecl = $0.decl.as(StructDeclSyntax.self),
-                      !structDecl.name.text.contains(action.name.text)
-            {
-                $0.with(
-                    \.decl,
-                     """
-                     \n\(raw: reducerAccessModifier) typealias \(raw: structDecl.name.text) = \(raw: action.name.text).\(raw: structDecl.name.text)
-                     """
-                )
-            } else if let classDecl = $0.decl.as(ClassDeclSyntax.self),
-                      !classDecl.name.text.contains(action.name.text)
-            {
-                $0.with(
-                    \.decl,
-                     """
-                     \n\(raw: reducerAccessModifier) typealias \(raw: classDecl.name.text) = \(raw: action.name.text).\(raw: classDecl.name.text)
-                     """
-                )
-            } else if let actorDecl = $0.decl.as(ActorDeclSyntax.self),
-                      !actorDecl.name.text.contains(action.name.text)
-            {
-                $0.with(
-                    \.decl,
-                     """
-                     \n\(raw: reducerAccessModifier) typealias \(raw: actorDecl.name.text) = \(raw: action.name.text).\(raw: actorDecl.name.text)
+                     \n\(raw: reducerAccessModifier) typealias \(raw: name) = \(raw: action.name.text).\(raw: name)
                      """
                 )
             } else {
@@ -219,10 +192,12 @@ public struct ReducerMacro: MemberMacro {
         }
     }
 
-    private static func mapToAction(from enumDecl: EnumDeclSyntax) -> String {
-        enumDecl.caseElements.map { caseElement in
+    private static func mapToAction(from enumDecl: EnumDeclSyntax?, switchTarget: String) -> String {
+        let cases = enumDecl?.caseElements.map { caseElement in
             if let parameters = caseElement.parameterClause?.parameters.compactMap({ $0.as(EnumCaseParameterSyntax.self) }) {
-                let argumentNames = parameters.argumentNames
+                let argumentNames = parameters.enumerated().map { index, parameter in
+                    parameter.firstName?.text ?? "arg\(index + 1)"
+                }
                 let variables = argumentNames
                     .map { "let \($0)" }
                     .joined(separator: ", ")
@@ -244,13 +219,15 @@ public struct ReducerMacro: MemberMacro {
                 """
             }
         }.joined(separator: "\n")
-    }
-}
 
-private extension [EnumCaseParameterSyntax] {
-    var argumentNames: [String] {
-        enumerated().map { index, parameter in
-            parameter.firstName?.text ?? "arg\(index + 1)"
+        return if let cases, let enumDecl, !enumDecl.caseElements.isEmpty {
+            """
+            switch \(switchTarget) {
+            \(cases)
+            }
+            """
+        } else {
+            "fatalError()"
         }
     }
 }
@@ -258,7 +235,9 @@ private extension [EnumCaseParameterSyntax] {
 private extension EnumDeclSyntax {
     var cases: [EnumCaseDeclSyntax] {
         memberBlock.members
-            .compactMap { $0.as(MemberBlockItemSyntax.self)?.decl.as(EnumCaseDeclSyntax.self) }
+            .compactMap {
+                $0.as(MemberBlockItemSyntax.self)?.decl.as(EnumCaseDeclSyntax.self)
+            }
     }
 
     var caseElements: [EnumCaseElementSyntax] {
@@ -296,12 +275,3 @@ private extension EnumDeclSyntax {
             } ?? []
     }
 }
-
-protocol HasName: DeclSyntaxProtocol {
-    var name: TokenSyntax { get }
-}
-
-extension StructDeclSyntax: HasName {}
-extension ClassDeclSyntax: HasName {}
-extension ActorDeclSyntax: HasName {}
-extension EnumDeclSyntax: HasName {}
