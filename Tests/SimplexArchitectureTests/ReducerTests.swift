@@ -146,18 +146,19 @@ extension DependencyValues {
     }
 }
 
-private struct TestReducer: ReducerProtocol {
+@Reducer
+private struct TestReducer {
     struct ReducerState: Equatable {
         var count = 0
         var string = "string"
     }
 
-    enum ReducerAction {
+    enum ReducerAction: Equatable {
         case incrementFromReducerAction
         case decrementFromReducerAction
     }
 
-    enum Action: Equatable {
+    enum ViewAction: Equatable {
         case increment
         case decrement
         case serial
@@ -175,7 +176,7 @@ private struct TestReducer: ReducerProtocol {
     @Dependency(\.continuousClock) private var clock
     @Dependency(\.test) var test
 
-    func reduce(into state: StateContainer<TestView>, action: ReducerAction) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<TestView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .incrementFromReducerAction:
             state.count += 1
@@ -183,11 +184,7 @@ private struct TestReducer: ReducerProtocol {
         case .decrementFromReducerAction:
             state.count -= 1
             return .none
-        }
-    }
 
-    func reduce(into state: StateContainer<TestView>, action: Action) -> SideEffect<Self> {
-        switch action {
         case .increment:
             state.count += 1
             return .none
@@ -256,8 +253,9 @@ private struct TestView: View {
     }
 }
 
-private struct MyReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+private struct MyReducer {
+    enum ViewAction {
         case hoge
     }
 

@@ -4,7 +4,7 @@ import SwiftUI
 public extension View {
     func alert<Target: ActionSendable>(
         target: Target,
-        unwrapping value: Binding<AlertState<Target.Reducer.Action>?>
+        unwrapping value: Binding<AlertState<Target.Reducer.ViewAction>?>
     ) -> some View {
         self.alert(
             (value.wrappedValue?.title).map(Text.init) ?? Text(""),

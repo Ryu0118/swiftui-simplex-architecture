@@ -17,7 +17,7 @@ struct ActionTransition<Reducer: ReducerProtocol> {
     /// The unique effect context that represents root effect.
     let effectContext: UUID
     /// The Action that cause a change of state
-    let action: CombineAction<Reducer>
+    let action: Reducer.Action
 
     /// - Parameters:
     ///   - previous: The previous state.
@@ -30,7 +30,7 @@ struct ActionTransition<Reducer: ReducerProtocol> {
         next: Self.State,
         effect: SideEffect<Reducer>,
         effectContext: UUID,
-        for action: CombineAction<Reducer>
+        for action: Reducer.Action
     ) {
         self.previous = previous
         self.next = next

@@ -1,8 +1,9 @@
 import SwiftUI
 import SimplexArchitecture
 
-struct RootReducer: ReducerProtocol {
-    enum Action: Equatable {
+@Reducer
+struct RootReducer {
+    enum ViewAction: Equatable {
         case onSearchButtonTapped
         case onTextChanged(String)
     }
@@ -20,9 +21,19 @@ struct RootReducer: ReducerProtocol {
 
     func reduce(
         into state: StateContainer<RootView>,
-        action: ReducerAction
-    ) -> SideEffect<RootReducer> {
+        action: Action
+    ) -> SideEffect<Self> {
         switch action {
+        case .onSearchButtonTapped:
+            state.isLoading = true
+            return fetchRepositories(query: state.text)
+
+        case .onTextChanged(let text):
+            if text.isEmpty {
+                state.repositories = []
+            }
+            return .none
+
         case let .fetchRepositoriesResponse(.success(repositories)):
             state.isLoading = false
             state.repositories = repositories
@@ -47,23 +58,6 @@ struct RootReducer: ReducerProtocol {
         case .alert(.retry):
             state.isLoading = true
             return fetchRepositories(query: state.text)
-        }
-    }
-
-    func reduce(
-        into state: StateContainer<RootView>,
-        action: Action
-    ) -> SideEffect<Self> {
-        switch action {
-        case .onSearchButtonTapped:
-            state.isLoading = true
-            return fetchRepositories(query: state.text)
-
-        case .onTextChanged(let text):
-            if text.isEmpty {
-                state.repositories = []
-            }
-            return .none
         }
     }
 

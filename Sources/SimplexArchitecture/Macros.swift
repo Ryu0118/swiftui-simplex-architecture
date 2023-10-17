@@ -21,9 +21,9 @@
 ///         Text("MyView")
 ///     }
 /// }
-///
-/// struct MyReducer: ReducerProtocol {
-///     enum Action {
+/// @Reducer
+/// struct MyReducer {
+///     enum ViewAction {
 ///         case someAction
 ///     }
 ///
@@ -55,9 +55,9 @@
 ///             }
 ///     }
 /// }
-///
-/// struct MyReducer: ReducerProtocol {
-///     enum Action {
+/// @Reducer
+/// struct MyReducer {
+///     enum ViewAction {
 ///         case someAction
 ///     }
 ///
@@ -78,3 +78,9 @@
 @attached(extension, conformances: ActionSendable)
 public macro ViewState() =
     #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ViewStateMacro")
+
+/// Macro for creating Action from ViewAction and ReducerAction, and conforming Reducer to ReducerProtocol
+@attached(member, names: named(Action), named(ReducerAction))
+@attached(extension, conformances: ReducerProtocol)
+public macro Reducer() =
+    #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ReducerMacro")

@@ -79,11 +79,11 @@ final class StoreTests: XCTestCase {
 
     func testSendAction() async throws {
         let container = store.setContainerIfNeeded(for: TestView())
-        let sendTask1 = store.send(.action(.c1), container: container)
+        let sendTask1 = store.send(.c1, container: container)
         XCTAssertEqual(store.sentFromEffectActions.count, 0)
         XCTAssertNil(sendTask1.task)
 
-        let sendTask2 = store.send(.action(.c2), container: container)
+        let sendTask2 = store.send(.c2, container: container)
         XCTAssertNotNil(sendTask2.task)
     }
 
@@ -108,17 +108,6 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(parent.store.container?.count, 1)
     }
 
-    func testPullbackReducerAction() throws {
-        let parent = ParentView()
-        parent.store.setContainerIfNeeded(for: parent, viewState: .init())
-        store.setContainerIfNeeded(for: TestView())
-        XCTAssertNil(store.pullbackReducerAction)
-        store.pullback(to: /ParentReducer.Action.childReducerAction, parent: parent)
-        store.sendIfNeeded(.c4)
-        XCTAssertNotNil(store.pullbackReducerAction)
-        XCTAssertEqual(parent.store.container?.count, 1)
-    }
-
     func testPullbackActionForId() throws {
         let parent = ParentView()
         parent.store.setContainerIfNeeded(for: parent, viewState: .init())
@@ -128,18 +117,6 @@ final class StoreTests: XCTestCase {
         store.pullback(to: /ParentReducer.Action.childId, parent: parent, id: uuid)
         store.sendIfNeeded(.c1)
         XCTAssertNotNil(store.pullbackAction)
-        XCTAssertEqual(parent.store.container?.id, uuid)
-    }
-
-    func testPullbackReducerActionForId() throws {
-        let parent = ParentView()
-        parent.store.setContainerIfNeeded(for: parent, viewState: .init())
-        store.setContainerIfNeeded(for: TestView())
-        XCTAssertNil(store.pullbackReducerAction)
-        let uuid = UUID()
-        store.pullback(to: /ParentReducer.Action.childIdReducerAction, parent: parent, id: uuid)
-        store.sendIfNeeded(.c4)
-        XCTAssertNotNil(store.pullbackReducerAction)
         XCTAssertEqual(parent.store.container?.id, uuid)
     }
 
@@ -166,7 +143,7 @@ final class StoreTests: XCTestCase {
         await withDependencies {
             $0.isTesting = false
         } operation: {
-            await store.send(.action(.c3), container: container).wait()
+            await store.send(.c3, container: container).wait()
         }
         XCTAssertEqual(store.sentFromEffectActions.count, 0)
     }
@@ -176,7 +153,7 @@ final class StoreTests: XCTestCase {
         await withDependencies {
             $0.isTesting = true
         } operation: {
-            await store.send(.action(.c3), container: container).wait()
+            await store.send(.c3, container: container).wait()
         }
         XCTAssertEqual(store.sentFromEffectActions.count, 1)
     }
@@ -192,12 +169,13 @@ private struct ParentView: View {
     }
 }
 
-private struct ParentReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+private struct ParentReducer {
+    enum ViewAction {
         case child(TestReducer.Action)
-        case childReducerAction(TestReducer.ReducerAction)
+        case childReducerAction(TestReducer.Action)
         case childId(id: UUID, action: TestReducer.Action)
-        case childIdReducerAction(id: UUID, action: TestReducer.ReducerAction)
+        case childIdReducerAction(id: UUID, action: TestReducer.Action)
     }
 
     func reduce(into state: StateContainer<ParentView>, action: Action) -> SideEffect<ParentReducer> {
@@ -221,25 +199,16 @@ private struct ParentReducer: ReducerProtocol {
     }
 }
 
-private struct TestReducer: ReducerProtocol {
+@Reducer
+private struct TestReducer {
     enum ReducerAction: Equatable {
         case c3
         case c4
     }
 
-    enum Action: Equatable {
+    enum ViewAction: Equatable {
         case c1
         case c2
-    }
-
-    func reduce(into _: StateContainer<TestView>, action: ReducerAction) -> SideEffect<TestReducer> {
-        switch action {
-        case .c3:
-            return .send(.c4)
-
-        case .c4:
-            return .none
-        }
     }
 
     func reduce(into _: StateContainer<TestView>, action: Action) -> SideEffect<Self> {
@@ -249,6 +218,12 @@ private struct TestReducer: ReducerProtocol {
 
         case .c2:
             return .send(.c3)
+
+        case .c3:
+            return .send(.c4)
+
+        case .c4:
+            return .none
         }
     }
 }

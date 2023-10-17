@@ -5,7 +5,7 @@ import Foundation
 
 /// TestStore is a utility class for testing stores that use Reducer protocols.
 /// It provides methods for sending actions and verifying state changes.
-public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
+public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equatable {
     /// The running state container.
     var runningContainer: StateContainer<Reducer.Target>?
 
@@ -48,14 +48,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     deinit {
         if untestedActions.count > 0 {
             let unhandledActionStrings = untestedActions
-                .map {
-                    switch $0.action.kind {
-                    case let .viewAction(action):
-                        String(customDumping: action)
-                    case let .reducerAction(action):
-                        String(customDumping: action)
-                    }
-                }
+                .map { String(customDumping: $0.action) }
                 .joined(separator: ", ")
 
             XCTFail(
@@ -77,7 +70,6 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             await group.waitForAll()
         }
     }
-
     /// Asserts an action was received from an effect and asserts how the state changes.
     ///
     /// - Parameters:
@@ -90,45 +82,6 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
         expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
         file: StaticString = #file,
         line: UInt = #line
-    ) async {
-        await receive(
-            .action(action),
-            timeout: timeout,
-            expected: expected,
-            file: file,
-            line: line
-        )
-    }
-
-    /// Asserts an action was received from an effect and asserts how the state changes.
-    ///
-    /// - Parameters:
-    ///   - action: An action expected from an effect.
-    ///   - timeout: The amount of time to wait for the expected action.
-    ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
-    @_disfavoredOverload
-    public func receive(
-        _ action: Reducer.ReducerAction,
-        timeout: TimeInterval = 5,
-        expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async {
-        await receive(
-            .action(action),
-            timeout: timeout,
-            expected: expected,
-            file: file,
-            line: line
-        )
-    }
-
-    private func receive(
-        _ action: CombineAction<Reducer>,
-        timeout: TimeInterval = 5,
-        expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
-        file: StaticString,
-        line: UInt
     ) async {
         guard let _ = runningContainer else {
             XCTFail(
@@ -196,7 +149,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
                 break
             }
 
-            if let stateTransition = untestedActions.first(where: { $0.action == .action(action) }) {
+            if let stateTransition = untestedActions.first(where: { $0.action == action }) {
                 testedActions.append(stateTransition)
                 break
             }
@@ -218,7 +171,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @discardableResult
     @MainActor
     public func send(
-        _ action: Reducer.Action,
+        _ action: Reducer.ViewAction,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
     ) async -> SendTask {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
@@ -252,7 +205,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @discardableResult
     @MainActor
     public func send(
-        _ action: Reducer.Action,
+        _ action: Reducer.ViewAction,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
     ) async -> SendTask where Reducer.Target.ViewState: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
@@ -287,7 +240,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @discardableResult
     @MainActor
     public func send(
-        _ action: Reducer.Action,
+        _ action: Reducer.ViewAction,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
     ) async -> SendTask where Reducer.ReducerState: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
@@ -321,7 +274,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @discardableResult
     @MainActor
     public func send(
-        _ action: Reducer.Action,
+        _ action: Reducer.ViewAction,
         assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
     ) async -> SendTask where Reducer.ReducerState: Equatable, Reducer.Target.ViewState: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
@@ -394,7 +347,7 @@ extension TestStore {
     }
 }
 
-public extension ActionSendable where Reducer.Action: Equatable, Reducer.ReducerAction: Equatable {
+public extension ActionSendable where Reducer.Action: Equatable {
     /// Creates and returns a new test store.
     ///
     /// - Parameters:

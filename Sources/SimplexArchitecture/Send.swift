@@ -2,44 +2,16 @@
 public struct Send<Reducer: ReducerProtocol>: Sendable {
     @usableFromInline
     let sendAction: @Sendable (Reducer.Action) -> SendTask
-    @usableFromInline
-    let sendReducerAction: @Sendable (Reducer.ReducerAction) -> SendTask
 
-    init(
-        sendAction: @Sendable @escaping (Reducer.Action) -> SendTask,
-        sendReducerAction: @Sendable @escaping (Reducer.ReducerAction) -> SendTask
-    ) {
+    init(sendAction: @Sendable @escaping (Reducer.Action) -> SendTask) {
         self.sendAction = sendAction
-        self.sendReducerAction = sendReducerAction
-    }
-
-    @MainActor
-    @discardableResult
-    @inlinable
-    func callAsFunction(_ action: Reducer.Action) -> SendTask {
-        sendAction(action)
-    }
-
-    @MainActor
-    @_disfavoredOverload
-    @discardableResult
-    @inlinable
-    func callAsFunction(_ action: Reducer.ReducerAction) -> SendTask {
-        sendReducerAction(action)
     }
 
     /// Sends an action back into the system from an effect.
     @MainActor
+    @discardableResult
     @inlinable
-    public func callAsFunction(_ action: Reducer.Action) async {
-        await sendAction(action).wait()
-    }
-
-    /// Sends an reducer action back into the system from an effect.
-    @_disfavoredOverload
-    @MainActor
-    @inlinable
-    public func callAsFunction(_ action: Reducer.ReducerAction) async {
-        await sendReducerAction(action).wait()
+    public func callAsFunction(_ action: Reducer.Action) -> SendTask {
+        sendAction(action)
     }
 }

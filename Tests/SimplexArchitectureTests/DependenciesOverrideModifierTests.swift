@@ -22,8 +22,9 @@ final class DependenciesOverrideModifierTests: XCTestCase {
     }
 }
 
-struct BaseReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+struct BaseReducer {
+    enum ViewAction {
         case test
         case callback
     }

@@ -18,13 +18,6 @@ public struct _DependenciesOverrideModifier<Base: ReducerProtocol>: ReducerModif
     }
 
     @inlinable
-    public func reduce(into state: StateContainer<Base.Target>, action: Base.ReducerAction) -> SideEffect<Base> {
-        withDependencies(override) {
-            base.reduce(into: state, action: action)
-        }
-    }
-
-    @inlinable
     public func dependency<Value>(
         _ keyPath: WritableKeyPath<DependencyValues, Value>,
         value: Value

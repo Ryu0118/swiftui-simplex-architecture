@@ -36,8 +36,9 @@ let package = Package(
 ## Usage
 ### Basic Usage
 ```Swift
-struct MyReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+struct MyReducer {
+    enum ViewAction {
         case increment
         case decrement
     }
@@ -80,8 +81,9 @@ ReducerState is also effective to improve performance because the View is not up
 
 This is the example code
 ```Swift
-struct MyReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+struct MyReducer {
+    enum ViewAction {
         case increment
         case decrement
     }
@@ -135,8 +137,9 @@ If there are Actions that you do not want to expose to View, ReducerAction is ef
 This is the sample code:
 
 ```Swift
-struct MyReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+struct MyReducer {
+    enum ViewAction {
         case login
     }
 
@@ -156,11 +159,6 @@ struct MyReducer: ReducerProtocol {
                     )
                 )
             }
-        }
-    }
-
-    func reduce(into state: StateContainer<MyView>, action: ReducerAction) -> SideEffect<Self> {
-        switch action {
         case let .loginResponse(result):
             ...
             return .none
@@ -206,12 +204,13 @@ struct ParentView: View {
     }
 }
 
-struct ParentReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+struct ParentReducer {
+    enum ViewAction {
         case child(ChildReducer.Action)
     }
 
-    func reduce(into state: StateContainer<ParentView>, action: Action) -> SideEffect<ParentReducer> {
+    func reduce(into state: StateContainer<ParentView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .child(.onButtonTapped):
             // do something
@@ -231,12 +230,13 @@ struct ChildView: View, ActionSendable {
     }
 }
 
-struct ChildReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+struct ChildReducer {
+    enum ViewAction {
         case onButtonTapped
     }
 
-    func reduce(into state: StateContainer<ChildView>, action: Action) -> SideEffect<ChildReducer> {
+    func reduce(into state: StateContainer<ChildView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .onButtonTapped:
             return .none
