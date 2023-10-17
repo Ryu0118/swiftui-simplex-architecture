@@ -21,9 +21,9 @@
 ///         Text("MyView")
 ///     }
 /// }
-///
-/// struct MyReducer: ReducerProtocol {
-///     enum Action {
+/// @Reducer
+/// struct MyReducer {
+///     enum ViewAction {
 ///         case someAction
 ///     }
 ///
@@ -55,9 +55,9 @@
 ///             }
 ///     }
 /// }
-///
-/// struct MyReducer: ReducerProtocol {
-///     enum Action {
+/// @Reducer
+/// struct MyReducer {
+///     enum ViewAction {
 ///         case someAction
 ///     }
 ///
@@ -79,45 +79,8 @@
 public macro ViewState() =
     #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ViewStateMacro")
 
+/// Macro for creating Action from ViewAction and ReducerAction, and conforming Reducer to ReducerProtocol
 @attached(member, names: named(Action), named(ReducerAction))
 @attached(extension, conformances: ReducerProtocol)
 public macro Reducer() =
     #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ReducerMacro")
-
-import SwiftUI
-@Reducer
-struct MyReducer: ReducerProtocol {
-    enum ViewAction {
-        case increment
-        case decrement
-    }
-    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
-        switch action {
-        case .increment:
-            state.counter += 1
-            return .none
-        case .decrement:
-            state.counter -= 1
-            return .none
-        }
-    }
-}
-
-@ViewState
-struct MyView: View {
-    @State var counter = 0
-
-    let store: Store<MyReducer> = Store(reducer: MyReducer())
-
-    var body: some View {
-        VStack {
-            Text("\(counter)")
-            Button("+") {
-                send(.increment)
-            }
-            Button("-") {
-                send(.decrement)
-            }
-        }
-    }
-}
