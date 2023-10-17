@@ -78,3 +78,8 @@
 @attached(extension, conformances: ActionSendable)
 public macro ViewState() =
     #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ViewStateMacro")
+
+@attached(member, names: named(Action))
+@attached(extension, conformances: ReducerProtocol)
+public macro Reducer() =
+    #externalMacro(module: "SimplexArchitectureMacrosPlugin", type: "ReducerMacro")
