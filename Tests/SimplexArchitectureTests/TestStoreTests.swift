@@ -40,8 +40,9 @@ final class TestStoreTests: XCTestCase {
     }
 }
 
-private struct TestReducer: ReducerProtocol {
-    enum Action: Equatable {
+@Reducer
+private struct TestReducer {
+    enum ViewAction: Equatable {
         case increment
         case decrement
         case receiveTest

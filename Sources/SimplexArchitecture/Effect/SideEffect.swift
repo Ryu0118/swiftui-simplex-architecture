@@ -14,13 +14,8 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
             catch: (@Sendable (_ error: any Error, _ send: Send<Reducer>) async -> Void)?
         )
         case sendAction(Reducer.Action)
-        case sendReducerAction(Reducer.ReducerAction)
         case serialAction([Reducer.Action])
         case concurrentAction([Reducer.Action])
-        case serialReducerAction([Reducer.ReducerAction])
-        case concurrentReducerAction([Reducer.ReducerAction])
-        case serialCombineAction([CombineAction<Reducer>])
-        case concurrentCombineAction([CombineAction<Reducer>])
         case runEffects([SideEffect<Reducer>])
     }
 
@@ -81,18 +76,6 @@ public extension SideEffect {
     static func send(_ action: Reducer.Action) -> Self {
         .init(effectKind: .sendAction(action))
     }
-
-    /// Creates a side effect that sends a specific reducer action.
-    ///
-    /// - Parameter action: The reducer action to send.
-    ///
-    /// - Returns: A side effect that represents sending the specified reducer action.
-    @_disfavoredOverload
-    @inlinable
-    static func send(_ action: Reducer.ReducerAction) -> Self {
-        .init(effectKind: .sendReducerAction(action))
-    }
-
     /// Creates a side effect that dispatches multiple actions concurrently.
     ///
     /// - Parameter actions: An array of actions to dispatch concurrently.
@@ -111,50 +94,6 @@ public extension SideEffect {
     @inlinable
     static func serial(_ actions: Reducer.Action...) -> Self {
         .init(effectKind: .serialAction(actions))
-    }
-
-    /// Creates a side effect that dispatches multiple reducer actions concurrently.
-    ///
-    /// - Parameter actions: An array of reducer actions to dispatch concurrently.
-    ///
-    /// - Returns: A side effect that represents dispatching the specified reducer actions concurrently.
-    @_disfavoredOverload
-    @inlinable
-    static func concurrent(_ actions: Reducer.ReducerAction...) -> Self {
-        .init(effectKind: .concurrentReducerAction(actions))
-    }
-
-    /// Creates a side effect that dispatches multiple reducer actions serially.
-    ///
-    /// - Parameter actions: An array of reducer actions to dispatch serially.
-    ///
-    /// - Returns: A side effect that represents dispatching the specified reducer actions serially.
-    @_disfavoredOverload
-    @inlinable
-    static func serial(_ actions: Reducer.ReducerAction...) -> Self {
-        .init(effectKind: .serialReducerAction(actions))
-    }
-
-    /// Creates a side effect that dispatches multiple `CombineAction` instances concurrently.
-    ///
-    /// - Parameter actions: An array of `CombineAction` instances to dispatch concurrently.
-    ///
-    /// - Returns: A side effect that represents dispatching the specified `CombineAction` instances concurrently.
-    @_disfavoredOverload
-    @inlinable
-    static func concurrent(_ actions: CombineAction<Reducer>...) -> Self {
-        .init(effectKind: .concurrentCombineAction(actions))
-    }
-
-    /// Creates a side effect that dispatches multiple `CombineAction` instances serially.
-    ///
-    /// - Parameter actions: An array of `CombineAction` instances to dispatch serially.
-    ///
-    /// - Returns: A side effect that represents dispatching the specified `CombineAction` instances serially.
-    @_disfavoredOverload
-    @inlinable
-    static func serial(_ actions: CombineAction<Reducer>...) -> Self {
-        .init(effectKind: .serialCombineAction(actions))
     }
 
     /// Creates a side effect that runs a list of other side effects.

@@ -192,7 +192,7 @@ final class ReducerMacroTests: XCTestCase {
                 package enum ReducerAction: Equatable {
                 }
 
-                package enum Action: Equatable {
+                package enum Action: Equatable , ActionProtocol {
                     package init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -225,7 +225,7 @@ final class ReducerMacroTests: XCTestCase {
                 internal enum ReducerAction: Equatable {
                 }
 
-                internal enum Action: Equatable {
+                internal enum Action: Equatable , ActionProtocol {
                     internal init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -258,7 +258,7 @@ final class ReducerMacroTests: XCTestCase {
                 enum ReducerAction: Equatable {
                 }
 
-                 enum Action: Equatable {
+                 enum Action: Equatable , ActionProtocol {
                  init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -291,7 +291,7 @@ final class ReducerMacroTests: XCTestCase {
                 enum ReducerAction: Equatable {
                 }
 
-                internal enum Action: Equatable {
+                internal enum Action: Equatable , ActionProtocol {
                     internal init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -324,7 +324,7 @@ final class ReducerMacroTests: XCTestCase {
                 enum ReducerAction: Equatable {
                 }
 
-                internal enum Action: Equatable {
+                internal enum Action: Equatable , ActionProtocol {
                     internal init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -359,7 +359,7 @@ final class ReducerMacroTests: XCTestCase {
                 public enum ReducerAction: Equatable {
                 }
 
-                public enum Action: Equatable {
+                public enum Action: Equatable , ActionProtocol {
                     public init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -392,7 +392,7 @@ final class ReducerMacroTests: XCTestCase {
                 public enum ReducerAction: Equatable, Hashable, Codable {
                 }
 
-                public enum Action: Equatable, Hashable, Codable {
+                public enum Action: Equatable, Hashable, Codable , ActionProtocol {
                     public init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -427,7 +427,7 @@ final class ReducerMacroTests: XCTestCase {
                 public enum ReducerAction {
                 }
 
-                public enum Action {
+                public enum Action: ActionProtocol {
                     public init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -474,7 +474,7 @@ final class ReducerMacroTests: XCTestCase {
                     case response(TaskResult<VoidSuccess>)
                 }
 
-                public enum Action {
+                public enum Action: ActionProtocol {
                         case increment
                         case decrement
                         case increment(arg1: String, arg2: Int)

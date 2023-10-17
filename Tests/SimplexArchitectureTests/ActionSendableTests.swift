@@ -28,8 +28,9 @@ final class ActionSendableTests: XCTestCase {
     }
 }
 
-private struct TestReducer: ReducerProtocol {
-    enum Action: Equatable {
+@Reducer
+private struct TestReducer {
+    enum ViewAction: Equatable {
         case c1
         case c2
     }

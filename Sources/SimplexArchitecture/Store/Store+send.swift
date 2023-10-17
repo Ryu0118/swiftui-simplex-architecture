@@ -5,7 +5,7 @@ extension Store {
     @usableFromInline
     @discardableResult
     func send(
-        _ action: consuming Reducer.Action,
+        _ action: consuming Reducer.ViewAction,
         target: consuming Reducer.Target
     ) -> SendTask {
         send(
@@ -15,6 +15,16 @@ extension Store {
     }
 
     @usableFromInline
+    @discardableResult
+    func send(
+        _ action: consuming Reducer.Action,
+        target: consuming Reducer.Target
+    ) -> SendTask {
+        send(action, container: setContainerIfNeeded(for: target))
+    }
+
+    @usableFromInline
+    @discardableResult
     func send(
         _ action: consuming Reducer.ReducerAction,
         target: consuming Reducer.Target
@@ -27,10 +37,10 @@ extension Store {
 
     @usableFromInline
     func send(
-        _ action: Reducer.Action,
+        _ action: Reducer.ViewAction,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        send(.action(action), container: container)
+        send(Reducer.Action.init(viewAction: action), container: container)
     }
 
     @usableFromInline
@@ -38,22 +48,18 @@ extension Store {
         _ action: Reducer.ReducerAction,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        send(.action(action), container: container)
+        send(Reducer.Action.init(reducerAction: action), container: container)
     }
 
+    @_disfavoredOverload
     @inline(__always)
     func send(
-        _ action: CombineAction<Reducer>,
+        _ action: Reducer.Action,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
         defer {
-            switch action.kind {
-            case .viewAction(let action):
-                guard let pullbackAction else { break }
+            if let pullbackAction {
                 pullbackAction(action)
-            case .reducerAction(let action):
-                guard let pullbackReducerAction else { break }
-                pullbackReducerAction(action)
             }
         }
 
@@ -93,7 +99,7 @@ extension Store {
 
     @usableFromInline
     @discardableResult
-    func sendIfNeeded(_ action: Reducer.Action) -> SendTask {
+    func sendIfNeeded(_ action: Reducer.ViewAction) -> SendTask {
         if let container {
             send(action, container: container)
         } else {
@@ -170,15 +176,6 @@ extension Store {
                 ),
             ]
 
-        case let .sendReducerAction(action):
-            return [
-                SendTask(
-                    task: Task.withEffectContext { @MainActor in
-                        send(action)
-                    }
-                ),
-            ]
-
         case let .concurrentAction(actions):
             return actions.reduce(into: [SendTask]()) { partialResult, action in
                 partialResult.append(
@@ -198,52 +195,6 @@ extension Store {
             }
             return [SendTask(task: task)]
 
-        case let .concurrentReducerAction(actions):
-            return actions.reduce(into: [SendTask]()) { tasks, action in
-                tasks.append(
-                    SendTask(
-                        task: Task.withEffectContext { @MainActor in
-                            send(action)
-                        }
-                    )
-                )
-            }
-
-        case let .serialReducerAction(actions):
-            let task = Task.withEffectContext {
-                for action in actions {
-                    await send(action)
-                }
-            }
-            return [SendTask(task: task)]
-
-        case let .concurrentCombineAction(combineActions):
-            return combineActions.compactMap { combineAction in
-                switch combineAction.kind {
-                case let .reducerAction(action):
-                    SendTask(
-                        task: Task.withEffectContext { @MainActor in send(action) }
-                    )
-                case let .viewAction(action):
-                    SendTask(
-                        task: Task.withEffectContext { @MainActor in send(action) }
-                    )
-                }
-            }
-
-        case let .serialCombineAction(combineActions):
-            let task = Task.withEffectContext {
-                for combineAction in combineActions {
-                    switch combineAction.kind {
-                    case let .reducerAction(action):
-                        await send(action)
-                    case let .viewAction(action):
-                        await send(action)
-                    }
-                }
-            }
-            return [SendTask(task: task)]
-
         case let .runEffects(effects):
             return effects.reduce(into: [SendTask]()) { partialResult, effect in
                 partialResult += runEffect(effect, send: send)
@@ -255,13 +206,8 @@ extension Store {
     }
 
     func makeSend(for container: StateContainer<Reducer.Target>) -> Send<Reducer> {
-        Send(
-            sendAction: { [weak self] action in
-                self?.send(action, container: container) ?? .never
-            },
-            sendReducerAction: { [weak self] reducerAction in
-                self?.send(reducerAction, container: container) ?? .never
-            }
-        )
+        Send { [weak self] action in
+            self?.send(action, container: container) ?? .never
+        }
     }
 }

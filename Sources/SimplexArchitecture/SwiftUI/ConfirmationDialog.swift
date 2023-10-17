@@ -4,7 +4,7 @@ import SwiftUI
 public extension View {
     func confirmationDialog<Target: ActionSendable>(
         target: Target,
-        unwrapping value: Binding<ConfirmationDialogState<Target.Reducer.Action>?>
+        unwrapping value: Binding<ConfirmationDialogState<Target.Reducer.ViewAction>?>
     ) -> some View {
         self.confirmationDialog(
             value.wrappedValue.flatMap { Text($0.title) } ?? Text(""),

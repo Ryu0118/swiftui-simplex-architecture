@@ -17,9 +17,8 @@ public final class Store<Reducer: ReducerProtocol> {
     @TestOnly var sentFromEffectActions: [ActionTransition<Reducer>] = []
 
     @usableFromInline var pullbackAction: ((Reducer.Action) -> Void)?
-    @usableFromInline var pullbackReducerAction: ((Reducer.ReducerAction) -> Void)?
 
-    let reduce: (StateContainer<Reducer.Target>, CombineAction<Reducer>) -> SideEffect<Reducer>
+    let reduce: (StateContainer<Reducer.Target>, Reducer.Action) -> SideEffect<Reducer>
     var initialReducerState: (() -> Reducer.ReducerState)?
 
     /// Initialize  `Store` with the given reducer when the `ReducerState` is `Never`.

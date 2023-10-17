@@ -28,12 +28,13 @@ final class StateContainerTests: XCTestCase {
     }
 }
 
-private struct TestReducer: ReducerProtocol {
+@Reducer
+private struct TestReducer {
     struct ReducerState: Equatable {
         var count = 0
     }
 
-    enum Action: Equatable {
+    enum ViewAction: Equatable {
         case c1
         case c2
     }

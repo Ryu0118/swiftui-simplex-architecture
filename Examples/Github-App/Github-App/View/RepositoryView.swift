@@ -1,8 +1,9 @@
 import SwiftUI
 import SimplexArchitecture
 
-struct RepositoryReducer: ReducerProtocol {
-    enum Action {
+@Reducer
+struct RepositoryReducer {
+    enum ViewAction {
         case onOpenURLButtonTapped
     }
 
