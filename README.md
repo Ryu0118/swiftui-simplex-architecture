@@ -20,7 +20,7 @@ let package = Package(
     name: "YourProject",
     ...
     dependencies: [
-        .package(url: "https://github.com/Ryu0118/swiftui-simplex-architecture", branch: "main")
+        .package(url: "https://github.com/Ryu0118/swiftui-simplex-architecture", exact: "0.7.0")
     ],
     targets: [
         .target(
