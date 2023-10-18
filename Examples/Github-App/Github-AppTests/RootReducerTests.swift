@@ -1,6 +1,6 @@
-import XCTest
-import SimplexArchitecture
 @testable import Github_App
+import SimplexArchitecture
+import XCTest
 
 @MainActor
 final class RootReducerTests: XCTestCase {

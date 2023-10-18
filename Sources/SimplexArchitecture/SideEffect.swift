@@ -29,7 +29,7 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
 }
 
 public extension SideEffect {
-    /// Creates a side effect of type `.none`.
+    /// Indicates no side effects
     ///
     /// - Returns: A side effect of type `.none`.
     @inlinable
@@ -76,6 +76,7 @@ public extension SideEffect {
     static func send(_ action: Reducer.Action) -> Self {
         .init(effectKind: .sendAction(action))
     }
+
     /// Creates a side effect that dispatches multiple actions concurrently.
     ///
     /// - Parameter actions: An array of actions to dispatch concurrently.

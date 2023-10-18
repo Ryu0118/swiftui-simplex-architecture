@@ -1,22 +1,22 @@
 import Foundation
+import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-import SwiftDiagnostics
 
 public struct ReducerMacro: MemberMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax,
         Context: MacroExpansionContext
     >(
-        of node: AttributeSyntax,
+        of _: AttributeSyntax,
         providingMembersOf declaration: Declaration,
-        in context: Context
+        in _: Context
     ) throws -> [DeclSyntax] {
         guard let structDecl = declaration.as(StructDeclSyntax.self) else {
             throw DiagnosticsError(
                 diagnostics: [
-                    ReducerMacroDiagnostic.notStruct.diagnose(at: declaration)
+                    ReducerMacroDiagnostic.notStruct.diagnose(at: declaration),
                 ]
             )
         }
@@ -44,11 +44,11 @@ public struct ReducerMacro: MemberMacro {
 
         let emptyReducerAction: DeclSyntax? = if reducerAction == nil {
             DeclSyntax(
-               EnumDeclSyntax(
-                   modifiers: [DeclModifierSyntax(name: .identifier(reducerAccessModifier))],
-                   name: .identifier("ReducerAction")
-               ) {}
-           )
+                EnumDeclSyntax(
+                    modifiers: [DeclModifierSyntax(name: .identifier(reducerAccessModifier))],
+                    name: .identifier("ReducerAction")
+                ) {}
+            )
         } else {
             nil
         }
@@ -60,8 +60,8 @@ public struct ReducerMacro: MemberMacro {
                     modifiers: [DeclModifierSyntax(name: .identifier(reducerAccessModifier))],
                     name: .identifier("Action"),
                     inheritanceClause: InheritanceClauseSyntax {
-                        (viewAction.inheritanceClause?.inheritedTypes ?? []) + 
-                        [InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ActionProtocol"))]
+                        (viewAction.inheritanceClause?.inheritedTypes ?? []) +
+                            [InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ActionProtocol"))]
                     }
                 ) {
                     MemberBlockItemListSyntax {
@@ -95,7 +95,7 @@ public struct ReducerMacro: MemberMacro {
                         )
                     }
                 }
-            )
+            ),
         ].compactMap { $0 }
     }
 
@@ -109,7 +109,7 @@ public struct ReducerMacro: MemberMacro {
                         diagnostics: [
                             ReducerMacroDiagnostic
                                 .typealiasCannotBeUsed(name: typealiasDecl.name.text)
-                                .diagnose(at: typealiasDecl.name)
+                                .diagnose(at: typealiasDecl.name),
                         ]
                     )
                 default: break
@@ -141,7 +141,7 @@ public struct ReducerMacro: MemberMacro {
                 diagnostics: [
                     ReducerMacroDiagnostic
                         .cannotFindViewAction(reducer: structDecl.name.text)
-                        .diagnose(at: structDecl)
+                        .diagnose(at: structDecl),
                 ]
             )
         }
@@ -155,7 +155,7 @@ public struct ReducerMacro: MemberMacro {
                     diagnostics: [
                         ReducerMacroDiagnostic
                             .noMatchInheritanceClause
-                            .diagnose(at: inheritanceClause)
+                            .diagnose(at: inheritanceClause),
                     ]
                 )
             } else {
@@ -163,7 +163,7 @@ public struct ReducerMacro: MemberMacro {
                     diagnostics: [
                         ReducerMacroDiagnostic
                             .noMatchInheritanceClause
-                            .diagnose(at: reducerAction)
+                            .diagnose(at: reducerAction),
                     ]
                 )
             }
@@ -179,7 +179,7 @@ public struct ReducerMacro: MemberMacro {
                 diagnostics: [
                     ReducerMacroDiagnostic
                         .duplicatedCase
-                        .diagnose(at: duplicateElement)
+                        .diagnose(at: duplicateElement),
                 ]
             )
         }
@@ -194,9 +194,9 @@ public struct ReducerMacro: MemberMacro {
             {
                 $0.with(
                     \.decl,
-                     """
-                     \n\(raw: reducerAccessModifier) typealias \(raw: name) = \(raw: action.name.text).\(raw: name)
-                     """
+                    """
+                    \n\(raw: reducerAccessModifier) typealias \(raw: name) = \(raw: action.name.text).\(raw: name)
+                    """
                 )
             } else {
                 $0

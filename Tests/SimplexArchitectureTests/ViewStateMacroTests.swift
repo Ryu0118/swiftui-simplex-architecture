@@ -140,9 +140,9 @@ final class ViewStateMacroTests: XCTestCase {
                     EmptyView()
                 }
 
-                internal struct ViewState: ViewStateProtocol {
+                 struct ViewState: ViewStateProtocol {
                     var count = 0
-                    internal static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<TestView>] = [\.count: \.count]
+                     static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<TestView>] = [\.count: \.count]
                 }
             }
 

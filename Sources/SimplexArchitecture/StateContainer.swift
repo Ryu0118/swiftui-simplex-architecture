@@ -15,29 +15,29 @@ public final class StateContainer<Target: ActionSendable> {
     var _reducerState: Target.Reducer.ReducerState?
 
     @usableFromInline
-    var entity: Target
+    var target: Target
 
     init(
-        _ entity: consuming Target,
+        _ target: consuming Target,
         viewState: Target.ViewState? = nil,
         reducerState: consuming Target.Reducer.ReducerState? = nil
     ) {
-        self.entity = entity
+        self.target = target
         self.viewState = viewState
         self._reducerState = reducerState
     }
 
     /// Returns Target value from Target.ViewState key path
-    public subscript<U>(dynamicMember keyPath: WritableKeyPath<Target.ViewState, U>) -> U {
+    public subscript<Value>(dynamicMember keyPath: WritableKeyPath<Target.ViewState, Value>) -> Value {
         _read {
             #if DEBUG
-            guard !isTesting else {
-                yield viewState![keyPath: keyPath]
-                return
-            }
+                guard !isTesting else {
+                    yield viewState![keyPath: keyPath]
+                    return
+                }
             #endif
-            if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
-                yield entity[keyPath: viewKeyPath]
+            if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, Value> {
+                yield target[keyPath: viewKeyPath]
             } else {
                 fatalError(
                     """
@@ -49,13 +49,13 @@ public final class StateContainer<Target: ActionSendable> {
         }
         _modify {
             #if DEBUG
-            guard !isTesting else {
-                yield &viewState![keyPath: keyPath]
-                return
-            }
+                guard !isTesting else {
+                    yield &viewState![keyPath: keyPath]
+                    return
+                }
             #endif
-            if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, U> {
-                yield &entity[keyPath: viewKeyPath]
+            if let viewKeyPath = Target.ViewState.keyPathMap[keyPath] as? WritableKeyPath<Target, Value> {
+                yield &target[keyPath: viewKeyPath]
             } else {
                 fatalError(
                     """
@@ -68,6 +68,6 @@ public final class StateContainer<Target: ActionSendable> {
     }
 
     func copy() -> Self {
-        Self(entity, viewState: viewState, reducerState: _reducerState)
+        Self(target, viewState: viewState, reducerState: _reducerState)
     }
 }

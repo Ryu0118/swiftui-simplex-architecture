@@ -17,10 +17,10 @@ extension ReducerMacroDiagnostic: DiagnosticMessage {
 
     public var message: String {
         switch self {
-        case .typealiasCannotBeUsed(let type):
+        case let .typealiasCannotBeUsed(type):
             "\(type) cannot be defined with typealias"
 
-        case .cannotFindViewAction(let reducer):
+        case let .cannotFindViewAction(reducer):
             "ViewAction not found in \(reducer)"
 
         case .notStruct:

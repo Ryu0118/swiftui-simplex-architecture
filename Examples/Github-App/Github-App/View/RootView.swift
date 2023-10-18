@@ -1,5 +1,5 @@
-import SwiftUI
 import SimplexArchitecture
+import SwiftUI
 
 @Reducer
 struct RootReducer {
@@ -19,16 +19,13 @@ struct RootReducer {
 
     @Dependency(\.repositoryClient.fetchRepositories) var fetchRepositories
 
-    func reduce(
-        into state: StateContainer<RootView>,
-        action: Action
-    ) -> SideEffect<Self> {
+    func reduce(into state: StateContainer<RootView>, action: Action) -> SideEffect<Self> {
         switch action {
         case .onSearchButtonTapped:
             state.isLoading = true
-            return fetchRepositories(query: state.text)
+            return fetchRepositories(query: state.searchText)
 
-        case .onTextChanged(let text):
+        case let .onTextChanged(text):
             if text.isEmpty {
                 state.repositories = []
             }
@@ -57,7 +54,7 @@ struct RootReducer {
 
         case .alert(.retry):
             state.isLoading = true
-            return fetchRepositories(query: state.text)
+            return fetchRepositories(query: state.searchText)
         }
     }
 
@@ -74,7 +71,7 @@ struct RootReducer {
 
 @ViewState
 struct RootView: View {
-    @State var text = ""
+    @State var searchText = ""
     @State var isLoading = false
     @State var repositories: [Repository] = []
     @State var alertState: AlertState<Reducer.ReducerAction>?
@@ -96,11 +93,11 @@ struct RootView: View {
                     ProgressView()
                 }
             }
-            .searchable(text: $text)
+            .searchable(text: $searchText)
             .onSubmit(of: .search) {
                 send(.onSearchButtonTapped)
             }
-            .onChange(of: text) { _, newValue in
+            .onChange(of: searchText) { _, newValue in
                 send(.onTextChanged(newValue))
             }
             .alert(target: self, unwrapping: $alertState)

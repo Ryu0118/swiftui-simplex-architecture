@@ -6,8 +6,7 @@ protocol HasName: DeclSyntaxProtocol {
 
 extension MemberBlockItemListSyntax.Element {
     var hasName: (any HasName)? {
-        if let enumDecl = decl.as(EnumDeclSyntax.self)
-        {
+        if let enumDecl = decl.as(EnumDeclSyntax.self) {
             enumDecl
         } else if let structDecl = decl.as(StructDeclSyntax.self) {
             structDecl

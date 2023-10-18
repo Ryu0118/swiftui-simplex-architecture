@@ -12,18 +12,19 @@ public final class Store<Reducer: ReducerProtocol> {
         }
     }
 
-    var _send: Send<Reducer>?
+    // Pullback Action to parent Store
+    @usableFromInline
+    var pullbackAction: ((Reducer.Action) -> Void)?
     // Buffer to store Actions recurrently invoked through SideEffect in a single Action sent from View
-    @TestOnly var sentFromEffectActions: [ActionTransition<Reducer>] = []
-
-    @usableFromInline var pullbackAction: ((Reducer.Action) -> Void)?
-
-    let reduce: (StateContainer<Reducer.Target>, Reducer.Action) -> SideEffect<Reducer>
+    @TestOnly
+    var sentFromEffectActions: [ActionTransition<Reducer>] = []
+    var _send: Send<Reducer>?
     var initialReducerState: (() -> Reducer.ReducerState)?
+    let reduce: (StateContainer<Reducer.Target>, Reducer.Action) -> SideEffect<Reducer>
 
     /// Initialize  `Store` with the given reducer when the `ReducerState` is `Never`.
     public init(reducer: Reducer) where Reducer.ReducerState == Never {
-        self.reduce = reducer.reduce
+        reduce = reducer.reduce
     }
 
     /// Initialize `Store` with the given `Reducer` and initial `ReducerState`.
@@ -31,14 +32,14 @@ public final class Store<Reducer: ReducerProtocol> {
         reducer: Reducer,
         initialReducerState: @autoclosure @escaping () -> Reducer.ReducerState
     ) {
-        self.reduce = reducer.reduce
+        reduce = reducer.reduce
         self.initialReducerState = initialReducerState
     }
 
     public init<R: ReducerModifier<Reducer>>(
         reducer: R
     ) where Reducer.ReducerState == Never {
-        self.reduce = reducer.reduce
+        reduce = reducer.reduce
     }
 
     /// Initialize `Store` with the given `Reducer` and initial `ReducerState`.
@@ -46,32 +47,25 @@ public final class Store<Reducer: ReducerProtocol> {
         reducer: R,
         initialReducerState: @autoclosure @escaping () -> Reducer.ReducerState
     ) {
-        self.reduce = reducer.reduce
+        reduce = reducer.reduce
         self.initialReducerState = initialReducerState
     }
 
-    public func getContainer(
-        for target: Reducer.Target,
-        viewState: Reducer.Target.ViewState? = nil
-    ) -> StateContainer<Reducer.Target> {
-        if let container {
-            container
-        } else {
-            StateContainer(target, viewState: viewState, reducerState: initialReducerState?())
-        }
-    }
-
-    @inlinable
     @discardableResult
-    public func setContainerIfNeeded(
+    @usableFromInline
+    func setContainerIfNeeded(
         for target: Reducer.Target,
         viewState: Reducer.Target.ViewState? = nil
     ) -> StateContainer<Reducer.Target> {
         if let container {
-            container.entity = target
+            container.target = target
             return container
         } else {
-            let container = getContainer(for: target, viewState: viewState)
+            let container = StateContainer(
+                target,
+                viewState: viewState,
+                reducerState: initialReducerState?()
+            )
             self.container = container
             return container
         }

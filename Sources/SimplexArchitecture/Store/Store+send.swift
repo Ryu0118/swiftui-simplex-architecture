@@ -2,8 +2,18 @@ import Foundation
 import XCTestDynamicOverlay
 
 extension Store {
-    @usableFromInline
+    @_disfavoredOverload
     @discardableResult
+    @inlinable
+    func send(
+        _ action: consuming Reducer.Action,
+        target: consuming Reducer.Target
+    ) -> SendTask {
+        send(action, container: setContainerIfNeeded(for: target))
+    }
+
+    @discardableResult
+    @inlinable
     func send(
         _ action: consuming Reducer.ViewAction,
         target: consuming Reducer.Target
@@ -14,17 +24,8 @@ extension Store {
         )
     }
 
-    @usableFromInline
     @discardableResult
-    func send(
-        _ action: consuming Reducer.Action,
-        target: consuming Reducer.Target
-    ) -> SendTask {
-        send(action, container: setContainerIfNeeded(for: target))
-    }
-
-    @usableFromInline
-    @discardableResult
+    @inlinable
     func send(
         _ action: consuming Reducer.ReducerAction,
         target: consuming Reducer.Target
@@ -35,24 +36,24 @@ extension Store {
         )
     }
 
-    @usableFromInline
+    @inlinable
     func send(
         _ action: Reducer.ViewAction,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        send(Reducer.Action.init(viewAction: action), container: container)
+        send(Reducer.Action(viewAction: action), container: container)
     }
 
-    @usableFromInline
+    @inlinable
     func send(
         _ action: Reducer.ReducerAction,
         container: StateContainer<Reducer.Target>
     ) -> SendTask {
-        send(Reducer.Action.init(reducerAction: action), container: container)
+        send(Reducer.Action(reducerAction: action), container: container)
     }
 
     @_disfavoredOverload
-    @inline(__always)
+    @usableFromInline
     func send(
         _ action: Reducer.Action,
         container: StateContainer<Reducer.Target>
@@ -66,58 +67,38 @@ extension Store {
         let sideEffect: SideEffect<Reducer>
         // If Unit Testing is in progress and an action is sent from SideEffect
         #if DEBUG
-        @Dependency(\.isTesting) var isTesting
-        if let effectContext = EffectContext.id, isTesting {
-            let before = container.copy()
-            sideEffect = reduce(container, action)
-            sentFromEffectActions.append(
-                ActionTransition(
-                    previous: .init(state: before.viewState, reducerState: before._reducerState),
-                    next: .init(state: container.viewState, reducerState: before._reducerState),
-                    effect: sideEffect,
-                    effectContext: effectContext,
-                    for: action
+            @Dependency(\.isTesting) var isTesting
+            if let effectContext = EffectContext.id, isTesting {
+                let before = container.copy()
+                sideEffect = reduce(container, action)
+                sentFromEffectActions.append(
+                    ActionTransition(
+                        previous: .init(state: before.viewState, reducerState: before._reducerState),
+                        next: .init(state: container.viewState, reducerState: before._reducerState),
+                        effect: sideEffect,
+                        effectContext: effectContext,
+                        for: action
+                    )
                 )
-            )
-        } else {
-            sideEffect = reduce(container, action)
-        }
+            } else {
+                sideEffect = reduce(container, action)
+            }
         #else
-        sideEffect = reduce(container, action)
+            sideEffect = reduce(container, action)
         #endif
 
         if case .none = sideEffect.kind {
             return .never
         } else {
-            let send = self._send ?? makeSend(for: container)
+            let send = _send ?? makeSend(for: container)
+            let tasks = runEffect(sideEffect, send: send)
 
-            return executeTasks(
-                runEffect(sideEffect, send: send)
-            )
+            return reduce(tasks: tasks)
         }
     }
 
-    @usableFromInline
-    @discardableResult
-    func sendIfNeeded(_ action: Reducer.ViewAction) -> SendTask {
-        if let container {
-            send(action, container: container)
-        } else {
-            .never
-        }
-    }
-
-    @usableFromInline
-    @discardableResult
-    func sendIfNeeded(_ action: Reducer.ReducerAction) -> SendTask {
-        if let container {
-            send(action, container: container)
-        } else {
-            .never
-        }
-    }
-
-    func executeTasks(_ tasks: [SendTask]) -> SendTask {
+    // Combine multiple SendTasks into one Task
+    func reduce(tasks: [SendTask]) -> SendTask {
         guard !tasks.isEmpty else {
             return .never
         }
@@ -205,6 +186,7 @@ extension Store {
         }
     }
 
+    @inlinable
     func makeSend(for container: StateContainer<Reducer.Target>) -> Send<Reducer> {
         Send { [weak self] action in
             self?.send(action, container: container) ?? .never

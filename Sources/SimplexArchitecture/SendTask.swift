@@ -2,6 +2,7 @@ import Foundation
 
 /// The type returned from send(_:) that represents the lifecycle of the effect started from sending an action.
 public struct SendTask: Sendable, Hashable {
+    @usableFromInline
     static let never = SendTask(task: nil)
 
     @usableFromInline

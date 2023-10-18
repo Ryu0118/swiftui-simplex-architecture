@@ -1,5 +1,5 @@
-import SwiftUI
 import SimplexArchitecture
+import SwiftUI
 
 @Reducer
 struct RepositoryReducer {

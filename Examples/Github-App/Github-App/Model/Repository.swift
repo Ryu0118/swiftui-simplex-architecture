@@ -10,13 +10,13 @@ struct Repository: Identifiable, Equatable, Hashable {
     let stargazersCount: Int
 
     init(item: Response.Item) {
-        self.id = item.id
-        self.url = item.svnUrl
-        self.fullName = item.fullName
-        self.avatarUrl = item.owner.avatarUrl
-        self.description = item.description
-        self.language = item.language
-        self.stargazersCount = item.stargazersCount
+        id = item.id
+        url = item.svnUrl
+        fullName = item.fullName
+        avatarUrl = item.owner.avatarUrl
+        description = item.description
+        language = item.language
+        stargazersCount = item.stargazersCount
     }
 }
 

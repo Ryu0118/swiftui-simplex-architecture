@@ -1,10 +1,11 @@
+import CasePaths
 @testable import SimplexArchitecture
 import SwiftUI
 import XCTest
-import CasePaths
 
 final class StoreTests: XCTestCase {
-    fileprivate var store: Store<TestReducer>!
+    private var store: Store<TestReducer>!
+    private var target = TestView()
 
     override func setUp() {
         super.setUp()
@@ -15,22 +16,22 @@ final class StoreTests: XCTestCase {
         XCTAssertNil(store.container)
         XCTAssertNil(store._send)
 
-        store.setContainerIfNeeded(for: TestView())
+        store.setContainerIfNeeded(for: target)
 
         XCTAssertNotNil(store.container)
         XCTAssertNotNil(store._send)
     }
 
     func testExecuteTasks() throws {
-        let sendTask1 = store.executeTasks([])
+        let sendTask1 = store.reduce(tasks: [])
         XCTAssertNil(sendTask1.task)
 
-        let sendTask2 = store.executeTasks([.never])
+        let sendTask2 = store.reduce(tasks: [.never])
 
         XCTAssertEqual(sendTask2, .never)
         XCTAssertNil(sendTask1.task)
 
-        let sendTask3 = store.executeTasks([.never, .never])
+        let sendTask3 = store.reduce(tasks: [.never, .never])
         XCTAssertNotNil(sendTask3.task)
     }
 
@@ -88,11 +89,11 @@ final class StoreTests: XCTestCase {
     }
 
     func testSendIfNeeded() throws {
-        let sendTask1 = store.sendIfNeeded(.c1)
+        let sendTask1 = store.send(.c1, target: target)
         XCTAssertEqual(sendTask1, .never)
 
         store.setContainerIfNeeded(for: TestView())
-        let sendTask2 = store.sendIfNeeded(.c2)
+        let sendTask2 = store.send(.c2, target: target)
 
         XCTAssertNotNil(sendTask2.task)
     }
@@ -103,7 +104,7 @@ final class StoreTests: XCTestCase {
         store.setContainerIfNeeded(for: TestView())
         XCTAssertNil(store.pullbackAction)
         store.pullback(to: /ParentReducer.Action.child, parent: parent)
-        store.sendIfNeeded(.c1)
+        store.send(.c1, target: target)
         XCTAssertNotNil(store.pullbackAction)
         XCTAssertEqual(parent.store.container?.count, 1)
     }
@@ -115,7 +116,7 @@ final class StoreTests: XCTestCase {
         XCTAssertNil(store.pullbackAction)
         let uuid = UUID()
         store.pullback(to: /ParentReducer.Action.childId, parent: parent, id: uuid)
-        store.sendIfNeeded(.c1)
+        store.send(.c1, target: target)
         XCTAssertNotNil(store.pullbackAction)
         XCTAssertEqual(parent.store.container?.id, uuid)
     }
@@ -188,11 +189,11 @@ private struct ParentReducer {
             state.count += 1
             return .none
 
-        case .childId(let id, _):
+        case let .childId(id, _):
             state.id = id
             return .none
 
-        case .childIdReducerAction(let id, _):
+        case let .childIdReducerAction(id, _):
             state.id = id
             return .none
         }

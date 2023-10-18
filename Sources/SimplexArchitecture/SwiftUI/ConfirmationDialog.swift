@@ -6,7 +6,7 @@ public extension View {
         target: Target,
         unwrapping value: Binding<ConfirmationDialogState<Target.Reducer.ViewAction>?>
     ) -> some View {
-        self.confirmationDialog(
+        confirmationDialog(
             value.wrappedValue.flatMap { Text($0.title) } ?? Text(""),
             isPresented: value.isPresent(),
             titleVisibility: value.wrappedValue.map { .init($0.titleVisibility) } ?? .automatic,
@@ -37,7 +37,7 @@ public extension View {
         target: Target,
         unwrapping value: Binding<ConfirmationDialogState<Target.Reducer.ReducerAction>?>
     ) -> some View {
-        self.confirmationDialog(
+        confirmationDialog(
             value.wrappedValue.flatMap { Text($0.title) } ?? Text(""),
             isPresented: value.isPresent(),
             titleVisibility: value.wrappedValue.map { .init($0.titleVisibility) } ?? .automatic,

@@ -4,7 +4,7 @@ extension DeclModifierListSyntax {
     var accessModifier: String {
         let accessModifiers = [
             "open", "public", "package", "internal",
-            "fileprivate", "private"
+            "fileprivate", "private",
         ]
         return compactMap { $0.as(DeclModifierSyntax.self)?.name.text }
             .filter { accessModifiers.contains($0 ?? "") }.first?

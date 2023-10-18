@@ -17,9 +17,9 @@ public enum TaskResult<Success: Sendable>: Sendable {
     @inlinable
     public func get() throws -> Success {
         switch self {
-        case .success(let success):
+        case let .success(success):
             success
-        case .failure(let error):
+        case let .failure(error):
             throw error
         }
     }
@@ -50,9 +50,9 @@ extension TaskResult: Equatable where Success: Equatable {
 extension TaskResult: Hashable where Success: Hashable {
     public func hash(into hasher: inout Hasher) {
         switch self {
-        case .success(let success):
+        case let .success(success):
             hasher.combine(success)
-        case .failure(let error):
+        case let .failure(error):
             if let error = error as? AnyHashable {
                 hasher.combine(error)
             } else {

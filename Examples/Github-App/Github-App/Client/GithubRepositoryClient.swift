@@ -1,6 +1,6 @@
-import Foundation
 import Dependencies
 import DependenciesMacro
+import Foundation
 
 @Dependencies
 struct RepositoryClient {
@@ -8,14 +8,14 @@ struct RepositoryClient {
 }
 
 extension RepositoryClient: DependencyKey {
-    static let liveValue: RepositoryClient = RepositoryClient(
+    static let liveValue: RepositoryClient = .init(
         fetchRepositories: { query in
             var component = URLComponents()
             component.scheme = "https"
             component.host = "api.github.com"
             component.path = "/search/repositories"
             component.queryItems = [
-                URLQueryItem(name: "q", value: query)
+                URLQueryItem(name: "q", value: query),
             ]
 
             guard let url = component.url else {

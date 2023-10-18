@@ -1,11 +1,11 @@
-import SimplexArchitecture
 import Benchmark
 import Combine
+import SimplexArchitecture
 
 let actionSendableSuite = BenchmarkSuite(name: "ActionSendable") {
     let testState = TestState()
 
-    $0.benchmark("Mutate state") {
+    $0.benchmark("Write directly to @Published") {
         testState.count += 1
     }
 

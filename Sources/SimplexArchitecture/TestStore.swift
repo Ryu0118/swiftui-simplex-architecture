@@ -70,6 +70,7 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             await group.waitForAll()
         }
     }
+
     /// Asserts an action was received from an effect and asserts how the state changes.
     ///
     /// - Parameters:
@@ -87,7 +88,9 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             XCTFail(
                 """
                 Action has not been sent. Please invoke TestStore.send(_:)
-                """
+                """,
+                file: file,
+                line: line
             )
             return
         }
@@ -110,8 +113,18 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 
                 expected?(actualContainer)
 
-                assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
-                assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
+                assertViewStateNoDifference(
+                    expected: expectedContainer,
+                    actual: actualContainer,
+                    file: file,
+                    line: line
+                )
+                assertReducerStateNoDifference(
+                    expected: expectedContainer,
+                    actual: actualContainer,
+                    file: file,
+                    line: line
+                )
 
                 testedActions.append(stateTransition)
                 break
@@ -172,21 +185,33 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @MainActor
     public func send(
         _ action: Reducer.ViewAction,
-        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
+        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
     ) async -> SendTask {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
         let sendTask = withDependencies(updateValuesForOperation) {
-            target.store.sendIfNeeded(action)
+            target.store.send(action, target: target)
         }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
 
-        assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
-        assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
+        assertViewStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
+        assertReducerStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
 
         await Task.megaYield()
         return sendTask
@@ -206,21 +231,33 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @MainActor
     public func send(
         _ action: Reducer.ViewAction,
-        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
+        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
     ) async -> SendTask where Reducer.Target.ViewState: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
         let sendTask = withDependencies(updateValuesForOperation) {
-            target.store.sendIfNeeded(action)
+            target.store.send(action, target: target)
         }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
 
-        assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
-        assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
+        assertViewStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
+        assertReducerStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
 
         await Task.megaYield()
 
@@ -241,21 +278,33 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @MainActor
     public func send(
         _ action: Reducer.ViewAction,
-        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
+        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
     ) async -> SendTask where Reducer.ReducerState: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
         let sendTask = withDependencies(updateValuesForOperation) {
-            target.store.sendIfNeeded(action)
+            target.store.send(action, target: target)
         }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
 
-        assertViewStateNoDifference(expected: expectedContainer, actual: actualContainer)
-        assertReducerNoDifference(expected: expectedContainer, actual: actualContainer)
+        assertViewStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
+        assertReducerStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
 
         await Task.megaYield()
         return sendTask
@@ -275,21 +324,33 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     @MainActor
     public func send(
         _ action: Reducer.ViewAction,
-        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil
+        assert expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
     ) async -> SendTask where Reducer.ReducerState: Equatable, Reducer.Target.ViewState: Equatable {
         let expectedContainer = target.store.setContainerIfNeeded(for: target, viewState: viewState)
         runningContainer = expectedContainer
         let actualContainer = expectedContainer.copy()
 
         let sendTask = withDependencies(updateValuesForOperation) {
-            target.store.sendIfNeeded(action)
+            target.store.send(action, target: target)
         }
         runningTasks.append(sendTask)
 
         expected?(actualContainer)
 
-        assertViewStateNoDifference(expected: actualContainer, actual: actualContainer)
-        assertReducerNoDifference(expected: actualContainer, actual: actualContainer)
+        assertViewStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
+        assertReducerStateNoDifference(
+            expected: expectedContainer,
+            actual: actualContainer,
+            file: file,
+            line: line
+        )
 
         await Task.megaYield()
 
@@ -300,49 +361,77 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
 extension TestStore {
     private func assertViewStateNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
-        actual actualContainer: StateContainer<Reducer.Target>
+        actual actualContainer: StateContainer<Reducer.Target>,
+        file: StaticString,
+        line: UInt
     ) where Reducer.Target.ViewState: Equatable {
         if let expectedViewState = expectedContainer.viewState,
            let actualViewState = actualContainer.viewState
         {
-            XCTAssertNoDifference(expectedViewState, actualViewState)
+            XCTAssertNoDifference(
+                expectedViewState,
+                actualViewState,
+                file: file,
+                line: line
+            )
         }
     }
 
     private func assertViewStateNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
-        actual actualContainer: StateContainer<Reducer.Target>
+        actual actualContainer: StateContainer<Reducer.Target>,
+        file: StaticString,
+        line: UInt
     ) {
         if let expectedViewState = expectedContainer.viewState,
            let actualViewState = actualContainer.viewState
         {
             let expectedDump = String(customDumping: expectedViewState)
             let actualDump = String(customDumping: actualViewState)
-            XCTAssertNoDifference(expectedDump, actualDump)
+            XCTAssertNoDifference(
+                expectedDump,
+                actualDump,
+                file: file,
+                line: line
+            )
         }
     }
 
     private func assertReducerStateNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
-        actual actualContainer: StateContainer<Reducer.Target>
+        actual actualContainer: StateContainer<Reducer.Target>,
+        file: StaticString,
+        line: UInt
     ) where Reducer.ReducerState: Equatable {
         if let expected = expectedContainer._reducerState,
            let actual = actualContainer._reducerState
         {
-            XCTAssertNoDifference(expected, actual)
+            XCTAssertNoDifference(
+                expected,
+                actual,
+                file: file,
+                line: line
+            )
         }
     }
 
-    private func assertReducerNoDifference(
+    private func assertReducerStateNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
-        actual actualContainer: StateContainer<Reducer.Target>
+        actual actualContainer: StateContainer<Reducer.Target>,
+        file: StaticString,
+        line: UInt
     ) {
         if let expected = expectedContainer._reducerState,
            let actual = actualContainer._reducerState
         {
             let expectedDump = String(customDumping: expected)
             let actualDump = String(customDumping: actual)
-            XCTAssertNoDifference(expectedDump, actualDump)
+            XCTAssertNoDifference(
+                expectedDump,
+                actualDump,
+                file: file,
+                line: line
+            )
         }
     }
 }
