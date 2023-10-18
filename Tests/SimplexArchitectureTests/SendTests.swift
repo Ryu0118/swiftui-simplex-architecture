@@ -1,5 +1,5 @@
-import SwiftUI
 @testable import SimplexArchitecture
+import SwiftUI
 import XCTest
 
 @MainActor
@@ -7,7 +7,7 @@ final class SendTests: XCTestCase {
     func testNormalSend() {
         let isCalled = LockIsolated(false)
         let send: Send<EmptyReducer> = Send { _ in
-            isCalled.setValue(true);
+            isCalled.setValue(true)
             return .never
         }
         send(.test)
@@ -17,7 +17,7 @@ final class SendTests: XCTestCase {
     func testAnimationSend() {
         let isCalled = LockIsolated(false)
         let send: Send<EmptyReducer> = Send { _ in
-            isCalled.setValue(true);
+            isCalled.setValue(true)
             return .never
         }
         send(.test, animation: .default)
@@ -27,7 +27,7 @@ final class SendTests: XCTestCase {
     func testTransactionSend() {
         let isCalled = LockIsolated(false)
         let send: Send<EmptyReducer> = Send { _ in
-            isCalled.setValue(true);
+            isCalled.setValue(true)
             return .never
         }
         send(.test, transaction: .init(animation: .default))
@@ -42,8 +42,8 @@ struct EmptyReducer {
     }
 
     func reduce(
-        into state: StateContainer<EmptyViewState>,
-        action: Action
+        into _: StateContainer<EmptyViewState>,
+        action _: Action
     ) -> SideEffect<EmptyReducer> {
         .none
     }

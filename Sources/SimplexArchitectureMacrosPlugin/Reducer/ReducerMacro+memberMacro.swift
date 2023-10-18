@@ -145,7 +145,7 @@ public struct ReducerMacro: MemberMacro {
                         diagnostics: [
                             ReducerMacroDiagnostic
                                 .actionMustBeEnum(actionName: name)
-                                .diagnose(at: hasName)
+                                .diagnose(at: hasName),
                         ]
                     )
                 }
@@ -285,7 +285,7 @@ private extension [EnumCaseElementSyntax] {
         var counts: [String: Int] = [:]
 
         for item in self {
-            if let parameterClause = item.parameterClause, parameterClause.parameters.compactMap(\.firstName).isEmpty 
+            if let parameterClause = item.parameterClause, parameterClause.parameters.compactMap(\.firstName).isEmpty
             {
                 /*
                  public enum ViewAction {

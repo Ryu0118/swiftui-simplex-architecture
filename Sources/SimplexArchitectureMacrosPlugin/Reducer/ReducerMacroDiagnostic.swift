@@ -33,7 +33,7 @@ extension ReducerMacroDiagnostic: DiagnosticMessage {
         case .noMatchInheritanceClause:
             "The inheritance clause must match between ViewAction and ReducerAction"
 
-        case .actionMustBeEnum(let actionName):
+        case let .actionMustBeEnum(actionName):
             "\(actionName) must be enum"
         }
     }
