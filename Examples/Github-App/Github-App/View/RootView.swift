@@ -74,7 +74,7 @@ struct RootView: View {
     @State var searchText = ""
     @State var isLoading = false
     @State var repositories: [Repository] = []
-    @State var alertState: AlertState<Reducer.ReducerAction>?
+    @State var alertState: AlertState<Reducer.Action>?
 
     let store: Store<RootReducer> = Store(reducer: RootReducer())
 

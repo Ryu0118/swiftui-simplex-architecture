@@ -4,7 +4,7 @@ import SwiftUI
 public extension View {
     func confirmationDialog<Target: ActionSendable>(
         target: Target,
-        unwrapping value: Binding<ConfirmationDialogState<Target.Reducer.ViewAction>?>
+        unwrapping value: Binding<ConfirmationDialogState<Target.Reducer.Action>?>
     ) -> some View {
         confirmationDialog(
             value.wrappedValue.flatMap { Text($0.title) } ?? Text(""),
@@ -17,38 +17,7 @@ public extension View {
                         switch button.action.type {
                         case let .send(action):
                             if let action = action {
-                                target.send(action)
-                            }
-                        case let .animatedSend(action, animation):
-                            if let action = action {
-                                target.send(action, animation: animation)
-                            }
-                        }
-                    } label: {
-                        Text(button.label)
-                    }
-                }
-            },
-            message: { $0.message.map { Text($0) } }
-        )
-    }
-
-    func confirmationDialog<Target: ActionSendable>(
-        target: Target,
-        unwrapping value: Binding<ConfirmationDialogState<Target.Reducer.ReducerAction>?>
-    ) -> some View {
-        confirmationDialog(
-            value.wrappedValue.flatMap { Text($0.title) } ?? Text(""),
-            isPresented: value.isPresent(),
-            titleVisibility: value.wrappedValue.map { .init($0.titleVisibility) } ?? .automatic,
-            presenting: value.wrappedValue,
-            actions: { confirmationDialogState in
-                ForEach(confirmationDialogState.buttons) { button in
-                    Button(role: button.role.map(ButtonRole.init)) {
-                        switch button.action.type {
-                        case let .send(action):
-                            if let action = action {
-                                _ = target.store.send(action, target: target)
+                                target.store.send(action, target: target)
                             }
                         case let .animatedSend(action, animation):
                             if let action = action {
