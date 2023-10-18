@@ -16,7 +16,8 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
         case sendAction(Reducer.Action)
         case serialAction([Reducer.Action])
         case concurrentAction([Reducer.Action])
-        case runEffects([SideEffect<Reducer>])
+        case serialEffect([SideEffect<Reducer>])
+        case concurrentEffect([SideEffect<Reducer>])
     }
 
     // The kind of side effect.
@@ -97,13 +98,23 @@ public extension SideEffect {
         .init(effectKind: .serialAction(actions))
     }
 
-    /// Creates a side effect that runs a list of other side effects.
+    /// Creates a side effect that run serially with an array of side effects.
     ///
     /// - Parameter effects: An array of `SideEffect` instances to run.
     ///
     /// - Returns: A side effect that represents running the specified side effects.
     @inlinable
-    static func runEffects(_ effects: [SideEffect<Reducer>]) -> Self {
-        .init(effectKind: .runEffects(effects))
+    static func serial(_ effects: SideEffect<Reducer>...) -> Self {
+        .init(effectKind: .serialEffect(effects))
+    }
+
+    /// Creates a side effect that run concurrently with an array of side effects.
+    ///
+    /// - Parameter effects: An array of `SideEffect` instances to run.
+    ///
+    /// - Returns: A side effect that represents running the specified side effects.
+    @inlinable
+    static func concurrent(_ effects: SideEffect<Reducer>...) -> Self {
+        .init(effectKind: .concurrentEffect(effects))
     }
 }

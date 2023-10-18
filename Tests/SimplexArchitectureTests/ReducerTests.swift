@@ -126,6 +126,28 @@ final class ReducerTests: XCTestCase {
             $0.count = 1
         }
     }
+
+    func testSerialEffects() async {
+        let testStore = TestView().testStore(viewState: .init())
+        await testStore.send(.runEffectsSerially)
+        await testStore.receive(.increment) {
+            $0.count = 1
+        }
+        await testStore.receive(.decrement) {
+            $0.count = 0
+        }
+        await testStore.receive(.increment) {
+            $0.count = 1
+        }
+    }
+
+    func testConcurrentEffects() async {
+        let testStore = TestView().testStore(viewState: .init())
+        await testStore.send(.runEffectsConcurrently)
+        await testStore.receiveWithoutStateCheck(.increment)
+        await testStore.receiveWithoutStateCheck(.decrement)
+        await testStore.receiveWithoutStateCheck(.increment)
+    }
 }
 
 struct TestDependency: DependencyKey {
@@ -171,6 +193,8 @@ private struct TestReducer {
         case send
         case runEffectWithDependencies
         case testDependencies
+        case runEffectsSerially
+        case runEffectsConcurrently
     }
 
     @Dependency(\.continuousClock) private var clock
@@ -235,6 +259,28 @@ private struct TestReducer {
                 try await test.asyncThrows()
                 await send(.increment)
             }
+
+        case .runEffectsSerially:
+            return .serial(
+                .run { send in
+                    await send(.increment)
+                },
+                .send(.decrement),
+                .run { send in
+                    await send(.increment)
+                }
+            )
+
+        case .runEffectsConcurrently:
+            return .concurrent(
+                .run { send in
+                    await send(.increment)
+                },
+                .send(.decrement),
+                .run { send in
+                    await send(.increment)
+                }
+            )
         }
     }
 }

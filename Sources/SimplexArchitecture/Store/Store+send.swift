@@ -176,9 +176,23 @@ extension Store {
             }
             return [SendTask(task: task)]
 
-        case let .runEffects(effects):
+        case let .serialEffect(effects):
+            let task = Task.detached {
+                for effect in effects {
+                    await self.reduce(tasks: self.runEffect(effect, send: send)).wait()
+                }
+            }
+            return [SendTask(task: task)]
+
+        case let .concurrentEffect(effects):
             return effects.reduce(into: [SendTask]()) { partialResult, effect in
-                partialResult += runEffect(effect, send: send)
+                partialResult.append(
+                    SendTask(
+                        task: Task.detached {
+                            await self.reduce(tasks: self.runEffect(effect, send: send)).wait()
+                        }
+                    )
+                )
             }
 
         case .none:
