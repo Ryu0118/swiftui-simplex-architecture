@@ -13,6 +13,46 @@ final class ReducerMacroTests: XCTestCase {
         }
     }
 
+    func testActionMustBeEnum() {
+        assertMacro {
+            """
+            @Reducer
+            public struct MyReducer {
+                public struct ViewAction {}
+            }
+            """
+        } matches: {
+            """
+            @Reducer
+            public struct MyReducer {
+                public struct ViewAction {}
+                ┬──────────────────────────
+                ╰─ 🛑 ViewAction must be enum
+            }
+            """
+        }
+
+        assertMacro {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction {}
+                public struct ReducerAction {}
+            }
+            """
+        } matches: {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction {}
+                public struct ReducerAction {}
+                ┬─────────────────────────────
+                ╰─ 🛑 ReducerAction must be enum
+            }
+            """
+        }
+    }
+
     func testNoMatchInheritanceClause() {
         assertMacro {
             """
@@ -621,6 +661,52 @@ final class ReducerMacroTests: XCTestCase {
                                 self = .request
                             case .response(let arg1):
                                 self = .response(arg1)
+                            }
+                        }
+                }
+            }
+
+            extension MyReducer: ReducerProtocol {
+            }
+            """
+        }
+
+        assertMacro {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction {
+                    case decrement(arg1: String = "", arg2: Int? = nil)
+                }
+                public enum ReducerAction {
+                    case decrement(arg1: String = "")
+                }
+            }
+            """
+        } matches: {
+            """
+            public struct MyReducer {
+                public enum ViewAction {
+                    case decrement(arg1: String = "", arg2: Int? = nil)
+                }
+                public enum ReducerAction {
+                    case decrement(arg1: String = "")
+                }
+
+                public enum Action: ActionProtocol {
+                        case decrement(arg1: String = "", arg2: Int? = nil)
+
+                        case decrement(arg1: String = "")
+                        public init(viewAction: ViewAction) {
+                            switch viewAction {
+                            case .decrement(let arg1, let arg2):
+                                self = .decrement(arg1: arg1, arg2: arg2)
+                            }
+                        }
+                        public init(reducerAction: ReducerAction) {
+                            switch reducerAction {
+                            case .decrement(let arg1):
+                                self = .decrement(arg1: arg1)
                             }
                         }
                 }
