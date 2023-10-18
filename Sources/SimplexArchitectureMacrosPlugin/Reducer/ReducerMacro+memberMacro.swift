@@ -123,15 +123,31 @@ public struct ReducerMacro: MemberMacro {
         var viewAction: EnumDeclSyntax?
         var reducerAction: EnumDeclSyntax?
 
-        structDecl.memberBlock.members
-            .compactMap { $0.decl.as(EnumDeclSyntax.self) }
-            .forEach { enumDecl in
-                switch enumDecl.name.text {
-                case "ViewAction":
-                    viewAction = enumDecl
-                case "ReducerAction":
-                    reducerAction = enumDecl
-                default: return
+        try structDecl.memberBlock.members
+            .forEach {
+                guard let hasName = $0.hasName else {
+                    return
+                }
+
+                let name = hasName.name.text
+
+                if let enumDecl = $0.decl.as(EnumDeclSyntax.self) {
+                    switch name {
+                    case "ViewAction":
+                        viewAction = enumDecl
+                    case "ReducerAction":
+                        reducerAction = enumDecl
+                    default: return
+                    }
+                } else if name == "ViewAction" || name == "ReducerAction" {
+                    // ViewAction and ReducerAction must be enum
+                    throw DiagnosticsError(
+                        diagnostics: [
+                            ReducerMacroDiagnostic
+                                .actionMustBeEnum(actionName: name)
+                                .diagnose(at: hasName)
+                        ]
+                    )
                 }
             }
 

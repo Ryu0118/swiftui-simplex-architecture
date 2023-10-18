@@ -8,6 +8,7 @@ public enum ReducerMacroDiagnostic {
     case notStruct
     case duplicatedCase
     case noMatchInheritanceClause
+    case actionMustBeEnum(actionName: String)
 }
 
 extension ReducerMacroDiagnostic: DiagnosticMessage {
@@ -31,6 +32,9 @@ extension ReducerMacroDiagnostic: DiagnosticMessage {
 
         case .noMatchInheritanceClause:
             "The inheritance clause must match between ViewAction and ReducerAction"
+
+        case .actionMustBeEnum(let actionName):
+            "\(actionName) must be enum"
         }
     }
 
@@ -52,6 +56,9 @@ extension ReducerMacroDiagnostic: DiagnosticMessage {
 
         case .noMatchInheritanceClause:
             MessageID(domain: "ReducerMacroDiagnostic", id: "noMatchInheritanceClause")
+
+        case .actionMustBeEnum:
+            MessageID(domain: "ReducerMacroDiagnostic", id: "actionMustBeEnum")
         }
     }
 }
