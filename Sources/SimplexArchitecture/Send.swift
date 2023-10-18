@@ -1,3 +1,5 @@
+import SwiftUI
+
 /// A type that can send actions back into the system when used from run(priority:operation:catch:fileID:line:).
 public struct Send<Reducer: ReducerProtocol>: Sendable {
     @usableFromInline
@@ -12,7 +14,35 @@ public struct Send<Reducer: ReducerProtocol>: Sendable {
     @MainActor
     @discardableResult
     @inlinable
-    public func callAsFunction(_ action: Reducer.Action) -> SendTask {
+    public func callAsFunction(
+        _ action: Reducer.Action
+    ) -> SendTask {
         sendAction(action)
+    }
+
+    /// Sends an action back into the system from an effect.
+    @MainActor
+    @discardableResult
+    @inlinable
+    public func callAsFunction(
+        _ action: Reducer.Action,
+        animation: Animation?
+    ) -> SendTask {
+        withAnimation(animation) {
+            sendAction(action)
+        }
+    }
+
+    /// Sends an action back into the system from an effect.
+    @MainActor
+    @discardableResult
+    @inlinable
+    public func callAsFunction(
+        _ action: Reducer.Action,
+        transaction: Transaction
+    ) -> SendTask {
+        withTransaction(transaction) {
+            sendAction(action)
+        }
     }
 }
