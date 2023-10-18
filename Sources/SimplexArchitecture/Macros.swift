@@ -6,16 +6,7 @@
 /// ```
 /// @ViewState
 /// struct MyView: View {
-///     let store: Store<MyReducer>
-///
-///     init(authRepository: AuthRepository, selfRepository: SelfRepository) {
-///         store = Store(
-///             reducer: MyReducer(
-///                 authRepository: authRepository,
-///                 selfRepository: selfRepository
-///             )
-///         )
-///     }
+///     let store: Store<MyReducer> = Store(reducer: MyReducer())
 ///
 ///     var body: some View {
 ///         Text("MyView")

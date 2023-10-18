@@ -9,7 +9,7 @@ final class TaskResultTests: XCTestCase {
         switch result1 {
         case .success:
             XCTFail()
-        case .failure(let error):
+        case let .failure(error):
             XCTAssertTrue(error is CancellationError)
         }
 

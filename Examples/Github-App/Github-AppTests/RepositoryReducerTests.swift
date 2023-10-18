@@ -1,7 +1,7 @@
-import XCTest
 import Dependencies
-import SimplexArchitecture
 @testable import Github_App
+import SimplexArchitecture
+import XCTest
 
 @MainActor
 final class RepositoryReducerTests: XCTestCase {

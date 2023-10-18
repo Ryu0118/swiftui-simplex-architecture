@@ -48,15 +48,12 @@ public struct ViewStateMacro: MemberMacro {
                 }
             }
 
-        let modifier = declaration.modifiers
-            .compactMap { $0.as(DeclModifierSyntax.self)?.name.text }
-            .filter { $0 != "final" && $0 != "private" && $0 != "fileprivate" }
-            .first ?? "internal"
+        let accessModifier = declaration.modifiers.accessModifier
 
         return [
             DeclSyntax(
                 StructDeclSyntax(
-                    modifiers: [DeclModifierSyntax(name: .identifier(modifier))],
+                    modifiers: [DeclModifierSyntax(name: .identifier(accessModifier))],
                     name: "ViewState",
                     inheritanceClause: InheritanceClauseSyntax {
                         InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ViewStateProtocol"))
@@ -66,7 +63,7 @@ public struct ViewStateMacro: MemberMacro {
                     MemberBlockItemListSyntax {
                         MemberBlockItemSyntax(
                             decl: DeclSyntax(
-                                "\(raw: modifier) static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<\(raw: declaration.name ?? "")>] = [\(raw: keyPathPairs)]"
+                                "\(raw: accessModifier) static let keyPathMap: [PartialKeyPath<ViewState>: PartialKeyPath<\(raw: declaration.name ?? "")>] = [\(raw: keyPathPairs)]"
                             )
                         )
                     }

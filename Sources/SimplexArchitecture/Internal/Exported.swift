@@ -1,2 +1,2 @@
-@_exported import SwiftUINavigation
 @_exported import Dependencies
+@_exported import SwiftUINavigation

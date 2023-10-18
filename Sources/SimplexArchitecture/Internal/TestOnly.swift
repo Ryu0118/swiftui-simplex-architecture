@@ -10,17 +10,17 @@ struct TestOnly<T> {
     var wrappedValue: T {
         _read {
             #if DEBUG
-            if !isTesting {
-                runtimeWarning("\(Self.self) is accessible only during Unit tests")
-            }
+                if !isTesting {
+                    runtimeWarning("\(Self.self) is accessible only during Unit tests")
+                }
             #endif
             yield _value
         }
         set {
             #if DEBUG
-            if isTesting {
-                _value = newValue
-            }
+                if isTesting {
+                    _value = newValue
+                }
             #endif
         }
     }

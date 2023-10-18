@@ -22,7 +22,7 @@ public struct _DependenciesOverrideModifier<Base: ReducerProtocol>: ReducerModif
         _ keyPath: WritableKeyPath<DependencyValues, Value>,
         value: Value
     ) -> Self {
-        Self(base: self.base) { values in
+        Self(base: base) { values in
             values[keyPath: keyPath] = value
             override(&values)
         }

@@ -3,6 +3,7 @@ public struct Send<Reducer: ReducerProtocol>: Sendable {
     @usableFromInline
     let sendAction: @Sendable (Reducer.Action) -> SendTask
 
+    @usableFromInline
     init(sendAction: @Sendable @escaping (Reducer.Action) -> SendTask) {
         self.sendAction = sendAction
     }

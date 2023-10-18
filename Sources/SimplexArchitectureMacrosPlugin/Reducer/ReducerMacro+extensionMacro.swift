@@ -3,11 +3,11 @@ import SwiftSyntaxMacros
 
 extension ReducerMacro: ExtensionMacro {
     public static func expansion(
-        of node: SwiftSyntax.AttributeSyntax,
+        of _: SwiftSyntax.AttributeSyntax,
         attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
         providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
         conformingTo _: [SwiftSyntax.TypeSyntax],
-        in context: some SwiftSyntaxMacros.MacroExpansionContext
+        in _: some SwiftSyntaxMacros.MacroExpansionContext
     ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
         if let inheritedTypes = declaration.inheritanceClause?.inheritedTypes,
            inheritedTypes.contains(where: { inherited in

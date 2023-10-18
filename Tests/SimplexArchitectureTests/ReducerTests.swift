@@ -259,7 +259,7 @@ private struct MyReducer {
         case hoge
     }
 
-    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<MyReducer> {
+    func reduce(into _: StateContainer<MyView>, action _: Action) -> SideEffect<MyReducer> {
         .none
     }
 }

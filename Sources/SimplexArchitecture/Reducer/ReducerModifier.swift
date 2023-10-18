@@ -1,5 +1,5 @@
-import Foundation
 import Dependencies
+import Foundation
 
 /// Protocols for modifying Reducer behavior
 public protocol ReducerModifier<Base> {

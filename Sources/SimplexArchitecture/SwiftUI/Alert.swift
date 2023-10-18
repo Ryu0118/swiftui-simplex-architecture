@@ -6,7 +6,7 @@ public extension View {
         target: Target,
         unwrapping value: Binding<AlertState<Target.Reducer.ViewAction>?>
     ) -> some View {
-        self.alert(
+        alert(
             (value.wrappedValue?.title).map(Text.init) ?? Text(""),
             isPresented: value.isPresent(),
             presenting: value.wrappedValue,
@@ -36,7 +36,7 @@ public extension View {
         target: Target,
         unwrapping value: Binding<AlertState<Target.Reducer.ReducerAction>?>
     ) -> some View {
-        self.alert(
+        alert(
             (value.wrappedValue?.title).map(Text.init) ?? Text(""),
             isPresented: value.isPresent(),
             presenting: value.wrappedValue,

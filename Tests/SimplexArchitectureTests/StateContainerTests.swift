@@ -5,7 +5,7 @@ import XCTest
 final class StateContainerTests: XCTestCase {
     func testInitialize() throws {
         let container = StateContainer(TestView(), viewState: .init())
-        XCTAssertNotNil(container.entity)
+        XCTAssertNotNil(container.target)
         XCTAssertNotNil(container.viewState)
         XCTAssertNil(container._reducerState)
     }
@@ -22,7 +22,7 @@ final class StateContainerTests: XCTestCase {
     func testCopy() throws {
         let container = StateContainer(TestView(), viewState: .init(), reducerState: .init(count: 100))
         let copy = container.copy()
-        XCTAssertEqual(String(customDumping: container.entity), String(customDumping: copy.entity))
+        XCTAssertEqual(String(customDumping: container.target), String(customDumping: copy.target))
         XCTAssertEqual(String(customDumping: container.viewState), String(customDumping: copy.viewState))
         XCTAssertEqual(container.reducerState, copy.reducerState)
     }
