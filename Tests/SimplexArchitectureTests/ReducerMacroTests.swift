@@ -128,6 +128,34 @@ final class ReducerMacroTests: XCTestCase {
             }
             """
         }
+
+        assertMacro {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction {
+                    case increment
+                }
+                public enum ReducerAction {
+                    case increment(Int)
+                }
+            }
+            """
+        } matches: {
+            """
+            @Reducer
+            public struct MyReducer {
+                public enum ViewAction {
+                    case increment
+                }
+                public enum ReducerAction {
+                    case increment(Int)
+                         ┬────────
+                         ╰─ 🛑 Cannot have duplicate cases in ViewAction and ReducerAction
+                }
+            }
+            """
+        }
     }
 
     func testNotStruct() {

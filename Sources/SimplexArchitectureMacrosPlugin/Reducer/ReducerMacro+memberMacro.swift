@@ -269,8 +269,25 @@ private extension [EnumCaseElementSyntax] {
         var counts: [String: Int] = [:]
 
         for item in self {
-            counts[item.trimmedDescription, default: 0] += 1
-            map[item.trimmedDescription] = item
+            if let parameterClause = item.parameterClause, parameterClause.parameters.compactMap(\.firstName).isEmpty 
+            {
+                /*
+                 public enum ViewAction {
+                     case increment
+                 }
+                 public enum ReducerAction {
+                     case increment(Int)
+                          ┬────────
+                          ╰─ 🛑 Cannot have duplicate cases in ViewAction and ReducerAction
+                 }
+                 */
+                let noAssociatedValueCase = item.with(\.parameterClause, nil)
+                counts[noAssociatedValueCase.trimmedDescription, default: 0] += 1
+                map[noAssociatedValueCase.trimmedDescription] = noAssociatedValueCase
+            } else {
+                counts[item.trimmedDescription, default: 0] += 1
+                map[item.trimmedDescription] = item
+            }
         }
 
         return counts.filter { $1 > 1 }.compactMap { map[$0.key] }
