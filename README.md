@@ -14,6 +14,14 @@
   [![Twitter](https://img.shields.io/twitter/follow/ryu_hu03?style=social)](https://twitter.com/ryu_hu03)
 </div>
 
+This library is inspired by TCA ([swift-composable-architecture](https://github.com/pointfreeco/swift-composable-architecture)), which allows you to decouple the state change logic from the SwiftUI's View and ObservableObject and confine it within the Reducer.
+
+In TCA, integrating child domains into parent domains resulted in higher computational costs, especially at the leaf nodes of the app. Our library addresses this by avoiding the integration of child domains into parent domains, eliminating unnecessary computational overhead. To share values or logic with deeply nested views, we leverage SwiftUI's EnvironmentObject property wrapper. This allows you to seamlessly write logic or state that can be accessed throughout the app. Moreover, our library simplifies the app-building process. You no longer need to remember various TCA modifiers or custom views like ForEachStore, IfLetStore, SwitchStore, sheet(store:), and so on.
+
+## Examples
+We've provided example implementations within this library. Currently, we only feature a simple GitHub repository search app, but we plan to expand with more examples in the future.
+- [Github Repository Search App](https://github.com/Ryu0118/swiftui-simplex-architecture/Examples/Github-App)
+
 ## Installation
 ```Swift
 let package = Package(
@@ -33,8 +41,10 @@ let package = Package(
 )
 ```
 
-## Usage
 ### Basic Usage
+The usage is almost the same as in TCA.
+The only difference is the location of the State definition and the names of `StateContainer` and `SideEffect`, etc. are slightly different from TCA.
+State definitions are done with property wrappers used in SwiftUI, such as `@State`, `@Binding`, and `@FocusState`.
 ```Swift
 @Reducer
 struct MyReducer {
@@ -68,6 +78,64 @@ struct MyView: View {
             }
             Button("-") {
                 send(.decrement)
+            }
+        }
+    }
+}
+```
+Actions used in the View are defined using an enum called `ViewAction`. For actions that you'd like to keep private and are used exclusively within the `Reducer`, utilize the `ReducerAction`.
+
+### ReducerAction
+
+If there are Actions that you do not want to expose to View, ReducerAction is effective.
+This is the sample code:
+
+```Swift
+@Reducer
+struct MyReducer {
+    enum ViewAction {
+        case login
+    }
+
+    enum ReducerAction {
+        case loginResponse(TaskResult<Response>)
+    }
+
+    @Dependency(\.authClient) var authClient
+
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+        switch action {
+        case .login:
+            return .run { [email = state.email, password = state.password] send in
+                await send(
+                    .loginResponse(
+                        TaskResult { try await authClient.login(email, password) }
+                    )
+                )
+            }
+        case let .loginResponse(result):
+            ...
+            return .none
+        }
+    }
+}
+
+@ViewState
+struct MyView: View {
+    @State var email: String = ""
+    @State var password: String = ""
+
+    let store: Store<MyReducer>
+
+    init(authClient: AuthClient) {
+        store = Store(reducer: MyReducer())
+    }
+
+    var body: some View {
+        VStack {
+            ...
+            Button("Login") {
+                send(.login)
             }
         }
     }
@@ -131,63 +199,6 @@ struct MyView: View {
 }
 ```
 
-### ReducerAction
-
-If there are Actions that you do not want to expose to View, ReducerAction is effective.
-This is the sample code:
-
-```Swift
-@Reducer
-struct MyReducer {
-    enum ViewAction {
-        case login
-    }
-
-    enum ReducerAction {
-        case loginResponse(TaskResult<Response>)
-    }
-
-    @Dependency(\.authClient) var authClient
-
-    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
-        switch action {
-        case .login:
-            return .run { [email = state.email, password = state.password] send in
-                await send(
-                    .loginResponse(
-                        TaskResult { try await authClient.login(email, password) }
-                    )
-                )
-            }
-        case let .loginResponse(result):
-            ...
-            return .none
-        }
-    }
-}
-
-@ViewState
-struct MyView: View {
-    @State var email: String = ""
-    @State var password: String = ""
-
-    let store: Store<MyReducer>
-
-    init(authClient: AuthClient) {
-        store = Store(reducer: MyReducer())
-    }
-
-    var body: some View {
-        VStack {
-            ...
-            Button("Login") {
-                send(.login)
-            }
-        }
-    }
-}
-```
-
 ### Pullback Action
 
 If you want to send the Action of the child Reducer to the parent Reducer, use pullback.
@@ -207,6 +218,8 @@ struct ParentView: View {
 @Reducer
 struct ParentReducer {
     enum ViewAction {
+    }
+    enum ReducerAction {
         case child(ChildReducer.Action)
     }
 
