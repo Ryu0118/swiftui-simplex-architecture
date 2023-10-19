@@ -18,6 +18,10 @@ This library is inspired by TCA ([swift-composable-architecture](https://github.
 
 In TCA, integrating child domains into parent domains resulted in higher computational costs, especially at the leaf nodes of the app. Our library addresses this by avoiding the integration of child domains into parent domains, eliminating unnecessary computational overhead. To share values or logic with deeply nested views, we leverage SwiftUI's EnvironmentObject property wrapper. This allows you to seamlessly write logic or state that can be accessed throughout the app. Moreover, our library simplifies the app-building process. You no longer need to remember various TCA modifiers or custom views like ForEachStore, IfLetStore, SwitchStore, sheet(store:), and so on.
 
+## Examples
+We've provided example implementations within this library. Currently, we only feature a simple GitHub repository search app, but we plan to expand with more examples in the future.
+- [Github Repository Search App](https://github.com/Ryu0118/swiftui-simplex-architecture/Examples/Github-App)
+
 ## Installation
 ```Swift
 let package = Package(
