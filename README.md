@@ -41,8 +41,10 @@ let package = Package(
 )
 ```
 
-## Usage
 ### Basic Usage
+The usage is almost the same as in TCA.
+The only difference is the location of the State definition and the names of `StateContainer` and `SideEffect`, etc. are slightly different from TCA.
+State definitions are done with property wrappers used in SwiftUI, such as `@State`, `@Binding`, and `@FocusState`.
 ```Swift
 @Reducer
 struct MyReducer {
@@ -76,6 +78,64 @@ struct MyView: View {
             }
             Button("-") {
                 send(.decrement)
+            }
+        }
+    }
+}
+```
+Actions used in the View are defined using an enum called `ViewAction`. For actions that you'd like to keep private and are used exclusively within the `Reducer`, utilize the `ReducerAction`.
+
+### ReducerAction
+
+If there are Actions that you do not want to expose to View, ReducerAction is effective.
+This is the sample code:
+
+```Swift
+@Reducer
+struct MyReducer {
+    enum ViewAction {
+        case login
+    }
+
+    enum ReducerAction {
+        case loginResponse(TaskResult<Response>)
+    }
+
+    @Dependency(\.authClient) var authClient
+
+    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
+        switch action {
+        case .login:
+            return .run { [email = state.email, password = state.password] send in
+                await send(
+                    .loginResponse(
+                        TaskResult { try await authClient.login(email, password) }
+                    )
+                )
+            }
+        case let .loginResponse(result):
+            ...
+            return .none
+        }
+    }
+}
+
+@ViewState
+struct MyView: View {
+    @State var email: String = ""
+    @State var password: String = ""
+
+    let store: Store<MyReducer>
+
+    init(authClient: AuthClient) {
+        store = Store(reducer: MyReducer())
+    }
+
+    var body: some View {
+        VStack {
+            ...
+            Button("Login") {
+                send(.login)
             }
         }
     }
@@ -133,63 +193,6 @@ struct MyView: View {
             }
             Button("-") {
                 send(.decrement)
-            }
-        }
-    }
-}
-```
-
-### ReducerAction
-
-If there are Actions that you do not want to expose to View, ReducerAction is effective.
-This is the sample code:
-
-```Swift
-@Reducer
-struct MyReducer {
-    enum ViewAction {
-        case login
-    }
-
-    enum ReducerAction {
-        case loginResponse(TaskResult<Response>)
-    }
-
-    @Dependency(\.authClient) var authClient
-
-    func reduce(into state: StateContainer<MyView>, action: Action) -> SideEffect<Self> {
-        switch action {
-        case .login:
-            return .run { [email = state.email, password = state.password] send in
-                await send(
-                    .loginResponse(
-                        TaskResult { try await authClient.login(email, password) }
-                    )
-                )
-            }
-        case let .loginResponse(result):
-            ...
-            return .none
-        }
-    }
-}
-
-@ViewState
-struct MyView: View {
-    @State var email: String = ""
-    @State var password: String = ""
-
-    let store: Store<MyReducer>
-
-    init(authClient: AuthClient) {
-        store = Store(reducer: MyReducer())
-    }
-
-    var body: some View {
-        VStack {
-            ...
-            Button("Login") {
-                send(.login)
             }
         }
     }
