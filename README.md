@@ -14,6 +14,10 @@
   [![Twitter](https://img.shields.io/twitter/follow/ryu_hu03?style=social)](https://twitter.com/ryu_hu03)
 </div>
 
+This library is inspired by TCA ([swift-composable-architecture](https://github.com/pointfreeco/swift-composable-architecture)), which allows you to decouple the state change logic from the SwiftUI's View and ObservableObject and confine it within the Reducer.
+
+In TCA, integrating child domains into parent domains resulted in higher computational costs, especially at the leaf nodes of the app. Our library addresses this by avoiding the integration of child domains into parent domains, eliminating unnecessary computational overhead. To share values or logic with deeply nested views, we leverage SwiftUI's EnvironmentObject property wrapper. This allows you to seamlessly write logic or state that can be accessed throughout the app. Moreover, our library simplifies the app-building process. You no longer need to remember various TCA modifiers or custom views like ForEachStore, IfLetStore, SwitchStore, sheet(store:), and so on.
+
 ## Installation
 ```Swift
 let package = Package(
@@ -207,6 +211,8 @@ struct ParentView: View {
 @Reducer
 struct ParentReducer {
     enum ViewAction {
+    }
+    enum ReducerAction {
         case child(ChildReducer.Action)
     }
 
