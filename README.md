@@ -41,7 +41,7 @@ let package = Package(
 )
 ```
 
-### Basic Usage
+## Basic Usage
 The usage is almost the same as in TCA.
 State definitions use property wrappers used in SwiftUI, such as `@State`, `@Binding`, `@FocusState.`
 ```Swift
