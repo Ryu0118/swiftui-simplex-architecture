@@ -28,7 +28,7 @@ let package = Package(
     name: "YourProject",
     ...
     dependencies: [
-        .package(url: "https://github.com/Ryu0118/swiftui-simplex-architecture", exact: "0.7.0")
+        .package(url: "https://github.com/Ryu0118/swiftui-simplex-architecture", exact: "0.8.0")
     ],
     targets: [
         .target(
@@ -43,7 +43,7 @@ let package = Package(
 
 ### Basic Usage
 The usage is almost the same as in TCA.
-State definitions use property wrappers used in SwiftUI, such as `@State`, `@Binding`, `@FocusState.
+State definitions use property wrappers used in SwiftUI, such as `@State`, `@Binding`, `@FocusState.`
 ```Swift
 @Reducer
 struct MyReducer {
@@ -244,10 +244,10 @@ struct MyReducer {
     ...
 }
 ```
-Reducer.reduce(into:action:) no longer needs to be prepared for two actions, ViewAction and ReducerAction, but can be integrated into `Action`.
+`Reducer.reduce(into:action:)` no longer needs to be prepared for two actions, `ViewAction` and `ReducerAction`, but can be integrated into `Action`.
 
-### `@ViewState
-@ViewState creates a ViewState structure and conforms it to the ActionSendable protocol.
+### `@ViewState`
+`@ViewState` creates a `ViewState` structure and conforms it to the `ActionSendable` protocol.
 ```Swift
 @ViewState
 struct MyView: View {
