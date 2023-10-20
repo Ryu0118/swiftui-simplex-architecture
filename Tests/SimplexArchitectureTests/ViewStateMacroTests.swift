@@ -23,10 +23,10 @@ final class ViewStateMacroTests: XCTestCase {
         } matches: {
             """
             @ViewState
-            ┬─────────
-            ├─ 🛑 'ViewState' macro can only be applied to struct or class
-            ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             public actor Test {
+                         ┬───
+                         ├─ 🛑 'ViewState' macro can only be applied to struct or class
+                         ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             }
             """
         }
@@ -40,10 +40,10 @@ final class ViewStateMacroTests: XCTestCase {
         } matches: {
             """
             @ViewState
-            ┬─────────
-            ├─ 🛑 'ViewState' macro can only be applied to struct or class
-            ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             public protocol Test {
+                            ┬───
+                            ├─ 🛑 'ViewState' macro can only be applied to struct or class
+                            ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             }
             """
         }
@@ -57,7 +57,6 @@ final class ViewStateMacroTests: XCTestCase {
         } matches: {
             """
             @ViewState
-            ┬─────────
             ├─ 🛑 'ViewState' macro can only be applied to struct or class
             ╰─ 🛑 'ViewState' macro can only be applied to struct or class
             public extension Test {

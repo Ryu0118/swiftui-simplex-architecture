@@ -29,19 +29,31 @@ extension ViewStateMacroDiagnostic: DiagnosticMessage {
 }
 
 public extension ViewStateMacro {
-    static func decodeExpansion(
-        of syntax: AttributeSyntax,
-        attachedTo declaration: some DeclGroupSyntax,
-        in context: some MacroExpansionContext
-    ) -> Bool {
-        if declaration.as(StructDeclSyntax.self) != nil || declaration.as(ClassDeclSyntax.self) != nil {
-            return true
-        } else if declaration.as(ActorDeclSyntax.self) != nil
-            || declaration.as(ProtocolDeclSyntax.self) != nil
-            || declaration.as(ExtensionDeclSyntax.self) != nil
-        {
-            context.diagnose(ViewStateMacroDiagnostic.requiresStructOrClass.diagnose(at: syntax))
+    static func diagnoseDeclaration(
+        attachedTo declaration: some DeclGroupSyntax
+    ) throws {
+        guard declaration.as(StructDeclSyntax.self) == nil,
+              declaration.as(ClassDeclSyntax.self) == nil
+        else {
+            return
         }
-        return false
+
+        if let tokenName = declaration.hasName?.name {
+            throw DiagnosticsError(
+                diagnostics: [
+                    ViewStateMacroDiagnostic
+                        .requiresStructOrClass
+                        .diagnose(at: tokenName),
+                ]
+            )
+        } else {
+            throw DiagnosticsError(
+                diagnostics: [
+                    ViewStateMacroDiagnostic
+                        .requiresStructOrClass
+                        .diagnose(at: declaration),
+                ]
+            )
+        }
     }
 }
