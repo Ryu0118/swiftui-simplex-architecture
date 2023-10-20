@@ -9,7 +9,7 @@ final class RepositoryReducerTests: XCTestCase {
         let isCalled = LockIsolated(false)
 
         let store = RepositoryView(repository: .stub)
-            .testStore(viewState: .init(repository: .stub)) {
+            .testStore(viewState: .init()) {
                 $0.openURL = .init { _ in isCalled.setValue(true); return true }
             }
 

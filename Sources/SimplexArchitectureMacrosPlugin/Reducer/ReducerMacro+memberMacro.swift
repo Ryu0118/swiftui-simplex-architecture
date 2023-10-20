@@ -30,17 +30,28 @@ public struct ReducerMacro: MemberMacro {
             reducerAccessModifier: reducerAccessModifier
         )
 
-        let modifiedReducerAction: [MemberBlockItemListSyntax.Element] = if let reducerAction {
+        let modifiedReducerAction: EnumDeclSyntax = if let reducerAction {
             changeAnyNestedDeclToTypealias(
                 action: reducerAction,
                 reducerAccessModifier: reducerAccessModifier
             )
         } else {
-            []
+            EnumDeclSyntax(
+                modifiers: [DeclModifierSyntax(name: .identifier(reducerAccessModifier))],
+                name: .identifier("ReducerAction")
+            ) {}
         }
 
-        let viewActionToAction = mapToAction(from: viewAction, switchTarget: "viewAction")
-        let reducerActionToAction = mapToAction(from: reducerAction, switchTarget: "reducerAction")
+        let viewActionToAction = mapToActionInitializer(
+            from: viewAction,
+            switchTarget: "viewAction",
+            accessModifier: reducerAccessModifier
+        )
+        let reducerActionToAction = mapToActionInitializer(
+            from: reducerAction,
+            switchTarget: "reducerAction",
+            accessModifier: reducerAccessModifier
+        )
 
         let emptyReducerAction: DeclSyntax? = if reducerAction == nil {
             DeclSyntax(
@@ -61,41 +72,28 @@ public struct ReducerMacro: MemberMacro {
                     name: .identifier("Action"),
                     inheritanceClause: InheritanceClauseSyntax {
                         (viewAction.inheritanceClause?.inheritedTypes ?? []) +
-                            [InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ActionProtocol"))]
+                        [InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ActionProtocol"))]
                     }
                 ) {
                     MemberBlockItemListSyntax {
-                        MemberBlockItemSyntax(
-                            decl: DeclSyntax(
-                                """
-                                \(raw: modifiedViewAction.map(\.description).joined())
-                                \(raw: modifiedReducerAction.map(\.description).joined())
-                                """
-                            )
+                        // case
+                        DeclSyntax(
+                            """
+                            \(raw: modifiedViewAction.memberBlock.members
+                                .map(\.description)
+                                .joined())
+                            \(raw: modifiedReducerAction.memberBlock.members
+                                .map(\.description)
+                                .joined())
+                            """
                         )
 
-                        MemberBlockItemSyntax(
-                            decl: DeclSyntax(
-                                """
-                                \(raw: reducerAccessModifier) init(viewAction: ViewAction) {
-                                    \(raw: viewActionToAction)
-                                }
-                                """
-                            ).formatted().cast(DeclSyntax.self)
-                        )
-
-                        MemberBlockItemSyntax(
-                            decl: DeclSyntax(
-                                """
-                                \(raw: reducerAccessModifier) init(reducerAction: ReducerAction) {
-                                    \(raw: reducerActionToAction)
-                                }
-                                """
-                            ).formatted().cast(DeclSyntax.self)
-                        )
+                        viewActionToAction
+                        reducerActionToAction
                     }
                 }
-            ),
+                    .formatted().cast(EnumDeclSyntax.self)
+            ).formatted().cast(DeclSyntax.self),
         ].compactMap { $0 }
     }
 
@@ -203,24 +201,44 @@ public struct ReducerMacro: MemberMacro {
         return (viewAction, reducerAction)
     }
 
-    private static func changeAnyNestedDeclToTypealias(action: EnumDeclSyntax, reducerAccessModifier: String) -> [MemberBlockItemListSyntax.Element] {
-        action.memberBlock.members.compactMap {
-            if let name = $0.hasName?.name.text,
-               !name.contains(action.name.text)
-            {
-                $0.with(
-                    \.decl,
-                    """
-                    \n\(raw: reducerAccessModifier) typealias \(raw: name) = \(raw: action.name.text).\(raw: name)
-                    """
-                )
-            } else {
-                $0
-            }
-        }
+    private static func changeAnyNestedDeclToTypealias(action: EnumDeclSyntax, reducerAccessModifier: String) -> EnumDeclSyntax {
+        action.with(
+            \.memberBlock,
+             action.memberBlock.with(
+                \.members,
+                 MemberBlockItemListSyntax(
+                    action.memberBlock.members.compactMap {
+                        if let name = $0.hasName?.name.text,
+                           !name.contains(action.name.text)
+                        {
+                            $0.with(
+                                \.decl,
+                                 DeclSyntax(
+                                    TypeAliasDeclSyntax(
+                                        modifiers: .init(arrayLiteral: DeclModifierSyntax(name: .identifier(reducerAccessModifier))),
+                                        name: .identifier(name),
+                                        initializer: TypeInitializerClauseSyntax(
+                                            value: IdentifierTypeSyntax(name: .identifier("\(action.name.text).\(name)"))
+                                        )
+                                    )
+                                 )
+                            )
+                        } else {
+                            $0
+                        }
+                    }
+                 )
+             )
+             .formatted()
+             .cast(MemberBlockSyntax.self)
+        )
     }
 
-    private static func mapToAction(from enumDecl: EnumDeclSyntax?, switchTarget: String) -> String {
+    private static func mapToActionInitializer(
+        from enumDecl: EnumDeclSyntax?,
+        switchTarget: String,
+        accessModifier: String
+    ) -> InitializerDeclSyntax {
         let cases = enumDecl?.caseElements.map { caseElement in
             if let parameters = caseElement.parameterClause?.parameters.compactMap({ $0.as(EnumCaseParameterSyntax.self) }) {
                 let argumentNames = parameters.enumerated().map { index, parameter in
@@ -248,15 +266,32 @@ public struct ReducerMacro: MemberMacro {
             }
         }.joined(separator: "\n")
 
-        return if let cases, let enumDecl, !enumDecl.caseElements.isEmpty {
-            """
-            switch \(switchTarget) {
-            \(cases)
+        return InitializerDeclSyntax(
+            modifiers: DeclModifierListSyntax {
+                DeclModifierSyntax(name: .identifier(accessModifier))
+            },
+            signature: FunctionSignatureSyntax(
+                parameterClause: FunctionParameterClauseSyntax {
+                    FunctionParameterSyntax(
+                        firstName: .identifier(switchTarget),
+                        type: IdentifierTypeSyntax(name: .identifier(enumDecl?.name.text ?? "ReducerAction"))
+                    )
+                }
+            ),
+            body: CodeBlockSyntax {
+                if let cases, let enumDecl, !enumDecl.caseElements.isEmpty {
+                    """
+                    switch \(raw: switchTarget) {
+                    \(raw: cases)
+                    }
+                    """
+                } else {
+                    "fatalError()"
+                }
             }
-            """
-        } else {
-            "fatalError()"
-        }
+        )
+        .formatted()
+        .cast(InitializerDeclSyntax.self)
     }
 }
 

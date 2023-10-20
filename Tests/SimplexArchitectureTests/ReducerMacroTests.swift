@@ -354,10 +354,10 @@ final class ReducerMacroTests: XCTestCase {
                 }
 
                  enum Action: Equatable , ActionProtocol {
-                 init(viewAction: ViewAction) {
+                     init(viewAction: ViewAction) {
                         fatalError()
                     }
-                 init(reducerAction: ReducerAction) {
+                     init(reducerAction: ReducerAction) {
                         fatalError()
                     }
                 }
@@ -577,7 +577,7 @@ final class ReducerMacroTests: XCTestCase {
 
                 public enum Action: ActionProtocol {
                         case alert(Alert)
-                public typealias Alert = ViewAction.Alert
+                        public typealias Alert = ViewAction.Alert
 
                         case request
                         case response(TaskResult<VoidSuccess>)

@@ -8,16 +8,14 @@ public struct ViewStateMacro: MemberMacro {
         Declaration: DeclGroupSyntax,
         Context: MacroExpansionContext
     >(
-        of node: AttributeSyntax,
+        of _: AttributeSyntax,
         providingMembersOf declaration: Declaration,
-        in context: Context
+        in _: Context
     ) throws -> [DeclSyntax] {
-        guard decodeExpansion(of: node, attachedTo: declaration, in: context) else {
-            return []
-        }
+        try diagnoseDeclaration(attachedTo: declaration)
 
         // SwiftUI's propertyWrapper
-        let detecting = [
+        let detectingPropertyWrapper = [
             "State",
             "Binding",
             "ObservableState",
@@ -32,7 +30,7 @@ public struct ViewStateMacro: MemberMacro {
         ]
 
         let viewState = declaration.variables
-            .filter(propertyWrappers: detecting)
+            .filter(propertyWrappers: detectingPropertyWrapper)
             .map { $0.with(\.attributes, []).with(\.modifiers, []) }
 
         let keyPathPairs = viewState

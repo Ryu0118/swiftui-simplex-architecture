@@ -7,6 +7,10 @@ struct RepositoryReducer {
         case onOpenURLButtonTapped
     }
 
+    struct ReducerState {
+        let url: String
+    }
+
     @Dependency(\.openURL) private var openURL
 
     func reduce(
@@ -16,7 +20,7 @@ struct RepositoryReducer {
         switch action {
         case .onOpenURLButtonTapped:
             return .run { _ in
-                await openURL(URL(string: state.repository.url)!)
+                await openURL(URL(string: state.reducerState.url)!)
             }
         }
     }
@@ -24,12 +28,15 @@ struct RepositoryReducer {
 
 @ViewState
 struct RepositoryView: View {
-    @State var repository: Repository
-
-    let store: Store<RepositoryReducer> = Store(reducer: RepositoryReducer())
+    let store: Store<RepositoryReducer>
+    let repository: Repository
 
     init(repository: Repository) {
         self.repository = repository
+        self.store = Store(
+            reducer: RepositoryReducer(),
+            initialReducerState: RepositoryReducer.ReducerState(url: repository.url)
+        )
     }
 
     var body: some View {

@@ -18,6 +18,7 @@ public final class Store<Reducer: ReducerProtocol> {
     // Buffer to store Actions recurrently invoked through SideEffect in a single Action sent from View
     @TestOnly
     var sentFromEffectActions: [ActionTransition<Reducer>] = []
+
     var _send: Send<Reducer>?
     var initialReducerState: (() -> Reducer.ReducerState)?
     let reduce: (StateContainer<Reducer.Target>, Reducer.Action) -> SideEffect<Reducer>

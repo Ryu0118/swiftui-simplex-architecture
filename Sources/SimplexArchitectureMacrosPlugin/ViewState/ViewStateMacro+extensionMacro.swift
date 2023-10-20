@@ -3,15 +3,13 @@ import SwiftSyntaxMacros
 
 extension ViewStateMacro: ExtensionMacro {
     public static func expansion(
-        of node: SwiftSyntax.AttributeSyntax,
+        of _: SwiftSyntax.AttributeSyntax,
         attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
         providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
         conformingTo _: [SwiftSyntax.TypeSyntax],
-        in context: some SwiftSyntaxMacros.MacroExpansionContext
+        in _: some SwiftSyntaxMacros.MacroExpansionContext
     ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
-        guard decodeExpansion(of: node, attachedTo: declaration, in: context) else {
-            return []
-        }
+        try diagnoseDeclaration(attachedTo: declaration)
 
         if let inheritedTypes = declaration.inheritanceClause?.inheritedTypes,
            inheritedTypes.contains(where: { inherited in
