@@ -20,7 +20,7 @@ In TCA, integrating child domains into parent domains resulted in higher computa
 
 ## Examples
 We've provided example implementations within this library. Currently, we only feature a simple GitHub repository search app, but we plan to expand with more examples in the future.
-- [Github Repository Search App](https://github.com/Ryu0118/swiftui-simplex-architecture/Examples/Github-App)
+- [Github Repository Search App](https://github.com/Ryu0118/swiftui-simplex-architecture/tree/main/Examples/Github-App)
 
 ## Installation
 ```Swift
@@ -312,7 +312,7 @@ func testReducer() async {
     }
 }
 ```
-If you're using swift-dependencies, you can perform dependency injection as follows:
+If you're using [swift-dependencies](https://github.com/pointfreeco/swift-dependencies), you can perform dependency injection as follows:
 ```Swift
 let store = MyView().testStore(viewState: .init()) {
     $0.apiClient.fetchData = { _ in ... }
