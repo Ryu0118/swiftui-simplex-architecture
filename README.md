@@ -82,7 +82,7 @@ struct MyView: View {
     }
 }
 ```
-Actions used in the View are defined using an enum called `ViewAction`. For actions that you'd like to keep private and are used exclusively within the `Reducer`, utilize the `ReducerAction`.
+Events from the View are defined using ViewAction. Actions that should be kept private or used only in the Reducer should use ReducerAction.
 
 ### ReducerAction
 
