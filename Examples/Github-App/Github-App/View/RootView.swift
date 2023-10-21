@@ -18,7 +18,7 @@ struct RootReducer {
     }
 
     enum CancelID {
-        case fetchRequest
+        case response
     }
 
     @Dependency(\.repositoryClient.fetchRepositories) var fetchRepositories
@@ -33,8 +33,8 @@ struct RootReducer {
             } else {
                 return .send(.queryChangeDebounced)
                     .debounce(
-                        id: CancelID.fetchRequest,
-                        for: .seconds(0.3), 
+                        id: CancelID.response,
+                        for: .seconds(0.3),
                         clock: clock
                     )
             }

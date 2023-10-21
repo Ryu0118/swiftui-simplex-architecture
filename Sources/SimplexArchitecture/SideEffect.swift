@@ -129,13 +129,13 @@ public extension SideEffect {
         for duration: Duration,
         clock: any Clock<Duration>
     ) -> Self {
-        switch self.kind {
+        switch kind {
         case .none, .debounce:
             self
         default:
             .init(
                 effectKind: .debounce(
-                    base: self.kind,
+                    base: kind,
                     id: AnyHashable(id),
                     sleep: {
                         try await clock.sleep(for: duration)

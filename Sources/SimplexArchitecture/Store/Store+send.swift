@@ -197,7 +197,7 @@ extension Store {
 
         case let .debounce(base, id, sleep):
             cancellableTasks[id]?.cancel()
-            let cancellableTask =  Task.withEffectContext {
+            let cancellableTask = Task.withEffectContext {
                 try? await sleep()
                 guard !Task.isCancelled else { return }
                 await reduce(tasks: runEffect(base, send: send)).wait()
