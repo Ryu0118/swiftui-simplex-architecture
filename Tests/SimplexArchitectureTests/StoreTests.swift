@@ -241,3 +241,13 @@ private struct TestView: View {
         EmptyView()
     }
 }
+
+extension Store {
+    @_disfavoredOverload
+    func runEffect(
+        _ sideEffect: SideEffect<Reducer>,
+        send: Send<Reducer>
+    ) -> [SendTask] {
+        runEffect(sideEffect.kind, send: send)
+    }
+}
