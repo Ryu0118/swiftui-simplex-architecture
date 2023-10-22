@@ -122,6 +122,16 @@ public extension SideEffect {
 }
 
 public extension SideEffect {
+    /// Turns an side effect into one that can be debounced.
+    ///
+    /// debounce is an operator that plays only the last event in a sequence of SideEffects that have been issued for more than a certain time interval.
+    /// To turn an effect into a debounce-able one you must provide an identifier, which is used to determine which in-flight effect should be canceled in order to start a new effect.
+    ///
+    /// - Parameters:
+    ///   - id: The effect's identifier.
+    ///   - duration: The duration you want to debounce for.
+    ///   - clock: A clock conforming to the `Clock` protocol, used to measure the passing of time for the debounce duration.
+    /// - Returns: A debounced version of the effect.
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     @inlinable
     func debounce(

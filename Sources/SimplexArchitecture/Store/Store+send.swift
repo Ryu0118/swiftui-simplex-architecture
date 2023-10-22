@@ -199,7 +199,9 @@ extension Store {
             cancellableTasks[id]?.cancel()
             let cancellableTask = Task.withEffectContext {
                 try? await sleep()
-                guard !Task.isCancelled else { return }
+                guard !Task.isCancelled else {
+                    return
+                }
                 await reduce(tasks: runEffect(base, send: send)).wait()
             }
             cancellableTasks.updateValue(cancellableTask, forKey: id)

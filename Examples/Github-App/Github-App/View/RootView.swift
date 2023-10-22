@@ -5,6 +5,7 @@ import SwiftUI
 struct RootReducer {
     enum ViewAction: Equatable {
         case textChanged
+        case onAppear
     }
 
     enum ReducerAction: Equatable {
@@ -26,6 +27,9 @@ struct RootReducer {
 
     func reduce(into state: StateContainer<RootView>, action: Action) -> SideEffect<Self> {
         switch action {
+        case .onAppear:
+            return fetchRepositories(query: "Swift")
+
         case .textChanged:
             if state.searchText.isEmpty {
                 state.repositories = []
@@ -116,6 +120,9 @@ struct RootView: View {
                 send(.textChanged)
             }
             .alert(target: self, unwrapping: $alertState)
+            .onAppear {
+                send(.onAppear)
+            }
         }
     }
 }
