@@ -196,16 +196,32 @@ extension Store {
             }
 
         case let .debounce(base, id, sleep):
-            cancellableTasks[id]?.cancel()
-            let cancellableTask = Task.withEffectContext {
+            let cancellableTask = withCancellableTask(
+                id: id,
+                cancelInFlight: true
+            ) {
                 try? await sleep()
                 guard !Task.isCancelled else {
                     return
                 }
-                await reduce(tasks: runEffect(base, send: send)).wait()
+                await self.reduce(tasks: self.runEffect(base, send: send)).wait()
             }
-            cancellableTasks.updateValue(cancellableTask, forKey: id)
             return [SendTask(task: cancellableTask)]
+
+        case let .cancellable(base, id, cancelInFlight):
+            return [
+                SendTask(
+                    task: withCancellableTask(
+                        id: id,
+                        cancelInFlight: cancelInFlight,
+                        operation: reduce(tasks: runEffect(base, send: send)).wait
+                    )
+                ),
+            ]
+
+        case let .cancel(id):
+            cancellationStorage.cancel(id: id)
+            return []
 
         case .none:
             return []
@@ -217,5 +233,20 @@ extension Store {
         Send { [weak self] action in
             self?.send(action, container: container) ?? .never
         }
+    }
+
+    private func withCancellableTask(
+        id: AnyHashable,
+        cancelInFlight: Bool,
+        operation: @Sendable @escaping () async -> Void
+    ) -> Task<Void, Never> {
+        if cancelInFlight {
+            cancellationStorage.cancel(id: id)
+        }
+        let cancellableTask = Task {
+            await operation()
+        }
+        cancellationStorage.append(id: id, task: cancellableTask)
+        return cancellableTask
     }
 }

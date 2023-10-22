@@ -213,7 +213,6 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             line: line
         )
 
-        await Task.megaYield()
         return sendTask
     }
 
@@ -258,8 +257,6 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             file: file,
             line: line
         )
-
-        await Task.megaYield()
 
         return sendTask
     }
@@ -306,7 +303,6 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             line: line
         )
 
-        await Task.megaYield()
         return sendTask
     }
 
@@ -351,8 +347,6 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             file: file,
             line: line
         )
-
-        await Task.megaYield()
 
         return sendTask
     }

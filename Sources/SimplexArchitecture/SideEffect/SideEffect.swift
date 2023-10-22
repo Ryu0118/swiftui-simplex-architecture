@@ -18,7 +18,9 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
         case concurrentAction([Reducer.Action])
         case serialEffect([SideEffect<Reducer>])
         case concurrentEffect([SideEffect<Reducer>])
+        case cancel(id: AnyHashable)
         indirect case debounce(base: Self, id: AnyHashable, sleep: () async throws -> Void)
+        indirect case cancellable(base: Self, id: AnyHashable, cancelInFlight: Bool)
     }
 
     // The kind of side effect.
@@ -153,5 +155,47 @@ public extension SideEffect {
                 )
             )
         }
+    }
+
+    /// Transforms the `SideEffect` into a cancellable version, allowing it to be cancelled if another `SideEffect`
+    /// with the same identifier is triggered.
+    ///
+    /// - Parameters:
+    ///   - id: A `Hashable` identifier for the `SideEffect`. This is used to track and cancel in-flight `SideEffect` instances.
+    ///   - cancelInFlight: A Boolean value that determines whether in-flight `SideEffect` instances with the same identifier should be cancelled.
+    ///     If true, any existing `SideEffect` with the same identifier will be cancelled before this one is executed. Defaults to false.
+    ///
+    /// - Returns: A cancellable version of the `SideEffect`. If the `SideEffect` is already of a kind that does not support
+    ///   cancellation, or if it's already cancellable or debounced, the original `SideEffect` is returned unchanged.
+    @inlinable
+    func cancellable(
+        id: some Hashable,
+        cancelInFlight: Bool = false
+    ) -> Self {
+        switch kind {
+        case .none, .cancellable, .debounce:
+            self
+
+        default:
+            .init(
+                effectKind: .cancellable(
+                    base: kind,
+                    id: AnyHashable(id),
+                    cancelInFlight: cancelInFlight
+                )
+            )
+        }
+    }
+
+    /// Creates a `SideEffect` that cancels any in-flight `SideEffect` instances with the given identifier.
+    ///
+    /// - Parameter id: The identifier of the `SideEffect` instances to cancel.
+    ///
+    /// - Returns: A `SideEffect` instance that will cancel in-flight `SideEffect` instances.
+    @inlinable
+    static func cancel(
+        id: some Hashable
+    ) -> Self {
+        .init(effectKind: .cancel(id: id))
     }
 }

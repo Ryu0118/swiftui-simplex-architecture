@@ -19,7 +19,7 @@ public final class Store<Reducer: ReducerProtocol> {
     @TestOnly
     var sentFromEffectActions: [ActionTransition<Reducer>] = []
     // If debounce or cancel is used in SideEffect, the task is stored here
-    var cancellableTasks: [AnyHashable: Task<Void, Never>] = [:]
+    var cancellationStorage = CancellationStorage()
 
     var _send: Send<Reducer>?
     var initialReducerState: (() -> Reducer.ReducerState)?
@@ -55,9 +55,7 @@ public final class Store<Reducer: ReducerProtocol> {
     }
 
     deinit {
-        cancellableTasks.values.forEach { task in
-            task.cancel()
-        }
+        cancellationStorage.cancelAll()
     }
 
     @discardableResult
