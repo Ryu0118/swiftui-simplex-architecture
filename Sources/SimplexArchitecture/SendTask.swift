@@ -14,6 +14,7 @@ public struct SendTask: Sendable, Hashable {
     }
 
     /// Waits for the task to complete asynchronously.
+    @Sendable
     @inlinable
     public func wait() async {
         await withTaskCancellationHandler {

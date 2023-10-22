@@ -151,9 +151,10 @@ final class ReducerTests: XCTestCase {
 
     func testDebounced() async {
         let testStore = TestView().testStore(
-            viewState: .init()) {
-                $0.continuousClock = ImmediateClock()
-            }
+            viewState: .init())
+        {
+            $0.continuousClock = ImmediateClock()
+        }
 
         await testStore.send(.debounced)
         await testStore.receive(.increment) {
@@ -208,6 +209,13 @@ private struct TestReducer {
         case runEffectsSerially
         case runEffectsConcurrently
         case debounced
+        case cancellable
+        case cancel
+    }
+
+    enum CancelID {
+        case debounce
+        case cancellable
     }
 
     @Dependency(\.continuousClock) private var clock
@@ -296,13 +304,21 @@ private struct TestReducer {
             )
 
         case .debounced:
-            enum CancelID { case debounce }
             return .send(.increment)
                 .debounce(
                     id: CancelID.debounce,
                     for: .seconds(0.3),
                     clock: clock
                 )
+
+        case .cancellable:
+            return .run { _ in
+                try await test.asyncThrows()
+            }
+            .cancellable(id: CancelID.cancellable)
+
+        case .cancel:
+            return .cancel(id: CancelID.cancellable)
         }
     }
 }
