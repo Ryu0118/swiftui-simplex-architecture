@@ -33,7 +33,7 @@ struct RepositoryView: View {
 
     init(repository: Repository) {
         self.repository = repository
-        self.store = Store(
+        store = Store(
             reducer: RepositoryReducer(),
             initialReducerState: RepositoryReducer.ReducerState(url: repository.url)
         )

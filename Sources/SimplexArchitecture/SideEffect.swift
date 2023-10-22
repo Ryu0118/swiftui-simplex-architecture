@@ -18,9 +18,11 @@ public struct SideEffect<Reducer: ReducerProtocol>: Sendable {
         case concurrentAction([Reducer.Action])
         case serialEffect([SideEffect<Reducer>])
         case concurrentEffect([SideEffect<Reducer>])
+        indirect case debounce(base: Self, id: AnyHashable, sleep: () async throws -> Void)
     }
 
     // The kind of side effect.
+    @usableFromInline
     let kind: EffectKind
 
     @usableFromInline
@@ -116,5 +118,40 @@ public extension SideEffect {
     @inlinable
     static func concurrent(_ effects: SideEffect<Reducer>...) -> Self {
         .init(effectKind: .concurrentEffect(effects))
+    }
+}
+
+public extension SideEffect {
+    /// Turns an side effect into one that can be debounced.
+    ///
+    /// debounce is an operator that plays only the last event in a sequence of SideEffects that have been issued for more than a certain time interval.
+    /// To turn an effect into a debounce-able one you must provide an identifier, which is used to determine which in-flight effect should be canceled in order to start a new effect.
+    ///
+    /// - Parameters:
+    ///   - id: The effect's identifier.
+    ///   - duration: The duration you want to debounce for.
+    ///   - clock: A clock conforming to the `Clock` protocol, used to measure the passing of time for the debounce duration.
+    /// - Returns: A debounced version of the effect.
+    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+    @inlinable
+    func debounce(
+        id: some Hashable,
+        for duration: Duration,
+        clock: any Clock<Duration>
+    ) -> Self {
+        switch kind {
+        case .none, .debounce:
+            self
+        default:
+            .init(
+                effectKind: .debounce(
+                    base: kind,
+                    id: AnyHashable(id),
+                    sleep: {
+                        try await clock.sleep(for: duration)
+                    }
+                )
+            )
+        }
     }
 }

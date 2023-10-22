@@ -18,6 +18,8 @@ public final class Store<Reducer: ReducerProtocol> {
     // Buffer to store Actions recurrently invoked through SideEffect in a single Action sent from View
     @TestOnly
     var sentFromEffectActions: [ActionTransition<Reducer>] = []
+    // If debounce or cancel is used in SideEffect, the task is stored here
+    var cancellableTasks: [AnyHashable: Task<Void, Never>] = [:]
 
     var _send: Send<Reducer>?
     var initialReducerState: (() -> Reducer.ReducerState)?
@@ -50,6 +52,12 @@ public final class Store<Reducer: ReducerProtocol> {
     ) {
         reduce = reducer.reduce
         self.initialReducerState = initialReducerState
+    }
+
+    deinit {
+        cancellableTasks.values.forEach { task in
+            task.cancel()
+        }
     }
 
     @discardableResult

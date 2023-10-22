@@ -69,13 +69,27 @@ final class StoreTests: XCTestCase {
 
         let sendTasks7 = store.runEffect(.serial(.c3, .c4), send: send)
         XCTAssertEqual(sendTasks7.count, 1)
-        XCTAssertNotNil(sendTasks5.first?.task)
+        XCTAssertNotNil(sendTasks7.first?.task)
 
         let sendTasks8 = store.runEffect(.concurrent(.c3, .c4), send: send)
         XCTAssertEqual(sendTasks8.count, 2)
         for task in sendTasks8.map(\.task) {
             XCTAssertNotNil(task)
         }
+
+        let sendTasks9 = store.runEffect(.serial(.send(.c1), .send(.c2)), send: send)
+        XCTAssertEqual(sendTasks9.count, 1)
+        XCTAssertNotNil(sendTasks9.first?.task)
+
+        let sendTasks10 = store.runEffect(.concurrent(.send(.c1), .send(.c2)), send: send)
+        XCTAssertEqual(sendTasks10.count, 2)
+        for task in sendTasks10.map(\.task) {
+            XCTAssertNotNil(task)
+        }
+
+        let sendTasks11 = store.runEffect(.send(.c1).debounce(id: "test", for: .seconds(0.3), clock: ImmediateClock()), send: send)
+        XCTAssertEqual(sendTasks11.count, 1)
+        XCTAssertNotNil(sendTasks11.first?.task)
     }
 
     func testSendAction() async throws {
@@ -239,5 +253,15 @@ private struct TestView: View {
 
     var body: some View {
         EmptyView()
+    }
+}
+
+extension Store {
+    @_disfavoredOverload
+    func runEffect(
+        _ sideEffect: SideEffect<Reducer>,
+        send: Send<Reducer>
+    ) -> [SendTask] {
+        runEffect(sideEffect.kind, send: send)
     }
 }

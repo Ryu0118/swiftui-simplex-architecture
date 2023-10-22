@@ -72,7 +72,7 @@ public struct ReducerMacro: MemberMacro {
                     name: .identifier("Action"),
                     inheritanceClause: InheritanceClauseSyntax {
                         (viewAction.inheritanceClause?.inheritedTypes ?? []) +
-                        [InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ActionProtocol"))]
+                            [InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "ActionProtocol"))]
                     }
                 ) {
                     MemberBlockItemListSyntax {
@@ -92,7 +92,7 @@ public struct ReducerMacro: MemberMacro {
                         reducerActionToAction
                     }
                 }
-                    .formatted().cast(EnumDeclSyntax.self)
+                .formatted().cast(EnumDeclSyntax.self)
             ).formatted().cast(DeclSyntax.self),
         ].compactMap { $0 }
     }
@@ -204,16 +204,16 @@ public struct ReducerMacro: MemberMacro {
     private static func changeAnyNestedDeclToTypealias(action: EnumDeclSyntax, reducerAccessModifier: String) -> EnumDeclSyntax {
         action.with(
             \.memberBlock,
-             action.memberBlock.with(
+            action.memberBlock.with(
                 \.members,
-                 MemberBlockItemListSyntax(
+                MemberBlockItemListSyntax(
                     action.memberBlock.members.compactMap {
                         if let name = $0.hasName?.name.text,
                            !name.contains(action.name.text)
                         {
                             $0.with(
                                 \.decl,
-                                 DeclSyntax(
+                                DeclSyntax(
                                     TypeAliasDeclSyntax(
                                         modifiers: .init(arrayLiteral: DeclModifierSyntax(name: .identifier(reducerAccessModifier))),
                                         name: .identifier(name),
@@ -221,16 +221,16 @@ public struct ReducerMacro: MemberMacro {
                                             value: IdentifierTypeSyntax(name: .identifier("\(action.name.text).\(name)"))
                                         )
                                     )
-                                 )
+                                )
                             )
                         } else {
                             $0
                         }
                     }
-                 )
-             )
-             .formatted()
-             .cast(MemberBlockSyntax.self)
+                )
+            )
+            .formatted()
+            .cast(MemberBlockSyntax.self)
         )
     }
 

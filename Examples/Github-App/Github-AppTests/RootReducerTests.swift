@@ -4,14 +4,14 @@ import XCTest
 
 @MainActor
 final class RootReducerTests: XCTestCase {
-    func testSearchButtonTapped() async {
-        let store = makeStore(
-            repositoryClient: RepositoryClient(
-                fetchRepositories: { _ in [.stub] }
-            )
-        )
+    func testTextChanged() async {
+        let store = RootView().testStore(viewState: .init(searchText: "text")) {
+            $0.repositoryClient.fetchRepositories = { _ in [.stub] }
+            $0.continuousClock = ImmediateClock()
+        }
 
-        await store.send(.onSearchButtonTapped) {
+        await store.send(.textChanged)
+        await store.receive(.queryChangeDebounced) {
             $0.isLoading = true
         }
         await store.receive(.fetchRepositoriesResponse(.success([.stub]))) {
@@ -20,15 +20,15 @@ final class RootReducerTests: XCTestCase {
         }
     }
 
-    func testSearchButtonTappedWithFailure() async {
+    func testTextChangedWithFailure() async {
         let error = CancellationError()
-        let store = makeStore(
-            repositoryClient: RepositoryClient(
-                fetchRepositories: { _ in throw error }
-            )
-        )
+        let store = RootView().testStore(viewState: .init(searchText: "text")) {
+            $0.repositoryClient.fetchRepositories = { _ in throw error }
+            $0.continuousClock = ImmediateClock()
+        }
 
-        await store.send(.onSearchButtonTapped) {
+        await store.send(.textChanged)
+        await store.receive(.queryChangeDebounced) {
             $0.isLoading = true
         }
         await store.receive(.fetchRepositoriesResponse(.failure(error))) {
@@ -48,17 +48,10 @@ final class RootReducerTests: XCTestCase {
         }
     }
 
-    func testTextChanged() async {
+    func testEmptyTextChanged() async {
         let store = RootView().testStore(viewState: .init(repositories: [.stub]))
-        await store.send(.onTextChanged("test"))
-        await store.send(.onTextChanged("")) {
+        await store.send(.textChanged) {
             $0.repositories = []
-        }
-    }
-
-    func makeStore(repositoryClient: RepositoryClient) -> TestStore<RootReducer> {
-        RootView().testStore(viewState: .init()) {
-            $0.repositoryClient = repositoryClient
         }
     }
 }

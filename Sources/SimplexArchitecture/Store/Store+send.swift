@@ -91,7 +91,7 @@ extension Store {
             return .never
         } else {
             let send = _send ?? makeSend(for: container)
-            let tasks = runEffect(sideEffect, send: send)
+            let tasks = runEffect(sideEffect.kind, send: send)
 
             return reduce(tasks: tasks)
         }
@@ -128,10 +128,10 @@ extension Store {
     }
 
     func runEffect(
-        _ sideEffect: borrowing SideEffect<Reducer>,
+        _ sideEffect: SideEffect<Reducer>.EffectKind,
         send: Send<Reducer>
     ) -> [SendTask] {
-        switch sideEffect.kind {
+        switch sideEffect {
         case let .run(priority, operation, `catch`):
             let task = Task.withEffectContext(priority: priority ?? .medium) {
                 do {
@@ -179,7 +179,7 @@ extension Store {
         case let .serialEffect(effects):
             let task = Task.detached {
                 for effect in effects {
-                    await self.reduce(tasks: self.runEffect(effect, send: send)).wait()
+                    await self.reduce(tasks: self.runEffect(effect.kind, send: send)).wait()
                 }
             }
             return [SendTask(task: task)]
@@ -189,11 +189,23 @@ extension Store {
                 partialResult.append(
                     SendTask(
                         task: Task.detached {
-                            await self.reduce(tasks: self.runEffect(effect, send: send)).wait()
+                            await self.reduce(tasks: self.runEffect(effect.kind, send: send)).wait()
                         }
                     )
                 )
             }
+
+        case let .debounce(base, id, sleep):
+            cancellableTasks[id]?.cancel()
+            let cancellableTask = Task.withEffectContext {
+                try? await sleep()
+                guard !Task.isCancelled else {
+                    return
+                }
+                await reduce(tasks: runEffect(base, send: send)).wait()
+            }
+            cancellableTasks.updateValue(cancellableTask, forKey: id)
+            return [SendTask(task: cancellableTask)]
 
         case .none:
             return []

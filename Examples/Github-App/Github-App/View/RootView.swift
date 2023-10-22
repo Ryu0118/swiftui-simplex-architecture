@@ -4,32 +4,51 @@ import SwiftUI
 @Reducer
 struct RootReducer {
     enum ViewAction: Equatable {
-        case onSearchButtonTapped
-        case onTextChanged(String)
+        case textChanged
+        case onAppear
     }
 
     enum ReducerAction: Equatable {
         case fetchRepositoriesResponse(TaskResult<[Repository]>)
         case alert(Alert)
+        case queryChangeDebounced
 
         enum Alert: Equatable {
             case retry
         }
     }
 
+    enum CancelID {
+        case response
+    }
+
     @Dependency(\.repositoryClient.fetchRepositories) var fetchRepositories
+    @Dependency(\.continuousClock) var clock
 
     func reduce(into state: StateContainer<RootView>, action: Action) -> SideEffect<Self> {
         switch action {
-        case .onSearchButtonTapped:
+        case .onAppear:
+            return fetchRepositories(query: "Swift")
+
+        case .textChanged:
+            if state.searchText.isEmpty {
+                state.repositories = []
+                return .none
+            } else {
+                return .send(.queryChangeDebounced)
+                    .debounce(
+                        id: CancelID.response,
+                        for: .seconds(0.3),
+                        clock: clock
+                    )
+            }
+
+        case .queryChangeDebounced:
+            guard !state.searchText.isEmpty else {
+                return .none
+            }
             state.isLoading = true
             return fetchRepositories(query: state.searchText)
-
-        case let .onTextChanged(text):
-            if text.isEmpty {
-                state.repositories = []
-            }
-            return .none
 
         case let .fetchRepositoriesResponse(.success(repositories)):
             state.isLoading = false
@@ -93,14 +112,17 @@ struct RootView: View {
                     ProgressView()
                 }
             }
-            .searchable(text: $searchText)
-            .onSubmit(of: .search) {
-                send(.onSearchButtonTapped)
-            }
-            .onChange(of: searchText) { _, newValue in
-                send(.onTextChanged(newValue))
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer
+            )
+            .onChange(of: searchText) { _, _ in
+                send(.textChanged)
             }
             .alert(target: self, unwrapping: $alertState)
+            .onAppear {
+                send(.onAppear)
+            }
         }
     }
 }
