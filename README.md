@@ -22,13 +22,17 @@ In TCA, integrating child domains into parent domains resulted in higher computa
 We've provided example implementations within this library. Currently, we only feature a simple GitHub repository search app, but we plan to expand with more examples in the future.
 - [Github Repository Search App](https://github.com/Ryu0118/swiftui-simplex-architecture/tree/main/Examples/Github-App)
 
+## Documentation
+The documentation for main are available here:
+- [main](https://ryu0118.github.io/swiftui-simplex-architecture/documentation/simplexarchitecture/)
+
 ## Installation
 ```Swift
 let package = Package(
     name: "YourProject",
     ...
     dependencies: [
-        .package(url: "https://github.com/Ryu0118/swiftui-simplex-architecture", exact: "0.8.0")
+        .package(url: "https://github.com/Ryu0118/swiftui-simplex-architecture", exact: "0.9.0")
     ],
     targets: [
         .target(
