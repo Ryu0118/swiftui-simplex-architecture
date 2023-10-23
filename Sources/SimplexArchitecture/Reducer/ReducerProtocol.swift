@@ -1,6 +1,6 @@
 /// A protocol that defines a reducer for a target type.
 ///
-/// ```
+/// ```Swift
 /// @Reducer
 /// struct MyReducer {
 ///     enum ViewAction {
@@ -41,7 +41,7 @@
 /// ```
 /// Also, `ReducerState` is useful to reduce unnecessary View updates. View is not updated when `ReducerState` changes. It can be used only with `Reducer`.
 ///
-/// ```
+/// ```Swift
 /// @Reducer
 /// struct MyReducer {
 ///     enum ViewAction {

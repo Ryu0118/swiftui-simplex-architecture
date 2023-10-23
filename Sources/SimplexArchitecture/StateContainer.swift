@@ -6,6 +6,7 @@ import XCTestDynamicOverlay
 /// StateContainer is not thread-safe. StateContainer must be accessed from MainActor.
 @dynamicMemberLookup
 public final class StateContainer<Target: ActionSendable> {
+    ///  Instance of ReducerState
     public var reducerState: Target.Reducer.ReducerState {
         _read { yield _reducerState! }
         _modify { yield &_reducerState! }
