@@ -3,7 +3,7 @@
 /// It is conformed to the `ActionSendable` protocol by the `ViewState` macro.
 ///
 /// Here is a example code.
-/// ```
+/// ```Swift
 /// @ViewState
 /// struct MyView: View {
 ///     let store: Store<MyReducer> = Store(reducer: MyReducer())
@@ -30,7 +30,7 @@
 /// }
 /// ```
 /// Here is a sample code if you want to use ReducerState.
-/// ```
+/// ```Swift
 /// @ViewState
 /// struct MyView: View {
 ///     let store: Store<MyReducer>

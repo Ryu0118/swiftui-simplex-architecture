@@ -36,7 +36,7 @@ public extension ActionSendable {
     }
 
     @inline(__always)
-    func threadCheck() {
+    private func threadCheck() {
         #if DEBUG
             guard !Thread.isMainThread else {
                 return

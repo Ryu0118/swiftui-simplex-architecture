@@ -1,9 +1,12 @@
 import Foundation
 import XCTestDynamicOverlay
 
+/// Container that holds the reducer state and state for a given target conforming to `ActionSendable`.
+///
 /// StateContainer is not thread-safe. StateContainer must be accessed from MainActor.
 @dynamicMemberLookup
 public final class StateContainer<Target: ActionSendable> {
+    ///  Instance of ReducerState
     public var reducerState: Target.Reducer.ReducerState {
         _read { yield _reducerState! }
         _modify { yield &_reducerState! }
