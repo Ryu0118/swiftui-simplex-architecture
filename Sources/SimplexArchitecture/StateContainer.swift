@@ -34,7 +34,7 @@ public final class StateContainer<Target: ActionSendable> {
     public subscript<Value>(dynamicMember keyPath: WritableKeyPath<Target.ViewState, Value>) -> Value {
         _read {
             #if DEBUG
-                guard !isTesting else {
+                guard !isTesting || viewState == nil else {
                     yield viewState![keyPath: keyPath]
                     return
                 }
@@ -52,7 +52,7 @@ public final class StateContainer<Target: ActionSendable> {
         }
         _modify {
             #if DEBUG
-                guard !isTesting else {
+                guard !isTesting || viewState == nil else {
                     yield &viewState![keyPath: keyPath]
                     return
                 }
