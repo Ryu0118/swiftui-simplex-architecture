@@ -68,6 +68,9 @@ public struct ReducerMacro: MemberMacro {
             emptyReducerAction,
             DeclSyntax(
                 EnumDeclSyntax(
+                    attributes: AttributeListSyntax {
+                        .attribute("@CasePathable")
+                    },
                     modifiers: [DeclModifierSyntax(name: .identifier(reducerAccessModifier))],
                     name: .identifier("Action"),
                     inheritanceClause: InheritanceClauseSyntax {

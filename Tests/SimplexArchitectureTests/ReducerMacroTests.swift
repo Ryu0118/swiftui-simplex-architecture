@@ -21,7 +21,7 @@ final class ReducerMacroTests: XCTestCase {
                 public struct ViewAction {}
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -40,7 +40,7 @@ final class ReducerMacroTests: XCTestCase {
                 public struct ReducerAction {}
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -66,7 +66,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -94,7 +94,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -123,7 +123,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -152,7 +152,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -181,7 +181,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -204,7 +204,7 @@ final class ReducerMacroTests: XCTestCase {
             @Reducer
             public class MyReducer {}
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             ╰─ 🛑 @Reducer can only be applied to struct
@@ -220,7 +220,7 @@ final class ReducerMacroTests: XCTestCase {
             public struct MyReducer {
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             ╰─ 🛑 ViewAction not found in MyReducer
@@ -238,7 +238,7 @@ final class ReducerMacroTests: XCTestCase {
                 public typealias ViewAction = Hoge
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -256,7 +256,7 @@ final class ReducerMacroTests: XCTestCase {
                 public typealias ReducerAction = Hoge
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @Reducer
             public struct MyReducer {
@@ -279,7 +279,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             package struct MyReducer {
                 package enum ViewAction: Equatable {
@@ -287,7 +287,7 @@ final class ReducerMacroTests: XCTestCase {
                 package enum ReducerAction: Equatable {
                 }
 
-                package enum Action: Equatable , ActionProtocol {
+                @CasePathable package enum Action: Equatable , ActionProtocol {
                     package init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -312,7 +312,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             internal struct MyReducer {
                 internal enum ViewAction: Equatable {
@@ -320,7 +320,7 @@ final class ReducerMacroTests: XCTestCase {
                 internal enum ReducerAction: Equatable {
                 }
 
-                internal enum Action: Equatable , ActionProtocol {
+                @CasePathable internal enum Action: Equatable , ActionProtocol {
                     internal init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -345,7 +345,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             struct MyReducer {
                 enum ViewAction: Equatable {
@@ -353,7 +353,7 @@ final class ReducerMacroTests: XCTestCase {
                 enum ReducerAction: Equatable {
                 }
 
-                 enum Action: Equatable , ActionProtocol {
+                @CasePathable  enum Action: Equatable , ActionProtocol {
                      init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -378,7 +378,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             fileprivate struct MyReducer {
                 enum ViewAction: Equatable {
@@ -386,7 +386,7 @@ final class ReducerMacroTests: XCTestCase {
                 enum ReducerAction: Equatable {
                 }
 
-                internal enum Action: Equatable , ActionProtocol {
+                @CasePathable internal enum Action: Equatable , ActionProtocol {
                     internal init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -411,7 +411,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             private struct MyReducer {
                 enum ViewAction: Equatable {
@@ -419,7 +419,7 @@ final class ReducerMacroTests: XCTestCase {
                 enum ReducerAction: Equatable {
                 }
 
-                internal enum Action: Equatable , ActionProtocol {
+                @CasePathable internal enum Action: Equatable , ActionProtocol {
                     internal init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -446,7 +446,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             public struct MyReducer {
                 public enum ViewAction: Equatable {
@@ -454,7 +454,7 @@ final class ReducerMacroTests: XCTestCase {
                 public enum ReducerAction: Equatable {
                 }
 
-                public enum Action: Equatable , ActionProtocol {
+                @CasePathable public enum Action: Equatable , ActionProtocol {
                     public init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -479,7 +479,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             public struct MyReducer {
                 public enum ViewAction: Equatable, Hashable, Codable {
@@ -487,7 +487,7 @@ final class ReducerMacroTests: XCTestCase {
                 public enum ReducerAction: Equatable, Hashable, Codable {
                 }
 
-                public enum Action: Equatable, Hashable, Codable , ActionProtocol {
+                @CasePathable public enum Action: Equatable, Hashable, Codable , ActionProtocol {
                     public init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -514,7 +514,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             public struct MyReducer {
                 public enum ViewAction {
@@ -522,7 +522,7 @@ final class ReducerMacroTests: XCTestCase {
                 public enum ReducerAction {
                 }
 
-                public enum Action: ActionProtocol {
+                @CasePathable public enum Action: ActionProtocol {
                     public init(viewAction: ViewAction) {
                         fatalError()
                     }
@@ -558,7 +558,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             public struct MyReducer {
                 public enum ViewAction {
@@ -575,7 +575,7 @@ final class ReducerMacroTests: XCTestCase {
                     case response(TaskResult<VoidSuccess>)
                 }
 
-                public enum Action: ActionProtocol {
+                @CasePathable public enum Action: ActionProtocol {
                         case alert(Alert)
                         public typealias Alert = ViewAction.Alert
 
@@ -621,7 +621,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             public struct MyReducer {
                 public enum ViewAction {
@@ -635,7 +635,7 @@ final class ReducerMacroTests: XCTestCase {
                     case response(TaskResult<VoidSuccess>)
                 }
 
-                public enum Action: ActionProtocol {
+                @CasePathable public enum Action: ActionProtocol {
                         case increment
                         case decrement
                         case increment(arg1: String, arg2: Int)
@@ -683,7 +683,7 @@ final class ReducerMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             """
             public struct MyReducer {
                 public enum ViewAction {
@@ -693,7 +693,7 @@ final class ReducerMacroTests: XCTestCase {
                     case decrement(arg1: String = "")
                 }
 
-                public enum Action: ActionProtocol {
+                @CasePathable public enum Action: ActionProtocol {
                         case decrement(arg1: String = "", arg2: Int? = nil)
 
                         case decrement(arg1: String = "")
