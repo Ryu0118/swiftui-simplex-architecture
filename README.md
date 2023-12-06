@@ -311,7 +311,7 @@ Furthermore, when effects are executed by steps and data is fed back into the st
 func testReducer() async {
     let store = MyView().testStore(viewState: .init())
     await store.send(.fetchData)
-    await store.receive(.fetchDataResponse) {
+    await store.receive(\.fetchDataResponse.success) {
         $0.data = ...
     }
 }
