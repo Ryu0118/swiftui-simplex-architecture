@@ -203,6 +203,8 @@ public final class TestStore<Reducer: ReducerProtocol> {
             line: line
         )
 
+        await Task.megaYield()
+
         return sendTask
     }
 

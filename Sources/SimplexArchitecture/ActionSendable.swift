@@ -15,20 +15,12 @@ public extension ActionSendable {
     /// Send an action to the store
     @discardableResult
     func send(_ action: consuming Reducer.ViewAction) -> SendTask {
-        @Dependency(\.isTesting) var isTesting
-        guard !isTesting else {
-            return .never
-        }
         threadCheck()
         return store.send(action, target: self)
     }
 
     @discardableResult
     func send(_ action: consuming Reducer.ViewAction, animation: Animation?) -> SendTask {
-        @Dependency(\.isTesting) var isTesting
-        guard !isTesting else {
-            return .never
-        }
         threadCheck()
         return withAnimation(animation) {
             store.send(action, target: self)
@@ -38,10 +30,6 @@ public extension ActionSendable {
     /// Send an action to the store with transaction
     @discardableResult
     func send(_ action: consuming Reducer.ViewAction, transaction: Transaction) -> SendTask {
-        @Dependency(\.isTesting) var isTesting
-        guard !isTesting else {
-            return .never
-        }
         threadCheck()
         return withTransaction(transaction) {
             store.send(action, target: self)
