@@ -20,7 +20,7 @@ final class ViewStateMacroTests: XCTestCase {
             public actor Test {
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @ViewState
             public actor Test {
@@ -37,7 +37,7 @@ final class ViewStateMacroTests: XCTestCase {
             public protocol Test {
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @ViewState
             public protocol Test {
@@ -54,7 +54,7 @@ final class ViewStateMacroTests: XCTestCase {
             public extension Test {
             }
             """
-        } matches: {
+        } diagnostics: {
             """
             @ViewState
             ├─ 🛑 'ViewState' macro can only be applied to struct or class
@@ -82,7 +82,7 @@ final class ViewStateMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             #"""
             public struct TestView: View {
                 @State var count = 0
@@ -125,7 +125,7 @@ final class ViewStateMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             #"""
             struct TestView: View {
                 @State var count = 0
@@ -168,7 +168,7 @@ final class ViewStateMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             #"""
             fileprivate struct TestView: View {
                 @State fileprivate var count = 0
@@ -211,7 +211,7 @@ final class ViewStateMacroTests: XCTestCase {
                 }
             }
             """
-        } matches: {
+        } expansion: {
             #"""
             private struct TestView: View {
                 @State private var count = 0

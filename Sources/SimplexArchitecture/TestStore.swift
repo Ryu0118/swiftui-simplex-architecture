@@ -5,7 +5,7 @@ import Foundation
 
 /// TestStore is a utility class for testing stores that use Reducer protocols.
 /// It provides methods for sending actions and verifying state changes.
-public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equatable {
+public final class TestStore<Reducer: ReducerProtocol> {
     /// The running state container.
     var runningContainer: StateContainer<Reducer.Target>?
 
@@ -68,106 +68,6 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
                 }
             }
             await group.waitForAll()
-        }
-    }
-
-    /// Asserts an action was received from an effect and asserts how the state changes.
-    ///
-    /// - Parameters:
-    ///   - action: An action expected from an effect.
-    ///   - timeout: The amount of time to wait for the expected action.
-    ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
-    public func receive(
-        _ action: Reducer.Action,
-        timeout: TimeInterval = 5,
-        expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async {
-        guard let _ = runningContainer else {
-            XCTFail(
-                """
-                Action has not been sent. Please invoke TestStore.send(_:)
-                """,
-                file: file,
-                line: line
-            )
-            return
-        }
-
-        let start = Date()
-
-        while !Task.isCancelled {
-            if Date().timeIntervalSince(start) > timeout {
-                XCTFail(
-                    "Store.receive has timed out.",
-                    file: file,
-                    line: line
-                )
-                break
-            }
-
-            if let stateTransition = untestedActions.first(where: { $0.action == action }) {
-                let expectedContainer = stateTransition.asNextStateContainer(from: target)
-                let actualContainer = stateTransition.asPreviousStateContainer(from: target)
-
-                expected?(actualContainer)
-
-                assertViewStateNoDifference(
-                    expected: expectedContainer,
-                    actual: actualContainer,
-                    file: file,
-                    line: line
-                )
-                assertReducerStateNoDifference(
-                    expected: expectedContainer,
-                    actual: actualContainer,
-                    file: file,
-                    line: line
-                )
-
-                testedActions.append(stateTransition)
-                break
-            }
-
-            await Task.yield()
-        }
-    }
-
-    /// Asserts an action was received from an effect. Does not assert state changes.
-    public func receiveWithoutStateCheck(
-        _ action: Reducer.Action,
-        timeout: TimeInterval = 5,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async {
-        guard let _ = runningContainer else {
-            XCTFail(
-                """
-                Action has not been sent. Please invoke TestStore.send(_:)
-                """
-            )
-            return
-        }
-
-        let start = Date()
-
-        while !Task.isCancelled {
-            if Date().timeIntervalSince(start) > timeout {
-                XCTFail(
-                    "Store.receive has timed out.",
-                    file: file,
-                    line: line
-                )
-                break
-            }
-
-            if let stateTransition = untestedActions.first(where: { $0.action == action }) {
-                testedActions.append(stateTransition)
-                break
-            }
-
-            await Task.yield()
         }
     }
 
@@ -303,6 +203,8 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
             line: line
         )
 
+        await Task.megaYield()
+
         return sendTask
     }
 
@@ -352,7 +254,186 @@ public final class TestStore<Reducer: ReducerProtocol> where Reducer.Action: Equ
     }
 }
 
+extension TestStore where Reducer.Action: CasePathable {
+    /// Asserts an action was received from an effect. Does not assert state changes.
+    ///
+    /// - Parameters:
+    ///   - action:  A case path identifying the case of an action to enum to receive
+    ///   - timeout: The amount of time to wait for the expected action.
+    public func receiveWithoutStateCheck<Value>(
+        _ actionCase: CaseKeyPath<Reducer.Action, Value>,
+        timeout: TimeInterval = 5,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        await receiveWithoutStateCheck(
+            { $0.is(actionCase) },
+            timeout: timeout,
+            file: file,
+            line: line
+        )
+    }
+
+    /// Asserts an action was received from an effect and asserts how the state changes.
+    ///
+    /// - Parameters:
+    ///   - action:  A case path identifying the case of an action to enum to receive
+    ///   - timeout: The amount of time to wait for the expected action.
+    ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
+    public func receive<Value>(
+        _ action: CaseKeyPath<Reducer.Action, Value>,
+        timeout: TimeInterval = 5,
+        expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        await receive(
+            { $0.is(action) },
+            timeout: timeout,
+            expected: expected,
+            file: file,
+            line: line
+        )
+    }
+}
+
+extension TestStore where Reducer.Action: Equatable {
+    /// Asserts an action was received from an effect. Does not assert state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action expected from an effect.
+    ///   - timeout: The amount of time to wait for the expected action.
+    public func receiveWithoutStateCheck(
+        _ action: Reducer.Action,
+        timeout: TimeInterval = 5,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        await receiveWithoutStateCheck(
+            { $0 == action },
+            timeout: timeout,
+            file: file,
+            line: line
+        )
+    }
+
+    /// Asserts an action was received from an effect and asserts how the state changes.
+    ///
+    /// - Parameters:
+    ///   - action: An action expected from an effect.
+    ///   - timeout: The amount of time to wait for the expected action.
+    ///   - expected: A closure that asserts state changed by sending the action to the store. The mutable state sent to this closure must be modified to match the state of the store after processing the given action. Do not provide a closure if no change is expected.
+    public func receive(
+        _ action: Reducer.Action,
+        timeout: TimeInterval = 5,
+        expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        await receive(
+            { $0 == action },
+            timeout: timeout,
+            expected: expected,
+            file: file,
+            line: line
+        )
+    }
+}
+
 extension TestStore {
+    private func receiveWithoutStateCheck(
+        _ assertion: (Reducer.Action) -> Bool,
+        timeout: TimeInterval = 5,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        guard let _ = runningContainer else {
+            XCTFail(
+                """
+                Action has not been sent. Please invoke TestStore.send(_:)
+                """
+            )
+            return
+        }
+
+        let start = Date()
+
+        while !Task.isCancelled {
+            if Date().timeIntervalSince(start) > timeout {
+                XCTFail(
+                    "Store.receive has timed out.",
+                    file: file,
+                    line: line
+                )
+                break
+            }
+
+            if let stateTransition = untestedActions.first(where: { assertion($0.action) }) {
+                testedActions.append(stateTransition)
+                break
+            }
+
+            await Task.yield()
+        }
+    }
+
+    private func receive(
+        _ assertion: (Reducer.Action) -> Bool,
+        timeout: TimeInterval = 5,
+        expected: ((StateContainer<Reducer.Target>) -> Void)? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        guard let _ = runningContainer else {
+            XCTFail(
+                """
+                Action has not been sent. Please invoke TestStore.send(_:)
+                """,
+                file: file,
+                line: line
+            )
+            return
+        }
+
+        let start = Date()
+
+        while !Task.isCancelled {
+            if Date().timeIntervalSince(start) > timeout {
+                XCTFail(
+                    "Store.receive has timed out.",
+                    file: file,
+                    line: line
+                )
+                break
+            }
+
+            if let stateTransition = untestedActions.first(where: { assertion($0.action) }) {
+                let expectedContainer = stateTransition.asNextStateContainer(from: target)
+                let actualContainer = stateTransition.asPreviousStateContainer(from: target)
+
+                expected?(actualContainer)
+
+                assertViewStateNoDifference(
+                    expected: expectedContainer,
+                    actual: actualContainer,
+                    file: file,
+                    line: line
+                )
+                assertReducerStateNoDifference(
+                    expected: expectedContainer,
+                    actual: actualContainer,
+                    file: file,
+                    line: line
+                )
+
+                testedActions.append(stateTransition)
+                break
+            }
+
+            await Task.yield()
+        }
+    }
+
     private func assertViewStateNoDifference(
         expected expectedContainer: StateContainer<Reducer.Target>,
         actual actualContainer: StateContainer<Reducer.Target>,
@@ -430,7 +511,7 @@ extension TestStore {
     }
 }
 
-public extension ActionSendable where Reducer.Action: Equatable {
+public extension ActionSendable {
     /// Creates and returns a new test store.
     ///
     /// - Parameters:

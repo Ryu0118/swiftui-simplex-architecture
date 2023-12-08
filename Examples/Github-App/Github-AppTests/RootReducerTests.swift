@@ -11,10 +11,10 @@ final class RootReducerTests: XCTestCase {
         }
 
         await store.send(.textChanged)
-        await store.receive(.queryChangeDebounced) {
+        await store.receive(\.queryChangeDebounced, timeout: 1) {
             $0.isLoading = true
         }
-        await store.receive(.fetchRepositoriesResponse(.success([.stub]))) {
+        await store.receive(\.fetchRepositoriesResponse.success, timeout: 1) {
             $0.repositories = [.stub]
             $0.isLoading = false
         }
@@ -28,10 +28,10 @@ final class RootReducerTests: XCTestCase {
         }
 
         await store.send(.textChanged)
-        await store.receive(.queryChangeDebounced) {
+        await store.receive(\.queryChangeDebounced, timeout: 1) {
             $0.isLoading = true
         }
-        await store.receive(.fetchRepositoriesResponse(.failure(error))) {
+        await store.receive(\.fetchRepositoriesResponse.failure, timeout: 1) {
             $0.isLoading = false
             $0.alertState = .init {
                 TextState("An Error has occurred.")

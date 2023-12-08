@@ -3,17 +3,17 @@ import SwiftUI
 
 @Reducer
 struct RootReducer {
-    enum ViewAction: Equatable {
+    enum ViewAction {
         case textChanged
         case onAppear
     }
 
-    enum ReducerAction: Equatable {
-        case fetchRepositoriesResponse(TaskResult<[Repository]>)
+    enum ReducerAction {
+        case fetchRepositoriesResponse(Result<[Repository], any Error>)
         case alert(Alert)
         case queryChangeDebounced
 
-        enum Alert: Equatable {
+        enum Alert {
             case retry
         }
     }
@@ -81,7 +81,7 @@ struct RootReducer {
         .run { send in
             await send(
                 .fetchRepositoriesResponse(
-                    TaskResult { try await fetchRepositories(query) }
+                    Result { try await fetchRepositories(query) }
                 )
             )
         }
