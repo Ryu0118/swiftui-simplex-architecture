@@ -21,7 +21,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.2"),
-        .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "1.2.1"),
+        .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "1.5.6"),
         .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.1.2"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.3.9"),
         .package(url: "https://github.com/pointfreeco/swiftui-navigation.git", from: "1.2.0"),
