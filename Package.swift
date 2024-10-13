@@ -25,7 +25,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.1.2"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.3.9"),
         .package(url: "https://github.com/pointfreeco/swiftui-navigation.git", from: "1.2.0"),
-        .package(url: "https://github.com/pointfreeco/swift-macro-testing.git", from: "0.2.2"),
+        .package(url: "https://github.com/pointfreeco/swift-macro-testing.git", from: "0.5.2"),
         .package(url: "https://github.com/google/swift-benchmark", from: "0.1.2"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
         .package(url: "https://github.com/pointfreeco/swift-concurrency-extras.git", from: "1.1.0")
